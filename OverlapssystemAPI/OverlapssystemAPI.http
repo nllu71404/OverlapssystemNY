@@ -1,0 +1,6 @@
+@OverlapssystemAPI_HostAddress = http://localhost:5207
+
+GET {{OverlapssystemAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OverlapssystemAPI\OverlapssystemAPI.csproj" />
+    <ProjectReference Include="..\OverlapssytemApplication\OverlapssytemApplication.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Services\" />
+  </ItemGroup>
+
+</Project>

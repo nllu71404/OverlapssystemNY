@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="Overlapssystem/Overlapssystem.csproj">
+    <BuildDependency Project="OverlapssystemAPI/OverlapssystemAPI.csproj" />
+    <BuildDependency Project="OverlapssystemDomain/OverlapssystemDomain.csproj" />
+    <BuildDependency Project="OverlapssystemInfrastructure/OverlapssystemInfrastructure.csproj" />
+  </Project>
+  <Project Path="OverlapssystemAPI/OverlapssystemAPI.csproj" />
+  <Project Path="OverlapssystemDomain/OverlapssystemDomain.csproj" />
+  <Project Path="OverlapssystemInfrastructure/OverlapssystemInfrastructure.csproj" />
+  <Project Path="OverlapssytemApplication/OverlapssytemApplication.csproj" Id="2d5a2586-ab72-46b1-8e9b-4819f3b3e07f" />
+</Solution>
