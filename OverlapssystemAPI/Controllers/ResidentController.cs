@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OverlapssystemInfrastructure.Repositories;
 using OverlapssystemDomain.Entities;
-using OverlapssystemDomain.Interfaces;
+using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -9,41 +8,46 @@ namespace OverlapssystemAPI.Controllers
     [Route("api/[controller]")]
     public class ResidentController : ControllerBase
     {
-        private readonly IResidentRepository _residentRepository;
-        public ResidentController(IResidentRepository residentRepository)
+        private readonly IResidentServices _residentServices;
+        public ResidentController(IResidentServices residentServices)
         {
-            _residentRepository = residentRepository;
+            _residentServices = residentServices;
         }
-        private ResidentModel _residents = new ResidentModel();
+        
 
 
         // GET: api/resident
-        [HttpGet("OpretBorger")]
+        [HttpGet("HenterResident")]
         public async Task<ActionResult> GetResidents()
         {
-            // Placeholder for getting residents logic
-            return Ok(_residents);
+            //Skal kalde LoadResidentAsync og returnerer resultatet
+            var residents = await _residentServices.LoadResidentsAsync();
+            return Ok(residents);
         }
 
-        [HttpPost("{id}")]
-        public async Task<ActionResult<ResidentModel>> CreateResident(int id, [FromBody] ResidentModel resident)
+        [HttpPost("OpretResident")]
+        public async Task<ActionResult<ResidentModel>> CreateResident([FromBody] ResidentModel resident)
         {
             // Placeholder for creating a resident logic
-            return Ok("Resident created successfully.");
+            await _residentServices.CreateResidentAsync(resident);
+            return Ok(resident);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ResidentModel>> UpdateResident(int id, [FromBody] ResidentModel resident)
         {
             // Placeholder for updating a resident logic
-            return Ok("Resident updated successfully.");
+            await _residentServices.UpdateResidentAsync(resident);
+            return Ok(resident);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteResident(int id) 
+        [HttpDelete("{residentid}")]
+        public async Task<ActionResult> DeleteResident(int residentId) 
         {
             // Placeholder for updating a resident logic
-            return Ok("Resident deleted successfully.");
+            await _residentServices.DeleteResidentAsync(residentId);
+            return Ok(residentId);
+
         }
 
 

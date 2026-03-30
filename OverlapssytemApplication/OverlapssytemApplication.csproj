@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OverlapssystemAPI\OverlapssystemAPI.csproj" />
     <ProjectReference Include="..\OverlapssystemInfrastructure\OverlapssystemInfrastructure.csproj" />
   </ItemGroup>
 

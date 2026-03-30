@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Enums;
 using OverlapssystemDomain.Interfaces;
+using OverlapssytemApplication.Interfaces;
 
 
 namespace OverlapssytemApplication.Services
 {
-    public class ResidentServices
+    public class ResidentServices : IResidentServices
     {
         private readonly IResidentRepository _residentRepository;
         private readonly IMedicinRepository _medicinRepository;
@@ -31,9 +32,9 @@ namespace OverlapssytemApplication.Services
         };
 
 
-        public async Task LoadResidentsAsync()
+        public async Task<List<ResidentModel>> LoadResidentsAsync()
         {
-            Residents = await _residentRepository.GetAllResidentsAsync();
+            return Residents = await _residentRepository.GetAllResidentsAsync();
         }
 
         public async Task LoadResidentsByDepartmentAsync()
@@ -41,20 +42,20 @@ namespace OverlapssytemApplication.Services
             Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
         }
 
-        public async Task SaveResidentAsync(ResidentModel resident)
+        public async Task UpdateResidentAsync(ResidentModel resident)
         {
             resident.DepartmentId = SelectedDepartmentId;
             await _residentRepository.UpdateResidentAsync(resident);
             Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
         }
 
-        public async Task DeleteResidentAsync(ResidentModel resident)
+        public async Task DeleteResidentAsync(int residentId)
         {
-            await _residentRepository.DeleteResidentAsync(resident.ResidentId);
+            await _residentRepository.DeleteResidentAsync(residentId);
             Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
         }
 
-        public async Task CreateResidentAsync()
+        public async Task CreateResidentAsync(ResidentModel resident)
         {
             NewResident.DepartmentId = SelectedDepartmentId;
             await _residentRepository.SaveNewResidentAsync(NewResident);
