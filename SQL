@@ -1,0 +1,162 @@
+USE master; 
+GO
+IF DB_ID('ProjektDB') IS NOT NULL BEGIN ALTER DATABASE ProjektDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE ProjektDB; 
+END 
+GO
+
+CREATE DATABASE ProjektDB; 
+GO
+USE ProjektDB; 
+GO
+
+-- Tables are created underneath
+CREATE TABLE dbo.Department (
+DepartmentName NVARCHAR(100) NOT NULL,
+DepartmentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY
+
+);
+GO
+
+CREATE TABLE dbo.Resident (
+ResidentName NVARCHAR(100),
+ResidentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
+ResidentStatus NVARCHAR(100),
+Risk NVARCHAR(100) NULL
+
+);
+GO
+
+CREATE TABLE dbo.MedicinTime (
+MedicinTimeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+MedicinTime DATETIME NULL,
+MedicinCheckTimeStamp DATETIME NULL
+
+);
+GO
+
+CREATE TABLE dbo.PNMedicin (
+PNID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+PNTime DATETIME NULL,
+Reason NVARCHAR(100) NULL,
+PNTimeStamp DATETIME NULL
+
+);
+GO
+
+CREATE TABLE dbo.Shopping (
+ShoppingID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+ShoppingDay DATE NULL,
+ShoppingTime DATETIME NULL,
+PaymentMethod NVARCHAR(100) NULL
+
+);
+GO
+
+CREATE TABLE dbo.DepartmentAssignment (
+DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
+DepartmentAssignmentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+DepartmentAssignmentTopic NVARCHAR(250) NULL,
+DepartmentAssignmentWorkerName NVARCHAR(100) NULL
+
+);
+GO
+
+CREATE TABLE dbo.WorkerTelefon (
+DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
+TelefonID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+TelefonNumber INT NULL,
+WorkerName NVARCHAR(100) NULL,
+Test BIT NULL
+
+);
+GO
+
+
+-- Creates Stored Procedures
+-- Creates a Resident to the table of Residents.
+CREATE OR ALTER PROCEDURE dbo.uspCreateResident
+@ResidentName NVARCHAR(100),
+@DepartmentID INT = NULL,
+@ResidentStatus NVARCHAR(100) = NULL,
+@Risk NVARCHAR(100) = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Resident
+(
+    ResidentName,
+    DepartmentID,
+    ResidentStatus,
+    Risk
+)
+VALUES
+(
+    @ResidentName,
+    @DepartmentID,
+    @ResidentStatus,
+    @Risk
+);
+
+SELECT SCOPE_IDENTITY() AS ResidentID;
+END;
+GO
+
+-- Gets all Residents from the resident table.
+CREATE OR ALTER PROCEDURE dbo.uspGetResidents
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.Resident
+END;
+GO
+
+-- Updates a resident by id in the resident table
+CREATE OR ALTER PROCEDURE dbo.uspUpdateResidentById
+@ResidentName NVARCHAR(100),
+@DepartmentID INT = NULL,
+@ResidentStatus NVARCHAR(100) = NULL,
+@Risk NVARCHAR(100) = NULL,
+@ResidentId INT
+AS
+BEGIN
+    UPDATE dbo.Resident
+    SET ResidentName = @ResidentName, 
+    ResidentStatus = @ResidentStatus, 
+    Risk = @Risk,
+    DepartmentID = @DepartmentID
+    WHERE ResidentID = @ResidentId;
+
+END;
+GO
+
+-- Delete an entry in the resident table
+CREATE OR ALTER PROCEDURE dbo.uspDeleteResident
+@ResidentId INT
+AS
+BEGIN
+DELETE FROM dbo.Resident WHERE ResidentID = @ResidentID
+END;
+GO
+
+-- Get Residents by department ID
+CREATE OR ALTER PROCEDURE dbo.uspGetResidentsByDepartmentID
+@DepartmentID INT
+AS
+BEGIN
+SELECT * FROM dbo.Resident WHERE DepartmentID = @DepartmentID
+END;
+GO
+
+-- Get all Medicin times from the MedicinTime table.
+CREATE   PROCEDURE [dbo].[uspGetMedicinTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.MedicinTime
+END;
+GO

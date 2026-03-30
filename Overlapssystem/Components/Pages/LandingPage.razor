@@ -11,7 +11,7 @@
 @inject IMedicinRepository medicinRepository
 @inject ResidentServices residentServices
 
-<h5>Overlap</h5>
+<h5>Overlapsseddel</h5>
 
 
 <!-- Du klikker på knappen og så henter den alle beboere ved at kalde funktion LoadResidentsAsync i ResidentService.cs-->
@@ -19,6 +19,16 @@
     Hent alle beboere
 </button>
 
+<!-- Hent beboere for specifik afdeling-->
+<div>
+    <label>Afdelings ID: </label>
+    <input type="number" @bind="residentServices.SelectedDepartmentId" />
+    <button @onclick="residentServices.LoadResidentsByDepartmentAsync">
+        Hent beboere for afdeling
+    </button>
+</div>
+
+<!-- Du opretter en ny beboer-->
 <h5>Opret ny beboer</h5>
 
 <div>
@@ -65,11 +75,19 @@
     </select>
 </div>
 
+<!-- Du gemmer en beboer-->
 <button @onclick="residentServices.CreateResidentAsync">
     Gem beboer
 </button>
 
-@if (residentServices.Residents.Any())
+<h5>Oversigt over beboere</h5>
+<!-- Du gemmer ændringer og sletter en beboer-->
+@if (!residentServices.Residents.Any())
+{
+    <p> Ingen beboere fundet</p>
+}
+else
+
 {
     <ul>
         @foreach (var resident in residentServices.Residents)
@@ -110,6 +128,7 @@
     {
         residentServices.SelectedDepartmentId = 2;
         await residentServices.LoadResidentsByDepartmentAsync();
+
 
     }
 
