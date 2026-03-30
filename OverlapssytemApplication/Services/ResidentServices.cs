@@ -37,37 +37,56 @@ namespace OverlapssytemApplication.Services
             return Residents = await _residentRepository.GetAllResidentsAsync();
         }
 
-        public async Task LoadResidentsByDepartmentAsync()
+        public async Task<List<ResidentModel>> LoadResidentsByDepartmentAsync(int departmentId)
         {
-            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
+            return Residents = await _residentRepository.GetResidentByDepartmentIdAsync(departmentId);
         }
 
+        //public async Task UpdateResidentAsync(ResidentModel resident)
+        //{
+        //    resident.DepartmentId = SelectedDepartmentId;
+        //    await _residentRepository.UpdateResidentAsync(resident);
+        //    Residents = await _residentRepository.GetResidentByDepartmentIdAsync(resident.departmentId);
+        //}
         public async Task UpdateResidentAsync(ResidentModel resident)
         {
-            resident.DepartmentId = SelectedDepartmentId;
             await _residentRepository.UpdateResidentAsync(resident);
-            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
+            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(resident.DepartmentId ?? 1);
         }
+
+        //public async Task DeleteResidentAsync(int residentId)
+        //{
+        //    await _residentRepository.DeleteResidentAsync(residentId);
+        //    Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
+        //}
 
         public async Task DeleteResidentAsync(int residentId)
         {
             await _residentRepository.DeleteResidentAsync(residentId);
-            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
         }
+
+        //public async Task CreateResidentAsync(ResidentModel resident)
+        //{
+        //    NewResident.DepartmentId = SelectedDepartmentId;
+        //    await _residentRepository.SaveNewResidentAsync(NewResident);
+
+        //    NewResident = new ResidentModel
+        //    {
+        //        Risiko = Risiko.Green,
+        //        DepartmentId = SelectedDepartmentId
+        //    };
+
+        //    Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
+        //}
 
         public async Task CreateResidentAsync(ResidentModel resident)
         {
-            NewResident.DepartmentId = SelectedDepartmentId;
-            await _residentRepository.SaveNewResidentAsync(NewResident);
-
-            NewResident = new ResidentModel
-            {
-                Risiko = Risiko.Green,
-                DepartmentId = SelectedDepartmentId
-            };
-
-            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
+            await _residentRepository.SaveNewResidentAsync(resident);
+            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(resident.DepartmentId ?? 1);
         }
+
+
+
         public void SetDepartment(int departmentId)
         {
             SelectedDepartmentId = departmentId;

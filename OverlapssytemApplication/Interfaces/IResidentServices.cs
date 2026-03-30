@@ -11,9 +11,12 @@ namespace OverlapssytemApplication.Interfaces
     public interface IResidentServices
     {
         Task<List<ResidentModel>> LoadResidentsAsync();
+        Task<List<ResidentModel>> LoadResidentsByDepartmentAsync(int departmentId);
         Task CreateResidentAsync(ResidentModel resident);
         Task UpdateResidentAsync(ResidentModel resident);
         Task DeleteResidentAsync(int residentId);
+        Task AddMedicinTimeAsync (ResidentModel resident, DateTime time);
+        Task ToggleMedicinGivenAsync (MedicinModel medTime);
         
     }
 }

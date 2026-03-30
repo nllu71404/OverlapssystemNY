@@ -2,28 +2,27 @@
 @page "/LandingPage"
 @rendermode InteractiveServer
 
-@using OverlapssystemDomain.Interfaces
 @using OverlapssystemDomain.Entities
 @using OverlapssystemDomain.Enums
+@using OverlapssystemDomain.Interfaces
 @using OverlapssytemApplication.Interfaces
 
-@inject IResidentRepository residentRepository
-@inject IMedicinRepository medicinRepository
+
 @inject IResidentServices residentServices
 
 <h5>Overlapsseddel</h5>
 
 
 <!-- Du klikker på knappen og så henter den alle beboere ved at kalde funktion LoadResidentsAsync i ResidentService.cs-->
-<button @onclick="residentServices.LoadResidentsAsync">
+<button @onclick="LoadAllResidentsAsync">
     Hent alle beboere
 </button>
 
 <!-- Hent beboere for specifik afdeling-->
 <div>
     <label>Afdelings ID: </label>
-    <input type="number" @bind="residentServices.SelectedDepartmentId" />
-    <button @onclick="residentServices.LoadResidentsByDepartmentAsync">
+    <input type="number" @bind="selectedDepartmentId" />
+    <button @onclick="LoadResidentsByDepartmentAsync">
         Hent beboere for afdeling
     </button>
 </div>
@@ -33,7 +32,7 @@
 
 <div>
     <label>Navn </label>
-    <input @bind="residentServices.NewResident.Name" />
+    <input @bind="newResident.Name" />
 </div>
 
 <div>
@@ -43,32 +42,16 @@
             <option value="@t">@t.ToString(@"hh\:mm")</option>
         }
     </select>
-    <button @onclick="() => residentServices.AddMedicinTimeAsync(resident, DateTime.Today.Add(selectedTime))">Tilføj medicin tid</button>
 </div>
-
-<ul>
-    @foreach (var medTime in resident.MedicinTimes)
-    {
-        <li>
-            <input type="checkbox" checked="@medTime.IsChecked"
-                   @onchange="() => medicinRepository.ToggleMedicinGivenAsync(medTime)" />
-            @medTime.MedicinTime.ToString(@"hh\:mm")
-            @if (medTime.MedicinCheckTimeStamp.HasValue)
-            {
-                <span> - Givet: @medTime.MedicinCheckTimeStamp.Value.ToString("HH:mm")</span>
-            }
-        </li>
-    }
-</ul>
 
 <div>
     <label>Status </label>
-    <input @bind="residentServices.NewResident.Status" />
+    <input @bind="newResident.Status" />
 </div>
 
 <div>
     <label>Risiko </label>
-    <select @bind="residentServices.NewResident.Risiko">
+    <select @bind="newResident.Risiko">
         <option value="@Risiko.Green">Green</option>
         <option value="@Risiko.Yellow">Yellow</option>
         <option value="@Risiko.Red">Red</option>
@@ -76,13 +59,13 @@
 </div>
 
 <!-- Du gemmer en beboer-->
-<button @onclick="residentServices.CreateResidentAsync">
+<button @onclick="CreateResidentAsync">
     Gem beboer
 </button>
 
 <h5>Oversigt over beboere</h5>
 <!-- Du gemmer ændringer og sletter en beboer-->
-@if (!residentServices.Residents.Any())
+@if (!residents.Any())
 {
     <p> Ingen beboere fundet</p>
 }
@@ -90,7 +73,7 @@ else
 
 {
     <ul>
-        @foreach (var resident in residentServices.Residents)
+        @foreach (var resident in residents)
         {
             <li style="margin-bottom: 15px;">
                 <div>
@@ -111,14 +94,42 @@ else
                         <option value="@Risiko.Red">Red</option>
                     </select>
                 </div>
+                <div>
+                    <label>Tilføj medicintid </label>
+                    <select @bind="selectedTime">
+                        @foreach (var t in availableTimes)
+                        {
+                            <option value="@t">@t.ToString(@"hh\:mm")</option>
+                        }
+                    </select>
+                    <button @onclick="() => AddMedicinTimeAsync(resident, DateTime.Today.Add(selectedTime))">
+                        Tilføj medicin tid
+                    </button>
+                </div>
 
-                <button @onclick='() => residentServices.SaveResidentAsync(resident)'>
+                <ul>
+                    @foreach (var medTime in resident.MedicinTimes)
+                    {
+                        <li>
+                            <input type="checkbox" checked="@medTime.IsChecked"
+                                   @onchange="() => residentServices.ToggleMedicinGivenAsync(medTime)" />
+                            @medTime.MedicinTime.ToString(@"hh\:mm")
+                            @if (medTime.MedicinCheckTimeStamp.HasValue)
+                            {
+                                <span> - Givet: @medTime.MedicinCheckTimeStamp.Value.ToString("HH:mm")</span>
+                            }
+                        </li>
+                    }
+                </ul>
+
+                <button @onclick='() => SaveResidentAsync(resident)'>
                     Gem ændringer
                 </button>
 
-                <button @onclick='() => residentServices.DeleteResidentAsync(resident)'>
+                <button @onclick='() => DeleteResidentAsync(resident)'>
                     Slet beboer
                 </button>
+
             </li>
         }
     </ul>
@@ -126,10 +137,44 @@ else
 @code {
     protected override async Task OnInitializedAsync()
     {
-        residentServices.SelectedDepartmentId = 2;
-        await residentServices.LoadResidentsByDepartmentAsync();
+        selectedDepartmentId = 2;
+        //await residentServices.LoadResidentsByDepartmentAsync();
 
 
+    }
+
+    private async Task LoadResidentsByDepartmentAsync()
+    {
+        //residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
+        residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
+
+    }
+    private async Task LoadAllResidentsAsync()
+    {
+        residents = await residentServices.LoadResidentsAsync();
+    }
+    private async Task AddMedicinTimeAsync(ResidentModel resident, DateTime time)
+    {
+        await residentServices.AddMedicinTimeAsync(resident, time);
+    }
+
+    private async Task CreateResidentAsync()
+    {
+        newResident.DepartmentId = selectedDepartmentId;
+        await residentServices.CreateResidentAsync(newResident);
+        residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
+        newResident = new ResidentModel { Risiko = Risiko.Green };
+    }
+
+    private async Task SaveResidentAsync(ResidentModel resident)
+    {
+        await residentServices.UpdateResidentAsync(resident);
+    }
+
+    private async Task DeleteResidentAsync(ResidentModel resident)
+    {
+        await residentServices.DeleteResidentAsync(resident.ResidentId);
+        residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
     }
 
     private TimeSpan selectedTime;
@@ -141,6 +186,7 @@ else
         new TimeSpan(18, 0, 0)
     };
 
-    MedicinModel medicin = new MedicinModel();
-    ResidentModel resident = new ResidentModel();
+    List<ResidentModel> residents = new();
+    int selectedDepartmentId = 2;
+    ResidentModel newResident = new ResidentModel { Risiko = Risiko.Green };
 }
