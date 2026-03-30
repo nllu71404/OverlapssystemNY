@@ -30,7 +30,8 @@ GO
 CREATE TABLE dbo.MedicinTime (
 MedicinTimeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
-MedicinTime DATETIME NULL
+MedicinTime DATETIME NULL,
+MedicinCheckTimeStamp DATETIME NULL
 
 );
 GO
@@ -151,4 +152,11 @@ SELECT * FROM dbo.Resident WHERE DepartmentID = @DepartmentID
 END;
 GO
 
-
+-- Get all Medicin times from the MedicinTime table.
+CREATE   PROCEDURE [dbo].[uspGetMedicinTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.MedicinTime
+END;
+GO
