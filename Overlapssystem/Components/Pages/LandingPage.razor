@@ -11,7 +11,7 @@
 @inject IMedicinRepository medicinRepository
 @inject ResidentServices residentServices
 
-<h5>Overlap</h5>
+<h5>Overlapsseddel</h5>
 
 
 <!-- Du klikker på knappen og så henter den alle beboere ved at kalde funktion LoadResidentsAsync i ResidentService.cs-->
@@ -82,7 +82,12 @@
 
 <h5>Oversigt over beboere</h5>
 <!-- Du gemmer ændringer og sletter en beboer-->
-@if (residentServices.Residents.Any())
+@if (!residentServices.Residents.Any())
+{
+    <p> Ingen beboere fundet</p>
+}
+else
+
 {
     <ul>
         @foreach (var resident in residentServices.Residents)
