@@ -58,6 +58,9 @@ namespace OverlapssystemAPI.Controllers
             return Ok(residents);
         }
 
+        // Tjekke medicin af når den er blevet givet 
+
+
 
     }
 }

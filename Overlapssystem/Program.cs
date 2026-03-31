@@ -11,13 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Add service for residentService
-
-builder.Services.AddScoped<IResidentRepository, ResidentRepository>();
-builder.Services.AddScoped<IMedicinRepository, MedicinRepository>();
-builder.Services.AddScoped<IResidentServices, ResidentServices>();
-builder.Services.AddScoped<ResidentServices>();
-
 // HttpClient
 builder.Services.AddScoped(sp => new HttpClient
 {

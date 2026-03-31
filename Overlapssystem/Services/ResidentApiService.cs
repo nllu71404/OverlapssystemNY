@@ -39,5 +39,10 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<ResidentModel>>($"api/Resident/Department/{id}");
         }
 
+        public async Task ToggleMedicinGivenAsync(int id)
+        {
+            await _http.PostAsJsonAsync($"api/Resident/")
+        }
+
     }
 }
