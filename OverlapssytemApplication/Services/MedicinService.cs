@@ -17,6 +17,8 @@ namespace OverlapssytemApplication.Services
         {
             _medicinRepository = medicinRepository;
         }
+
+        // Marker medicin som givet eller ikke givet ved at opdatere MedicinCheckTimeStamp
         public async Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked) 
         {
             var medicin = await _medicinRepository.GetMedicinByIdAsync(medicinTimeId);
