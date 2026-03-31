@@ -369,3 +369,72 @@ BEGIN
 DELETE FROM dbo.Shopping WHERE ShoppingID = @ShoppingID
 END;
 GO
+
+-- Gets all departments from the Department table.
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartments]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.Department
+END;
+GO
+
+-- Gets departments by departmentID
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartmentsByDepartmentID]
+@DepartmentID INT
+AS
+BEGIN
+SELECT * FROM dbo.Department WHERE DepartmentID = @DepartmentID
+END;
+GO
+
+-- Gets departments by departmentName
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartmentsByDepartmentName]
+@DepartmentName INT
+AS
+BEGIN
+SELECT * FROM dbo.Department WHERE DepartmentName = @DepartmentName
+END;
+GO
+
+-- Creates a Department to the Department table.
+CREATE OR ALTER   PROCEDURE [dbo].[uspCreateDepartment]
+@DepartmentName NVARCHAR(100)
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Department
+(
+    DepartmentName
+)
+VALUES
+(
+    @DepartmentName
+);
+
+SELECT SCOPE_IDENTITY() AS DepartmentID;
+END;
+GO
+
+-- Updates a Department by id in the Department table
+CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentById]
+@DepartmentName NVARCHAR(100),
+@DepartmentID INT
+AS
+BEGIN
+    UPDATE dbo.Department
+    SET DepartmentName = @DepartmentName
+    WHERE DepartmentID = @DepartmentID;
+
+END;
+GO
+
+-- Delete an entry in the Department table
+CREATE OR ALTER     PROCEDURE [dbo].[uspDeleteDepartment]
+@DepartmentID INT
+AS
+BEGIN
+DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
+END;
+GO
