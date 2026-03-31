@@ -170,6 +170,15 @@ SELECT * FROM dbo.MedicinTime WHERE ResidentID = @ResidentID
 END;
 GO
 
+-- Get Medicin Times by Medicin ID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetMedicinTimesByMedicinTimeID]
+@MedicinTimeID INT
+AS
+BEGIN
+SELECT * FROM dbo.MedicinTime WHERE MedicinTimeID = @MedicinTimeID
+END;
+GO
+
 -- Creates a Medicin Time to the MedicinTime table.
 CREATE OR ALTER PROCEDURE [dbo].[uspCreateMedicinTime]
 @MedicinTime DATETIME,
