@@ -54,20 +54,51 @@ namespace OverlapssystemInfrastructure.Repositories
             return medicinTimes;
         }
 
-        public Task<List<MedicinModel>> GetMedicinByResidentIdAsync(int residentId)
+        public async Task<List<MedicinModel>> GetMedicinByResidentIdAsync(int residentId)
         {
-            throw new NotImplementedException();
+            List<MedicinModel> medicinTimes = new();
+
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspGetMedicinTimesByResidentID", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@ResidentID", SqlDbType.Int).Value = residentId;
+
+            await connection.OpenAsync();
+
+            using SqlDataReader reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                MedicinModel medicinTime = new MedicinModel
+                {
+                    MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
+                    ResidentID = reader["ResidentID"] == DBNull.Value ? null : Convert.ToInt32(reader["ResidentID"]),
+                    MedicinTime = reader["MedicinTime"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(reader["MedicinTime"]),
+                    MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value ? null : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
+                };
+
+                medicinTimes.Add(medicinTime);
+            }
+
+            return medicinTimes;
         }
 
-        public Task DeleteMedicinAsync(int medicinId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task SaveNewMedicinAsync(MedicinModel medicin)
+        public async Task DeleteMedicinAsync(int medicinId)
         {
             using SqlConnection connection = new SqlConnection(_connectionString);
-            using SqlCommand command = new SqlCommand("dbo.uspCreateMedicin", connection);
+            using SqlCommand command = new SqlCommand("dbo.uspDeleteMedicinTime", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@MedicinTimeId", SqlDbType.Int).Value = medicinId;
+
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task<int> SaveNewMedicinAsync(MedicinModel medicin)
+        {
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspCreateMedicinTime", connection);
 
             command.CommandType = CommandType.StoredProcedure;
 
@@ -79,17 +110,62 @@ namespace OverlapssystemInfrastructure.Repositories
                     : DBNull.Value;
 
             await connection.OpenAsync();
-            await command.ExecuteScalarAsync();
+            object? result = await command.ExecuteScalarAsync();
+            return Convert.ToInt32(result);
         }
 
-        public Task ToggleMedicinGivenAsync(MedicinModel medTime)
+
+        public async Task UpdateMedicinAsync(MedicinModel medicin)
         {
-            throw new NotImplementedException();
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspUpdateMedicinTimeById", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.Add("@MedicinTime", SqlDbType.DateTime).Value = medicin.MedicinTime;
+            command.Parameters.Add("@ResidentID", SqlDbType.Int).Value =
+                medicin.ResidentID.HasValue ? medicin.ResidentID.Value : DBNull.Value;
+            command.Parameters.Add("@MedicinTimeID", SqlDbType.Int).Value = medicin.MedicinTimeID;
+            command.Parameters.Add("@MedicinCheckTimeStamp", SqlDbType.DateTime).Value =
+                 medicin.MedicinCheckTimeStamp.HasValue
+                     ? medicin.MedicinCheckTimeStamp.Value
+                     : DBNull.Value;
+
+
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
         }
 
-        public Task UpdateMedicinAsync(MedicinModel medicin)
+        public async Task<MedicinModel> GetMedicinByIdAsync(int medicinId)
         {
-            throw new NotImplementedException();
+            MedicinModel medicinTime = new MedicinModel();
+
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspGetMedicinTimesByMedicinTimeID", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@MedicinTimeID", SqlDbType.Int).Value = medicinId;
+
+            await connection.OpenAsync();
+
+            using SqlDataReader reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                MedicinModel newMedicinTime = new MedicinModel
+                {
+                    MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
+                    ResidentID = reader["ResidentID"] == DBNull.Value ? null : Convert.ToInt32(reader["ResidentID"]),
+                    MedicinTime = reader["MedicinTime"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(reader["MedicinTime"]),
+                    MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value ? null : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
+                };
+
+                medicinTime = newMedicinTime;
+            }
+            return medicinTime;
+
         }
+
+
+       
     }
 }

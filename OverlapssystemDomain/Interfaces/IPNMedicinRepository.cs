@@ -9,10 +9,10 @@ namespace OverlapssystemDomain.Interfaces
 {
     public interface IPNMedicinRepository
     {
-        List<PNMedicinModel> GetAllPNMedicin();
-        List<PNMedicinModel> GetPNMedicinByResidentId(int residentId);
-        int SaveNewPNMedicin(PNMedicinModel pNMedicin);
-        void DeletePNMedicin(int pNMedicinId);
-        void UpdatePNMedicin(PNMedicinModel pNMedicin);
+        Task<List<PNMedicinModel>> GetAllPNMedicinAsync();
+        Task<List<PNMedicinModel>> GetPNMedicinByResidentIdAsync(int residentId);
+        Task<int> SaveNewPNMedicinAsync(PNMedicinModel pNMedicin);
+        Task DeletePNMedicinAsync(int pNMedicinId);
+        Task UpdatePNMedicinAsync(PNMedicinModel pNMedicin);
     }
 }

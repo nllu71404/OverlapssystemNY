@@ -1,43 +1,150 @@
-﻿using OverlapssystemDomain.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Interfaces;
 
 namespace OverlapssystemInfrastructure.Repositories
 {
-    public class DepartmentRepository
+    public class DepartmentRepository : IDepartmentRepository
     {
-        public Task DeleteDepartmentAsync(int departmentId)
+        private readonly string _connectionString;
+
+        public DepartmentRepository(IConfiguration configuration)
         {
-            throw new NotImplementedException();
+            _connectionString = configuration.GetConnectionString("ProjektDB")
+                ?? throw new InvalidOperationException("Connection string 'ProjektDB' not found.");
         }
 
-        public Task<List<DepartmentModel>> GetAllDepartmentsAsync()
+        public async Task<List<DepartmentModel>> GetAllDepartmentsAsync()
         {
-            throw new NotImplementedException();
+            List<DepartmentModel> departments = new();
+
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspGetDepartments", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+
+            await connection.OpenAsync();
+
+            using SqlDataReader reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                DepartmentModel department = new DepartmentModel
+                {
+
+                    DepartmentID = Convert.ToInt32(reader["DepartmentID"]),              
+                    Name = reader["DepartmentName"]?.ToString() ?? ""
+
+                };
+
+                departments.Add(department);
+            }
+
+            return departments;
         }
 
-        public Task<DepartmentModel> GetDepartmentByIdAsync(int departmentId)
+        public async Task<DepartmentModel> GetDepartmentByIdAsync(int departmentId)
         {
-            throw new NotImplementedException();
+            DepartmentModel department = new();
+
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspGetDepartmentsByDepartmentID", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentId;
+
+            await connection.OpenAsync();
+
+            using SqlDataReader reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                DepartmentModel newDepartment = new DepartmentModel
+                {
+
+                    DepartmentID = Convert.ToInt32(reader["DepartmentID"]),
+                    Name = reader["DepartmentName"]?.ToString() ?? ""
+
+                };
+
+                department = newDepartment;
+            }
+
+            return department;
         }
 
-        public Task<DepartmentModel> GetDepartmentByNameAsync(string departmentName)
+        public async Task<DepartmentModel> GetDepartmentByNameAsync(string departmentName)
         {
-            throw new NotImplementedException();
+            DepartmentModel department = new();
+
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspGetDepartmentsByDepartmentName", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@DepartmentName", SqlDbType.Int).Value = departmentName;
+
+            await connection.OpenAsync();
+
+            using SqlDataReader reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                DepartmentModel newDepartment = new DepartmentModel
+                {
+
+                    DepartmentID = Convert.ToInt32(reader["DepartmentID"]),
+                    Name = reader["DepartmentName"]?.ToString() ?? ""
+
+                };
+
+                department = newDepartment;
+            }
+
+            return department;
         }
 
-        public Task<int> SaveNewDepartmentAsync(DepartmentModel department)
+        public async Task<int> SaveNewDepartmentAsync(DepartmentModel department)
         {
-            throw new NotImplementedException();
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspCreateDepartment", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+
+            
+            command.Parameters.Add("@DepartmentName", SqlDbType.NVarChar, 100).Value = department.Name;
+      
+            await connection.OpenAsync();
+            object? result = await command.ExecuteScalarAsync();
+            return Convert.ToInt32(result);
         }
 
-        public Task UpdateDepartmentAsync(DepartmentModel department)
+        public async Task UpdateDepartmentAsync(DepartmentModel department)
         {
-            throw new NotImplementedException();
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspUpdateDepartmentById", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.Add("@DepartmentName", SqlDbType.NVarChar, 100).Value = department.Name;
+            command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = department.DepartmentID;
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task DeleteDepartmentAsync(int departmentId)
+        {
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspDeleteDepartment", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentId;
+           
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
         }
     }
 }

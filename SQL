@@ -49,7 +49,7 @@ GO
 CREATE TABLE dbo.Shopping (
 ShoppingID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
-ShoppingDay DATE NULL,
+ShoppingDay NVARCHAR(100) NULL,
 ShoppingTime DATETIME NULL,
 PaymentMethod NVARCHAR(100) NULL
 
@@ -153,10 +153,297 @@ END;
 GO
 
 -- Get all Medicin times from the MedicinTime table.
-CREATE   PROCEDURE [dbo].[uspGetMedicinTimes]
+CREATE OR ALTER PROCEDURE [dbo].[uspGetMedicinTimes]
 AS
 BEGIN
 SET NOCOUNT ON;
 SELECT * FROM dbo.MedicinTime
+END;
+GO
+
+-- Get Medicin Times by Resident ID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetMedicinTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.MedicinTime WHERE ResidentID = @ResidentID
+END;
+GO
+
+-- Get Medicin Times by Medicin ID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetMedicinTimesByMedicinTimeID]
+@MedicinTimeID INT
+AS
+BEGIN
+SELECT * FROM dbo.MedicinTime WHERE MedicinTimeID = @MedicinTimeID
+END;
+GO
+
+-- Creates a Medicin Time to the MedicinTime table.
+CREATE OR ALTER PROCEDURE [dbo].[uspCreateMedicinTime]
+@MedicinTime DATETIME,
+@ResidentID INT = NULL,
+@MedicinCheckTimeStamp DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.MedicinTime
+(
+    MedicinTime,
+    ResidentID,
+    MedicinCheckTimeStamp
+)
+VALUES
+(
+    @MedicinTime,
+    @ResidentID,
+    @MedicinCheckTimeStamp
+);
+
+SELECT SCOPE_IDENTITY() AS MedicinTimeID;
+END;
+GO
+
+-- Updates a medicin time by id in the MedicinTime table
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
+@MedicinTime DATETIME,
+@ResidentID INT = NULL,
+@MedicinCheckTimeStamp DATETIME = NULL,
+@MedicinTimeID INT
+AS
+BEGIN
+    UPDATE dbo.MedicinTime
+    SET MedicinTime = @MedicinTime, 
+    ResidentID = @ResidentID, 
+    MedicinCheckTimeStamp = @MedicinCheckTimeStamp
+    WHERE MedicinTimeID = @MedicinTimeID;
+
+END;
+GO
+
+-- Delete an entry in the MedicinTime table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteMedicinTime]
+@MedicinTimeID INT
+AS
+BEGIN
+DELETE FROM dbo.MedicinTime WHERE MedicinTimeID = @MedicinTimeID
+END;
+GO
+
+-- Gets all PNMedicin times from the PNMedicin table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetPNMedicinTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.PNMedicin
+END;
+GO
+
+-- Get PNMedicin Times by Resident ID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetPNMedicinTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.PNMedicin WHERE ResidentID = @ResidentID
+END;
+GO
+
+--Creates an entry in the PNMedicin table
+CREATE OR ALTER  PROCEDURE [dbo].[uspCreatePNMedicinTime]
+@PNTime DATETIME,
+@ResidentID INT = NULL,
+@PNTimeStamp DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.PNMedicin
+(
+    PNTime,
+    ResidentID,
+    PNTimeStamp
+)
+VALUES
+(
+    @PNTime,
+    @ResidentID,
+    @PNTimeStamp
+);
+
+SELECT SCOPE_IDENTITY() AS PNMedicinID;
+END;
+GO
+
+-- Updates a PNmedicin time by id in the PNMedicin table
+CREATE OR ALTER  PROCEDURE [dbo].[uspUpdatePNMedicinTimeById]
+@PNTime DATETIME,
+@ResidentID INT = NULL,
+@PNTimeStamp DATETIME = NULL,
+@PNID INT
+AS
+BEGIN
+    UPDATE dbo.PNMedicin
+    SET PNTime = @PNTime, 
+    ResidentID = @ResidentID, 
+    PNTimeStamp = @PNTimeStamp
+    WHERE PNID = @PNID;
+
+END;
+GO
+
+-- Delete an entry in the PNMedicin table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeletePNMedicinTime]
+@PNID INT
+AS
+BEGIN
+DELETE FROM dbo.PNMedicin WHERE PNID = @PNID
+END;
+GO
+
+-- Gets all shopping times from the Shopping table.
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetShoppingTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.Shopping
+END;
+GO
+
+-- Get Shopping times by Resident ID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetShoppingTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.Shopping WHERE ResidentID = @ResidentID
+END;
+GO
+
+--Creates an entry in the Shopping table
+CREATE OR ALTER    PROCEDURE [dbo].[uspCreateShoppingTime]
+@ResidentID INT = NULL,
+@ShoppingDay NVARCHAR(100) NULL,
+@ShoppingTime DATETIME = NULL,
+@PaymentMethod NVARCHAR(100) NULL
+
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Shopping
+(
+    ResidentID,
+    ShoppingDay,
+    ShoppingTime,
+    PaymentMethod
+)
+VALUES
+(
+    @ResidentID,
+    @ShoppingDay,
+    @ShoppingTime,
+    @PaymentMethod
+);
+
+SELECT SCOPE_IDENTITY() AS ShoppingID;
+END;
+GO
+
+-- Updates a Shopping time by id in the Shopping table
+CREATE OR ALTER    PROCEDURE [dbo].[uspUpdateShoppingTimeById]
+@ResidentID INT = NULL,
+@ShoppingDay NVARCHAR(100) NULL,
+@ShoppingTime DATETIME = NULL,
+@PaymentMethod NVARCHAR(100) NULL,
+@ShoppingID INT
+
+AS
+BEGIN
+    UPDATE dbo.Shopping
+    SET  
+    ResidentID = @ResidentID, 
+    ShoppingDay = @ShoppingDay,
+    ShoppingTime = @ShoppingTime,
+    PaymentMethod = @PaymentMethod
+    WHERE ShoppingID = @ShoppingID;
+
+END;
+GO
+
+-- Delete an entry in the Shopping table
+CREATE OR ALTER   PROCEDURE [dbo].[uspDeleteShoppingTime]
+@ShoppingID INT
+AS
+BEGIN
+DELETE FROM dbo.Shopping WHERE ShoppingID = @ShoppingID
+END;
+GO
+
+-- Gets all departments from the Department table.
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartments]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.Department
+END;
+GO
+
+-- Gets departments by departmentID
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartmentsByDepartmentID]
+@DepartmentID INT
+AS
+BEGIN
+SELECT * FROM dbo.Department WHERE DepartmentID = @DepartmentID
+END;
+GO
+
+-- Gets departments by departmentName
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartmentsByDepartmentName]
+@DepartmentName INT
+AS
+BEGIN
+SELECT * FROM dbo.Department WHERE DepartmentName = @DepartmentName
+END;
+GO
+
+-- Creates a Department to the Department table.
+CREATE OR ALTER   PROCEDURE [dbo].[uspCreateDepartment]
+@DepartmentName NVARCHAR(100)
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Department
+(
+    DepartmentName
+)
+VALUES
+(
+    @DepartmentName
+);
+
+SELECT SCOPE_IDENTITY() AS DepartmentID;
+END;
+GO
+
+-- Updates a Department by id in the Department table
+CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentById]
+@DepartmentName NVARCHAR(100),
+@DepartmentID INT
+AS
+BEGIN
+    UPDATE dbo.Department
+    SET DepartmentName = @DepartmentName
+    WHERE DepartmentID = @DepartmentID;
+
+END;
+GO
+
+-- Delete an entry in the Department table
+CREATE OR ALTER     PROCEDURE [dbo].[uspDeleteDepartment]
+@DepartmentID INT
+AS
+BEGIN
+DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
 END;
 GO
