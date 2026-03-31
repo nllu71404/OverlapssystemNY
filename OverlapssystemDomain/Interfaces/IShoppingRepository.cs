@@ -9,10 +9,10 @@ namespace OverlapssystemDomain.Interfaces
 {
     public interface IShoppingRepository
     {
-        List<ShoppingModel> GetAllShopping();
-        List<ShoppingModel> GetShoppingByResidentId(int residentId);
-        int SaveNewShopping(ShoppingModel shopping);
-        void DeleteShopping(int shoppingId);
-        void UpdateShopping(ShoppingModel shopping);
+        Task<List<ShoppingModel>> GetAllShoppingAsync();
+        Task<List<ShoppingModel>> GetShoppingByResidentIdAsync(int residentId);
+        Task<int> SaveNewShoppingAsync(ShoppingModel shopping);
+        Task DeleteShoppingAsync(int shoppingId);
+        Task UpdateShoppingAsync(ShoppingModel shopping);
     }
 }

@@ -8,7 +8,7 @@ namespace OverlapssystemDomain.Entities
 {
     public class DepartmentModel
     {
-        public int Id { get; set; }
+        public int DepartmentID { get; set; }
 
         public string Name { get; set; } = "";
     }
