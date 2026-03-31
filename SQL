@@ -153,10 +153,71 @@ END;
 GO
 
 -- Get all Medicin times from the MedicinTime table.
-CREATE   PROCEDURE [dbo].[uspGetMedicinTimes]
+CREATE OR ALTER PROCEDURE [dbo].[uspGetMedicinTimes]
 AS
 BEGIN
 SET NOCOUNT ON;
 SELECT * FROM dbo.MedicinTime
+END;
+GO
+
+-- Get Medicin Times by Resident ID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetMedicinTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.MedicinTime WHERE ResidentID = @ResidentID
+END;
+GO
+
+-- Creates a Medicin Time to the MedicinTime table.
+CREATE OR ALTER PROCEDURE [dbo].[uspCreateMedicinTime]
+@MedicinTime DATETIME,
+@ResidentID INT = NULL,
+@MedicinCheckTimeStamp DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.MedicinTime
+(
+    MedicinTime,
+    ResidentID,
+    MedicinCheckTimeStamp
+)
+VALUES
+(
+    @MedicinTime,
+    @ResidentID,
+    @MedicinCheckTimeStamp
+);
+
+SELECT SCOPE_IDENTITY() AS MedicinTimeID;
+END;
+GO
+
+-- Updates a medicin time by id in the MedicinTime table
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
+@MedicinTime DATETIME,
+@ResidentID INT = NULL,
+@MedicinCheckTimeStamp DATETIME = NULL,
+@MedicinTimeID INT
+AS
+BEGIN
+    UPDATE dbo.MedicinTime
+    SET MedicinTime = @MedicinTime, 
+    ResidentID = @ResidentID, 
+    MedicinCheckTimeStamp = @MedicinCheckTimeStamp
+    WHERE MedicinTimeID = @MedicinTimeID;
+
+END;
+GO
+
+-- Delete an entry in the MedicinTime table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteMedicinTime]
+@MedicinTimeID INT
+AS
+BEGIN
+DELETE FROM dbo.MedicinTime WHERE @MedicinTimeID = @MedicinTimeID
 END;
 GO
