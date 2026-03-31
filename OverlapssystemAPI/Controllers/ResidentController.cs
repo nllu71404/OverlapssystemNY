@@ -50,6 +50,14 @@ namespace OverlapssystemAPI.Controllers
 
         }
 
+        // Tilføjet så API service og frontend kan bruge denne
+        [HttpGet("Department/{id}")]
+        public async Task<ActionResult> GetByDepartment(int id)
+        {
+            var residents = await _residentServices.LoadResidentsByDepartmentAsync(id);
+            return Ok(residents);
+        }
+
 
     }
 }

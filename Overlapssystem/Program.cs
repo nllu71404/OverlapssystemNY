@@ -1,6 +1,8 @@
 using Overlapssystem.Components;
+using Overlapssystem.Services;
 using OverlapssystemDomain.Interfaces;
 using OverlapssystemInfrastructure.Repositories;
+using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,8 +15,16 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<IResidentRepository, ResidentRepository>();
 builder.Services.AddScoped<IMedicinRepository, MedicinRepository>();
+builder.Services.AddScoped<IResidentServices, ResidentServices>();
 builder.Services.AddScoped<ResidentServices>();
 
+// HttpClient
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:7239/")
+});
+
+builder.Services.AddScoped<ResidentApiService>();
 
 
 var app = builder.Build();

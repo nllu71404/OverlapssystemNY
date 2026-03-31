@@ -6,9 +6,11 @@
 @using OverlapssystemDomain.Enums
 @using OverlapssystemDomain.Interfaces
 @using OverlapssytemApplication.Interfaces
+@using Overlapssystem.Services
 
 
-@inject IResidentServices residentServices
+@inject IResidentServices residentServices // Denne skal fjernes når vi har oprettet medicin metoden
+@inject ResidentApiService api
 
 <h5>Overlapsseddel</h5>
 
@@ -138,6 +140,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         selectedDepartmentId = 2;
+        residents = await api.GetByDepartment(selectedDepartmentId);
         //await residentServices.LoadResidentsByDepartmentAsync();
 
 
@@ -146,12 +149,12 @@ else
     private async Task LoadResidentsByDepartmentAsync()
     {
         //residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
-        residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
+        residents = await api.GetByDepartment(selectedDepartmentId);
 
     }
     private async Task LoadAllResidentsAsync()
     {
-        residents = await residentServices.LoadResidentsAsync();
+        residents = await api.GetAllResidents();
     }
     private async Task AddMedicinTimeAsync(ResidentModel resident, DateTime time)
     {
@@ -161,20 +164,20 @@ else
     private async Task CreateResidentAsync()
     {
         newResident.DepartmentId = selectedDepartmentId;
-        await residentServices.CreateResidentAsync(newResident);
-        residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
+        await api.CreateResident(newResident);
+        residents = await api.GetByDepartment(selectedDepartmentId);
         newResident = new ResidentModel { Risiko = Risiko.Green };
     }
 
     private async Task SaveResidentAsync(ResidentModel resident)
     {
-        await residentServices.UpdateResidentAsync(resident);
+        await api.UpdateResident(resident.ResidentId, resident);
     }
 
     private async Task DeleteResidentAsync(ResidentModel resident)
     {
-        await residentServices.DeleteResidentAsync(resident.ResidentId);
-        residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
+        await api.DeleteResident(resident.ResidentId);
+        residents = await api.GetByDepartment(selectedDepartmentId);
     }
 
     private TimeSpan selectedTime;
