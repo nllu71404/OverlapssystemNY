@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OverlapssytemApplication.Interfaces
 {
-    internal interface IMedicinService
+    public interface IMedicinService
     {
             Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked);
     }

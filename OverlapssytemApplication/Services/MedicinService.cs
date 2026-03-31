@@ -9,7 +9,7 @@ using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssytemApplication.Services
 {
-    internal class MedicinService : IMedicinService
+    public class MedicinService : IMedicinService
     {
         private readonly IMedicinRepository _medicinRepository;
 

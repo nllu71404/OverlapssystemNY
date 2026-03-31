@@ -12,6 +12,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\OverlapssytemApplication\OverlapssytemApplication.csproj" />
+		<ProjectReference Include="..\OverlapssystemShared\OverlapssystemShared.csproj" />
 	</ItemGroup>
 
 </Project>

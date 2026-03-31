@@ -5,11 +5,8 @@
 @using OverlapssystemDomain.Entities
 @using OverlapssystemDomain.Enums
 @using OverlapssystemDomain.Interfaces
-@using OverlapssytemApplication.Interfaces
 @using Overlapssystem.Services
 
-
-@inject IResidentServices residentServices // Denne skal fjernes når vi har oprettet medicin metoden
 @inject ResidentApiService api
 
 <h5>Overlapsseddel</h5>
@@ -104,7 +101,7 @@ else
                             <option value="@t">@t.ToString(@"hh\:mm")</option>
                         }
                     </select>
-                    <button @onclick="() => AddMedicinTimeAsync(resident, DateTime.Today.Add(selectedTime))">
+                    <button @onclick="() => AddMedicinTimeAsync(resident.ResidentId, DateTime.Today.Add(selectedTime))">
                         Tilføj medicin tid
                     </button>
                 </div>
@@ -114,14 +111,14 @@ else
                     {
                         <li>
                             <input type="checkbox" checked="@medTime.IsChecked"
-                                   @onchange="() => residentServices.ToggleMedicinGivenAsync(medTime)" />
+                                   @onchange="() => api.SetMedicinChecked(medTime.MedicinTimeID, !medTime.IsChecked)" />
                             @medTime.MedicinTime.ToString(@"hh\:mm")
                             @if (medTime.MedicinCheckTimeStamp.HasValue)
                             {
                                 <span> - Givet: @medTime.MedicinCheckTimeStamp.Value.ToString("HH:mm")</span>
                             }
                         </li>
-                    }
+                    } 
                 </ul>
 
                 <button @onclick='() => SaveResidentAsync(resident)'>
@@ -156,9 +153,9 @@ else
     {
         residents = await api.GetAllResidents();
     }
-    private async Task AddMedicinTimeAsync(ResidentModel resident, DateTime time)
+    private async Task AddMedicinTimeAsync(int residentid, DateTime dateTime)
     {
-        await residentServices.AddMedicinTimeAsync(resident, time);
+        await api.AddMedicinTime(residentid, dateTime);
     }
 
     private async Task CreateResidentAsync()

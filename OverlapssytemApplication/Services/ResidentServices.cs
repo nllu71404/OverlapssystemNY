@@ -100,16 +100,15 @@ namespace OverlapssytemApplication.Services
         {
             resident.MedicinTimes = await _medicinRepository.GetMedicinByResidentIdAsync(resident.ResidentId);
         }
-        public async Task AddMedicinTimeAsync(ResidentModel resident, DateTime time)
+        public async Task AddMedicinTimeAsync(int residentId, DateTime datetime)
         {
             var medTime = new MedicinModel
             {
-                ResidentID = resident.ResidentId,
-                MedicinTime = time,
+                ResidentID = residentId,
+                MedicinTime = datetime,
                 MedicinCheckTimeStamp = null
             };
             await _medicinRepository.SaveNewMedicinAsync(medTime);
-            await LoadMedicinTimesAsync(resident);
         }
         public async Task ToggleMedicinGivenAsync(MedicinModel medTime)
         {
