@@ -218,7 +218,7 @@ CREATE OR ALTER PROCEDURE [dbo].[uspDeleteMedicinTime]
 @MedicinTimeID INT
 AS
 BEGIN
-DELETE FROM dbo.MedicinTime WHERE @MedicinTimeID = @MedicinTimeID
+DELETE FROM dbo.MedicinTime WHERE MedicinTimeID = @MedicinTimeID
 END;
 GO
 
@@ -288,6 +288,84 @@ CREATE OR ALTER PROCEDURE [dbo].[uspDeletePNMedicinTime]
 @PNID INT
 AS
 BEGIN
-DELETE FROM dbo.PNMedicin WHERE @PNID = @PNID
+DELETE FROM dbo.PNMedicin WHERE PNID = @PNID
+END;
+GO
+
+-- Gets all shopping times from the Shopping table.
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetShoppingTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.Shopping
+END;
+GO
+
+-- Get Shopping times by Resident ID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetShoppingTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.Shopping WHERE ResidentID = @ResidentID
+END;
+GO
+
+--Creates an entry in the Shopping table
+CREATE OR ALTER    PROCEDURE [dbo].[uspCreateShoppingTime]
+@ResidentID INT = NULL,
+@ShoppingDay NVARCHAR(100) NULL,
+@ShoppingTime DATETIME = NULL,
+@PaymentMethod NVARCHAR(100) NULL
+
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Shopping
+(
+    ResidentID,
+    ShoppingDay,
+    ShoppingTime,
+    PaymentMethod
+)
+VALUES
+(
+    @ResidentID,
+    @ShoppingDay,
+    @ShoppingTime,
+    @PaymentMethod
+);
+
+SELECT SCOPE_IDENTITY() AS ShoppingID;
+END;
+GO
+
+-- Updates a Shopping time by id in the Shopping table
+CREATE OR ALTER    PROCEDURE [dbo].[uspUpdateShoppingTimeById]
+@ResidentID INT = NULL,
+@ShoppingDay NVARCHAR(100) NULL,
+@ShoppingTime DATETIME = NULL,
+@PaymentMethod NVARCHAR(100) NULL,
+@ShoppingID INT
+
+AS
+BEGIN
+    UPDATE dbo.Shopping
+    SET  
+    ResidentID = @ResidentID, 
+    ShoppingDay = @ShoppingDay,
+    ShoppingTime = @ShoppingTime,
+    PaymentMethod = @PaymentMethod
+    WHERE ShoppingID = @ShoppingID;
+
+END;
+GO
+
+-- Delete an entry in the Shopping table
+CREATE OR ALTER   PROCEDURE [dbo].[uspDeleteShoppingTime]
+@ShoppingID INT
+AS
+BEGIN
+DELETE FROM dbo.Shopping WHERE ShoppingID = @ShoppingID
 END;
 GO
