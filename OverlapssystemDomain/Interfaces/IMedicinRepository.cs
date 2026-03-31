@@ -11,9 +11,10 @@ namespace OverlapssystemDomain.Interfaces
     {
         Task<List<MedicinModel>> GetAllMedicinAsync();
         Task<List<MedicinModel>> GetMedicinByResidentIdAsync(int residentId);
-        Task SaveNewMedicinAsync(MedicinModel medicin);
+        Task<MedicinModel> GetMedicinByIdAsync(int medicinId);
+        Task<int> SaveNewMedicinAsync(MedicinModel medicin);
         Task DeleteMedicinAsync(int medicinId);
         Task UpdateMedicinAsync(MedicinModel medicin);
-        Task ToggleMedicinGivenAsync(MedicinModel medTime);
+        
     }
 }
