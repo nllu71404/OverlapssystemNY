@@ -49,7 +49,7 @@ GO
 CREATE TABLE dbo.Shopping (
 ShoppingID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
-ShoppingDay DATE NULL,
+ShoppingDay NVARCHAR(100) NULL,
 ShoppingTime DATETIME NULL,
 PaymentMethod NVARCHAR(100) NULL
 
