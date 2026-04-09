@@ -1,0 +1,108 @@
+﻿@using OverlapssystemDomain.Enums
+@using OverlapssystemDomain.Entities
+
+<div class="resident-card @GetRiskClass()">
+    <!-- Viser UI/design for en beboer-->
+    <!-- TOP -->
+    <div class="section">
+        <label>Vælg status</label>
+        <select @bind="Resident.Risiko" class="form-select">
+            <option value="@Risiko.Green">Grøn</option>
+            <option value="@Risiko.Yellow">Gul</option>
+            <option value="@Risiko.Red">Rød</option>
+        </select>
+    </div>
+
+    <div class="section">
+        <input class="form-control" @bind="Resident.Name" />
+    </div>
+
+    <div class="section">
+        <textarea class="form-control" @bind="Resident.Status"></textarea>
+    </div>
+
+    <!-- MEDICIN -->
+    <div class="section">
+        <div class="section-header">
+            <strong>MEDICIN TIDER</strong>
+            <button class="btn-plus">+</button>
+        </div>
+
+        @foreach (var med in Resident.MedicinTimes)
+        {
+            <div class="row-item">
+                <input type="checkbox" @bind="med.IsChecked" />
+
+                <span>@med.MedicinTime.ToString("dd-MM-yyyy HH:mm")</span>
+
+                <button class="btn-x">x</button>
+            </div>
+        }
+    </div>
+
+    <!-- PN MEDICIN -->
+    <div class="section">
+        <div class="section-header">
+            <strong>PN MEDICIN</strong>
+            <button class="btn-plus">+</button>
+        </div>
+
+        <input class="form-control" placeholder="PN Tid" />
+        <textarea class="form-control" placeholder="Årsag"></textarea>
+        <input class="form-control" placeholder="PN tidspunkt" />
+    </div>
+
+    <!-- HANDLEDAG -->
+    <div class="section">
+        <div class="section-header">
+            <strong>HANDLEDAG</strong>
+            <button class="btn-plus">+</button>
+        </div>
+
+        <select class="form-select">
+            <option>Mandag</option>
+            <option>Tirsdag</option>
+            <option>Onsdag</option>
+            <option>Torsdag</option>
+            <option>Fredag</option>
+            <option>Lørdag</option>
+            <option>Søndag</option>
+        </select>
+
+        <input type="datetime-local" class="form-control" />
+        <input class="form-control" placeholder="Betalingsmetode" />
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <button class="btn-save" @onclick="() => OnSave.InvokeAsync(Resident)">
+            Gem ændringer
+        </button>
+
+        <button class="btn-delete" @onclick="() => OnDelete.InvokeAsync(Resident)">
+            Slet borger
+        </button>
+    </div>
+
+</div>
+
+
+
+@code {
+    [Parameter]
+    public ResidentModel Resident { get; set; } = new();
+    
+    [Parameter]
+    public EventCallback<ResidentModel> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback<ResidentModel> OnDelete { get; set; }
+
+    private string GetRiskClass() => Resident.Risiko switch
+    {
+        Risiko.Green => "green",
+        Risiko.Yellow => "yellow",
+        Risiko.Red => "red",
+        _ => ""
+    };
+}

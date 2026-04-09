@@ -9,6 +9,7 @@
 
 @inject ResidentApiService api
 
+<!-- Henter data fra API og er det overordnet layout-->
 <h5>Overlapsseddel</h5>
 
 
@@ -71,7 +72,16 @@
 else
 
 {
-    <ul>
+    <div class="resident-grid">
+        @foreach (var resident in residents)
+        {
+            <ResidentCard Resident="resident"
+                 OnSave="SaveResidentAsync"
+                 OnDelete="DeleteResidentAsync" />
+        }
+    </div>
+}
+   @*  <ul>
         @foreach (var resident in residents)
         {
             <li style="margin-bottom: 15px;">
@@ -131,7 +141,7 @@ else
             </li>
         }
     </ul>
-}
+ *@}
 @code {
     protected override async Task OnInitializedAsync()
     {
