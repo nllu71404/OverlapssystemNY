@@ -110,7 +110,13 @@ else
                     @foreach (var medTime in resident.MedicinTimes)
                     {
                         <li>
-                           <input type="checkbox" @bind="medTime.IsChecked"/>
+                            <input type="checkbox"
+                                   checked="@medTime.IsChecked"
+                                   @onchange="async e =>
+                                   {
+                                       medTime.IsChecked = (bool)((ChangeEventArgs)e).Value;
+                                       await api.SetMedicinChecked(medTime.MedicinTimeID, medTime.IsChecked);
+                                   }" />
                             @medTime.MedicinTime.ToString(@"hh\:mm")
                             @if (medTime.MedicinCheckTimeStamp.HasValue)
                             {
@@ -124,7 +130,7 @@ else
                     Gem ændringer
                 </button>
 
-                <button @onclick='() => DeleteResidentAsync(resident)'>
+                <button @onclick='() => DeleteResidentAsync(resident.ResidentId)'>
                     Slet beboer
                 </button>
 
@@ -170,9 +176,9 @@ else
         await api.UpdateResident(resident.ResidentId, resident);
     }
 
-    private async Task DeleteResidentAsync(ResidentModel resident)
+    private async Task DeleteResidentAsync(int residentId)
     {
-        await api.DeleteResident(resident.ResidentId);
+        await api.DeleteResident(residentId);
         residents = await api.GetByDepartment(selectedDepartmentId);
     }
 
