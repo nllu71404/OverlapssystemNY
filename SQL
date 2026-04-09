@@ -447,3 +447,15 @@ BEGIN
 DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
 END;
 GO
+
+--Fast data
+
+--Departments 
+INSERT INTO Department (DepartmentName)
+VALUES ('Skoven');
+GO
+
+INSERT INTO Department (DepartmentName)
+VALUES ('Slottet');
+GO
+
