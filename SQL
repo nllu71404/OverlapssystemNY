@@ -235,15 +235,19 @@ GO
 
 -- Updates a medicin time by id in the MedicinTime table
 CREATE OR ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
-    ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
+    @MedicinTime DATETIME,
     @MedicinTimeID INT,
+    @ResidentID INT,
     @IsChecked BIT,
     @MedicinCheckTimeStamp DATETIME = NULL
 AS
 BEGIN
     UPDATE dbo.MedicinTime
-    SET IsChecked = @IsChecked,
-        MedicinCheckTimeStamp = @MedicinCheckTimeStamp
+    SET 
+    MedicinTime = @MedicinTime,
+    ResidentID = @ResidentID,
+    IsChecked = @IsChecked,
+    MedicinCheckTimeStamp = @MedicinCheckTimeStamp
     WHERE MedicinTimeID = @MedicinTimeID;
 END;
 GO
