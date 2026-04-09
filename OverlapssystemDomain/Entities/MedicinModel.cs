@@ -13,6 +13,16 @@ namespace OverlapssystemDomain.Entities
         public DateTime MedicinTime { get; set; }
         public DateTime? MedicinCheckTimeStamp { get; set; }
 
-        public bool IsChecked => MedicinCheckTimeStamp.HasValue;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                _isChecked = value;
+                MedicinCheckTimeStamp = value ? DateTime.UtcNow : null;
+            }
+        }
+        private bool _isChecked;
+ 
     }
 }

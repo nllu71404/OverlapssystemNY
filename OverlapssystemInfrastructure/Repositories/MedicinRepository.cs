@@ -126,6 +126,7 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@ResidentID", SqlDbType.Int).Value =
                 medicin.ResidentID.HasValue ? medicin.ResidentID.Value : DBNull.Value;
             command.Parameters.Add("@MedicinTimeID", SqlDbType.Int).Value = medicin.MedicinTimeID;
+            command.Parameters.Add("@IsChecked", SqlDbType.Bit).Value = medicin.IsChecked;
             command.Parameters.Add("@MedicinCheckTimeStamp", SqlDbType.DateTime).Value =
                  medicin.MedicinCheckTimeStamp.HasValue
                      ? medicin.MedicinCheckTimeStamp.Value

@@ -24,6 +24,7 @@ namespace OverlapssystemInfrastructure.Repositories
         }
 
         // Dette er funktionen som bliver kaldt for at hente alle beboere, og den kalder på stored procedure i SQL Server
+        //Husk at tjekke dictionaries ud!!
         public async Task<List<ResidentModel>> GetAllResidentsAsync()
         {
             List<ResidentModel> residents = new();
@@ -36,32 +37,47 @@ namespace OverlapssystemInfrastructure.Repositories
             await connection.OpenAsync();
 
             using SqlDataReader reader = await command.ExecuteReaderAsync();
+
+            var residentDict = new Dictionary<int, ResidentModel>(); //Tjek dictionaries ud!!!!
+
             while (await reader.ReadAsync())
             {
-                ResidentModel resident = new ResidentModel
+                int residentId = Convert.ToInt32(reader["ResidentID"]);
+
+                if (!residentDict.ContainsKey(residentId))
                 {
-                    // Konverter ResidentID til int, da det ikke er nullable i modellen
-                    ResidentId = Convert.ToInt32(reader["ResidentID"]),
+                    residentDict[residentId] = new ResidentModel
+                    {
+                        ResidentId = residentId,
+                        DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
+                        Name = reader["ResidentName"]?.ToString() ?? "",
+                        Status = reader["ResidentStatus"]?.ToString() ?? "",
+                        Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
+                            ? risiko
+                            : Risiko.Green,
+                        MedicinTimes = new List<MedicinModel>()
+                    };
+                }
 
-                    // Hvis DepartmentID er null i databasen, sæt det til null i modellen, ellers konverter det til int
-                    DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
-
-                    // Hent ResidentName som string, og hvis det er null, sæt det til en tom streng
-                    Name = reader["ResidentName"]?.ToString() ?? "",
-
-                    // Hent ResidentStatus som string, og hvis det er null, sæt det til en tom streng
-                    Status = reader["ResidentStatus"]?.ToString() ?? "",
-
-                    // Prøv at parse Risk til enum Risiko, og hvis det mislykkes, sæt det til Risiko.Green som default
-                    Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko) ? risiko : Risiko.Green
-                };
-
-                residents.Add(resident);
+                // Hvis der findes medicintid
+                if (reader["MedicinTimeID"] != DBNull.Value)
+                {
+                    residentDict[residentId].MedicinTimes.Add(new MedicinModel
+                    {
+                        MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
+                        MedicinTime = Convert.ToDateTime(reader["MedicinTime"]),
+                        IsChecked = Convert.ToBoolean(reader["IsChecked"]),
+                        MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
+                            ? null
+                            : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
+                    });
+                }
             }
 
-            return residents;
+            return residentDict.Values.ToList();
         }
-       
+
+
         public async Task<List<ResidentModel>> GetResidentByDepartmentIdAsync(int departmentId)
         {
             List<ResidentModel> residents = new();
@@ -75,23 +91,45 @@ namespace OverlapssystemInfrastructure.Repositories
             await connection.OpenAsync();
 
             using SqlDataReader reader = await command.ExecuteReaderAsync();
+
+            var residentDict = new Dictionary<int, ResidentModel>(); //Tjek dictionaries ud!!!!
+
             while (await reader.ReadAsync())
             {
-                ResidentModel resident = new ResidentModel
-                {
-                    ResidentId = Convert.ToInt32(reader["ResidentID"]),
-                    DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
-                    Name = reader["ResidentName"]?.ToString() ?? "",
-                    Status = reader["ResidentStatus"]?.ToString() ?? "",
-                    Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
-                        ? risiko
-                        : Risiko.Green
-                };
+                int residentId = Convert.ToInt32(reader["ResidentID"]);
 
-                residents.Add(resident);
+                if (!residentDict.ContainsKey(residentId))
+                {
+                    residentDict[residentId] = new ResidentModel
+                    {
+                        ResidentId = residentId,
+                        DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
+                        Name = reader["ResidentName"]?.ToString() ?? "",
+                        Status = reader["ResidentStatus"]?.ToString() ?? "",
+                        Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
+                            ? risiko
+                            : Risiko.Green,
+                        MedicinTimes = new List<MedicinModel>()
+                    };
+                }
+
+                // Hvis der findes medicintid
+                if (reader["MedicinTimeID"] != DBNull.Value)
+                {
+                    residentDict[residentId].MedicinTimes.Add(new MedicinModel
+                    {
+                        MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
+                        MedicinTime = Convert.ToDateTime(reader["MedicinTime"]),
+                        IsChecked = Convert.ToBoolean(reader["IsChecked"]),
+                        MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
+                            ? null
+                            : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
+                    });
+                }
             }
 
-            return residents;
+            return residentDict.Values.ToList();
+           
         }
 
         public async Task UpdateResidentAsync(ResidentModel resident)
