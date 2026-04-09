@@ -110,7 +110,7 @@ namespace OverlapssytemApplication.Services
             };
             await _medicinRepository.SaveNewMedicinAsync(medTime);
         }
-        public async Task ToggleMedicinGivenAsync(MedicinModel medTime)
+        public async Task ToggleMedicinGivenAsync(MedicinModel medTime) //Bruger vi denne metode nogen steder?:-)
         {
             medTime.MedicinCheckTimeStamp = medTime.MedicinCheckTimeStamp != null ? (DateTime?)null : DateTime.Now;
             await _medicinRepository.UpdateMedicinAsync(medTime);

@@ -9,10 +9,10 @@ using OverlapssytemApplication.Services;
 
 
 
-namespace TestOverlapssystem
+namespace TestOverlapssystem.ApplicationTests
 {
     [TestClass]
-    public sealed class TestResidentServices
+    public sealed class ResidentServicesTest
     {
         private Mock<IResidentRepository> _residentRepoMock;
         private Mock<IMedicinRepository> _medicinRepoMock;
@@ -99,6 +99,70 @@ namespace TestOverlapssystem
             // Assert
             _residentRepoMock.Verify(r => r.SaveNewResidentAsync(resident), Times.Once);
             _residentRepoMock.Verify(r => r.GetResidentByDepartmentIdAsync(2), Times.Once);
+        }
+
+        [TestMethod]
+        public void SetDepartment_DepartmentIdIsNotNull_CreatesANewResidentWithSelectedDepartmentId()
+        {
+            // Arrange
+            int departmentId = 5;
+
+            // Act
+            _service.SetDepartment(departmentId);
+
+            // Assert
+            Assert.AreEqual(departmentId, _service.SelectedDepartmentId);
+            Assert.IsNotNull(_service.NewResident);
+            Assert.AreEqual(departmentId, _service.NewResident.DepartmentId);
+        }
+
+        [TestMethod]
+        public async Task LoadMedicinTimesAsync_WhenCalled_LoadsMedicinTimesIntoResident()
+        {
+            // Arrange
+            var resident = new ResidentModel { ResidentId = 1 };
+            var medicinTimes = new List<MedicinModel>
+            {
+                new MedicinModel { MedicinTimeID = 1 },
+                new MedicinModel { MedicinTimeID = 2 }
+            };
+
+            _medicinRepoMock
+                .Setup(r => r.GetMedicinByResidentIdAsync(resident.ResidentId))
+                .ReturnsAsync(medicinTimes);
+
+            // Act
+            await _service.LoadMedicinTimesAsync(resident);
+
+            // Assert
+            Assert.IsNotNull(resident.MedicinTimes);
+            Assert.AreEqual(2, resident.MedicinTimes.Count);
+            CollectionAssert.AreEqual(medicinTimes, resident.MedicinTimes);
+        }
+
+        [TestMethod]
+        public async Task AddMedicinTimeAsync_ResidentIdAndTimeIsNotNull_CreatesMedicinTimeAndCallsRepo()
+        {
+            // Arrange
+            int residentId = 3;
+            DateTime medTimeDate = new DateTime(2026, 4, 9, 8, 0, 0);
+            int expectedId = 4;
+
+            MedicinModel capturedMedTime = null;
+            _medicinRepoMock
+                .Setup(r => r.SaveNewMedicinAsync(It.IsAny<MedicinModel>()))
+                .Callback<MedicinModel>(m => capturedMedTime = m)
+                .ReturnsAsync(expectedId);
+
+            // Act
+            await _service.AddMedicinTimeAsync(residentId, medTimeDate);
+
+            // Assert
+            Assert.IsNotNull(capturedMedTime);
+            Assert.AreEqual(residentId, capturedMedTime.ResidentID);
+            Assert.AreEqual(medTimeDate, capturedMedTime.MedicinTime);
+            Assert.IsNull(capturedMedTime.MedicinCheckTimeStamp);
+            _medicinRepoMock.Verify(r => r.SaveNewMedicinAsync(It.IsAny<MedicinModel>()), Times.Once);
         }
 
         [TestMethod]
