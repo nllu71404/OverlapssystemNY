@@ -31,7 +31,8 @@ CREATE TABLE dbo.MedicinTime (
 MedicinTimeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
 MedicinTime DATETIME NULL,
-MedicinCheckTimeStamp DATETIME NULL
+MedicinCheckTimeStamp DATETIME NULL,
+IsChecked BIT NOT NULL DEFAULT 0;
 
 );
 GO
@@ -107,11 +108,24 @@ END;
 GO
 
 -- Gets all Residents from the resident table.
-CREATE OR ALTER PROCEDURE dbo.uspGetResidents
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetResidents]
 AS
 BEGIN
 SET NOCOUNT ON;
-SELECT * FROM dbo.Resident
+SELECT 
+    r.ResidentID,
+    r.ResidentName,
+    r.ResidentStatus,
+    r.DepartmentID,
+    r.Risk,
+
+    m.MedicinTimeID,
+    m.MedicinTime,
+    m.IsChecked,
+    m.MedicinCheckTimeStamp
+
+FROM Resident r
+LEFT JOIN MedicinTime m ON r.ResidentID = m.ResidentID
 END;
 GO
 
@@ -144,11 +158,25 @@ END;
 GO
 
 -- Get Residents by department ID
-CREATE OR ALTER PROCEDURE dbo.uspGetResidentsByDepartmentID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetResidentsByDepartmentID]
 @DepartmentID INT
 AS
 BEGIN
-SELECT * FROM dbo.Resident WHERE DepartmentID = @DepartmentID
+SET NOCOUNT ON;
+SELECT 
+    r.ResidentID,
+    r.ResidentName,
+    r.ResidentStatus,
+    r.DepartmentID,
+    r.Risk,
+
+    m.MedicinTimeID,
+    m.MedicinTime,
+    m.IsChecked,
+    m.MedicinCheckTimeStamp
+
+FROM Resident r
+LEFT JOIN MedicinTime m ON r.ResidentID = m.ResidentID WHERE DepartmentID = @DepartmentID
 END;
 GO
 
@@ -207,18 +235,16 @@ GO
 
 -- Updates a medicin time by id in the MedicinTime table
 CREATE OR ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
-@MedicinTime DATETIME,
-@ResidentID INT = NULL,
-@MedicinCheckTimeStamp DATETIME = NULL,
-@MedicinTimeID INT
+    ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
+    @MedicinTimeID INT,
+    @IsChecked BIT,
+    @MedicinCheckTimeStamp DATETIME = NULL
 AS
 BEGIN
     UPDATE dbo.MedicinTime
-    SET MedicinTime = @MedicinTime, 
-    ResidentID = @ResidentID, 
-    MedicinCheckTimeStamp = @MedicinCheckTimeStamp
+    SET IsChecked = @IsChecked,
+        MedicinCheckTimeStamp = @MedicinCheckTimeStamp
     WHERE MedicinTimeID = @MedicinTimeID;
-
 END;
 GO
 
@@ -447,3 +473,15 @@ BEGIN
 DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
 END;
 GO
+
+--Fast data
+
+--Departments 
+INSERT INTO Department (DepartmentName)
+VALUES ('Skoven');
+GO
+
+INSERT INTO Department (DepartmentName)
+VALUES ('Slottet');
+GO
+
