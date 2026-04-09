@@ -110,7 +110,14 @@ else
                     @foreach (var medTime in resident.MedicinTimes)
                     {
                         <li>
-                           <input type="checkbox" @bind="medTime.IsChecked"/>
+                            <input type="checkbox"
+                                   checked="@medTime.IsChecked"
+                                   @onchange="async e =>
+                                   {
+                                       medTime.IsChecked = (bool)((ChangeEventArgs)e).Value;
+                                       medTime.MedicinCheckTimeStamp = medTime.IsChecked ? DateTime.UtcNow : null;
+                                       await api.SetMedicinChecked(medTime.MedicinTimeID, medTime.IsChecked);
+                                   }" />
                             @medTime.MedicinTime.ToString(@"hh\:mm")
                             @if (medTime.MedicinCheckTimeStamp.HasValue)
                             {
