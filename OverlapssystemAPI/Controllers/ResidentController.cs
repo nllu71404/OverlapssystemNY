@@ -15,8 +15,6 @@ namespace OverlapssystemAPI.Controllers
             _residentServices = residentServices;
         }
         
-
-
         // GET: api/resident
         [HttpGet("HenterResident")]
         public async Task<ActionResult> GetResidents()
@@ -33,8 +31,6 @@ namespace OverlapssystemAPI.Controllers
             await _residentServices.CreateResidentAsync(resident);
             return Ok(resident);
         }
-
-        
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ResidentModel>> UpdateResident(int id, [FromBody] ResidentModel resident)
