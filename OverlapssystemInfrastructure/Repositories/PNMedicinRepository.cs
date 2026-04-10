@@ -11,7 +11,7 @@ using OverlapssystemDomain.Interfaces;
 
 namespace OverlapssystemInfrastructure.Repositories
 {
-    internal class PNMedicinRepository : IPNMedicinRepository
+    public class PNMedicinRepository : IPNMedicinRepository
     {
         private readonly string _connectionString;
 

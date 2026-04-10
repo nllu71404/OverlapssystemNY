@@ -18,6 +18,32 @@ namespace OverlapssytemApplication.Services
             _medicinRepository = medicinRepository;
         }
 
+        public async Task<List<MedicinModel>> GetMedicinByResidentIdAsync(int residentId)
+        {
+            return await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
+        }
+
+        public async Task AddMedicinTimeAsync(int residentId, DateTime datetime)
+        {
+            var medTime = new MedicinModel
+            {
+                ResidentID = residentId,
+                MedicinTime = datetime,
+                MedicinCheckTimeStamp = null
+            };
+            await _medicinRepository.SaveNewMedicinAsync(medTime);
+        }
+
+        public async Task DeleteMedicinAsync(int medicinId)
+        {
+            await _medicinRepository.DeleteMedicinAsync(medicinId);
+        }
+
+        public async Task UpdateMedicinAsync(MedicinModel medicinModel)
+        {
+            await _medicinRepository.UpdateMedicinAsync(medicinModel);
+        }
+
         // Marker medicin som givet eller ikke givet ved at opdatere MedicinCheckTimeStamp
         public async Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked) 
         {
@@ -34,5 +60,10 @@ namespace OverlapssytemApplication.Services
 
             await _medicinRepository.UpdateMedicinAsync(medicin);
         }
+        
+
+       
+
+        
     }
 }

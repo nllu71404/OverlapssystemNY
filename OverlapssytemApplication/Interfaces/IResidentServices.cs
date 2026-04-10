@@ -15,8 +15,6 @@ namespace OverlapssytemApplication.Interfaces
         Task CreateResidentAsync(ResidentModel resident);
         Task UpdateResidentAsync(ResidentModel resident);
         Task DeleteResidentAsync(int residentId);
-        Task AddMedicinTimeAsync (int residentId, DateTime datetime);
-        Task ToggleMedicinGivenAsync (MedicinModel medTime);
         
     }
 }

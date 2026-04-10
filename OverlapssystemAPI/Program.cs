@@ -13,6 +13,11 @@ builder.Services.AddScoped<IResidentRepository, ResidentRepository>();
 builder.Services.AddScoped<IResidentServices, ResidentServices>();
 builder.Services.AddScoped<IMedicinService, MedicinService>();
 builder.Services.AddScoped<IMedicinRepository, MedicinRepository>();
+builder.Services.AddScoped<IPNMedicinService, PNMedicinService>();
+builder.Services.AddScoped<IPNMedicinRepository, PNMedicinRepository>();
+builder.Services.AddScoped<IShoppingService, ShoppingService>();
+builder.Services.AddScoped<IShoppingRepository, ShoppingRepository>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

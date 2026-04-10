@@ -14,12 +14,10 @@ namespace OverlapssytemApplication.Services
     public class ResidentServices : IResidentServices
     {
         private readonly IResidentRepository _residentRepository;
-        private readonly IMedicinRepository _medicinRepository;
 
-        public ResidentServices(IResidentRepository residentRepository, IMedicinRepository medicinRepository)
+        public ResidentServices(IResidentRepository residentRepository)
         {
             _residentRepository = residentRepository;
-            _medicinRepository = medicinRepository;
         }
 
 
@@ -96,24 +94,7 @@ namespace OverlapssytemApplication.Services
             };
         }
 
-        public async Task LoadMedicinTimesAsync(ResidentModel resident)
-        {
-            resident.MedicinTimes = await _medicinRepository.GetMedicinByResidentIdAsync(resident.ResidentId);
-        }
-        public async Task AddMedicinTimeAsync(int residentId, DateTime datetime)
-        {
-            var medTime = new MedicinModel
-            {
-                ResidentID = residentId,
-                MedicinTime = datetime,
-                MedicinCheckTimeStamp = null
-            };
-            await _medicinRepository.SaveNewMedicinAsync(medTime);
-        }
-        public async Task ToggleMedicinGivenAsync(MedicinModel medTime)
-        {
-            medTime.MedicinCheckTimeStamp = medTime.MedicinCheckTimeStamp != null ? (DateTime?)null : DateTime.Now;
-            await _medicinRepository.UpdateMedicinAsync(medTime);
-        }
+        
+        
     }
 }

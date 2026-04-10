@@ -11,7 +11,7 @@ using OverlapssystemDomain.Interfaces;
 
 namespace OverlapssystemInfrastructure.Repositories
 {
-    internal class ShoppingRepository : IShoppingRepository
+    public class ShoppingRepository : IShoppingRepository
     {
         private readonly string _connectionString;
 
