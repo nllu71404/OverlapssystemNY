@@ -18,6 +18,10 @@ builder.Services.AddScoped(sp => new HttpClient
 });
 
 builder.Services.AddScoped<ResidentApiService>();
+builder.Services.AddScoped<MedicinApiService>();
+builder.Services.AddScoped<DepartmentApiService>();
+builder.Services.AddScoped<PNMedicinApiService>();
+builder.Services.AddScoped<ShoppingApiService>();
 
 
 var app = builder.Build();

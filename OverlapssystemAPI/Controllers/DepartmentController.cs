@@ -23,7 +23,7 @@ namespace OverlapssystemAPI.Controllers
         }
 
         //Hent by ID
-        [HttpGet("HentAlleDepartmentsByID")]
+        [HttpGet("HentAlleDepartmentsByID/{departmentId}")]
         public async Task<ActionResult> GetDepartmentById(int departmentId)
         {
             var department = await _departmentService.GetDepartmentByIdAsync(departmentId);
@@ -31,7 +31,7 @@ namespace OverlapssystemAPI.Controllers
         }
 
         //Hent by name
-        [HttpGet("HentAlleDepartmentsByName")]
+        [HttpGet("HentAlleDepartmentsByName/{departmentName}")]
         public async Task<ActionResult> GetDepartmentByName(string departmentName)
         {
             var department = await _departmentService.GetDepartmentByNameAsync(departmentName);
