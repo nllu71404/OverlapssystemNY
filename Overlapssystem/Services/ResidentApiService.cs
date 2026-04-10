@@ -41,16 +41,7 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<ResidentModel>>($"api/Resident/Department/{id}");
         }
 
-        public async Task AddMedicinTime(int residentid, DateTime dateTime)
-        {
-            var DTO = new AddMedicinTimeDTO { ResidentId = residentid, DateTime =  dateTime };
-            await _http.PostAsJsonAsync($"api/Resident/MedicinGiven", DTO);
-        }
-
-        public async Task SetMedicinChecked(int medicinTimeId, bool isChecked)
-        {
-            await _http.PutAsJsonAsync($"api/Medicin/AngivMedicinTid", new {medicinTimeId, isChecked});
-        }
+        
 
     }
 }

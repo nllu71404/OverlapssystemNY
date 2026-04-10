@@ -26,7 +26,7 @@ namespace OverlapssystemAPI.Controllers
         }
 
         // Tilføjer medicintid 
-        [HttpPost("MedicinGiven")]
+        [HttpPost("TilføjMedicin")]
         public async Task<ActionResult<AddMedicinTimeDTO>> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
         {
             await _medicinServices.AddMedicinTimeAsync(medicinDTO.ResidentId, medicinDTO.DateTime);

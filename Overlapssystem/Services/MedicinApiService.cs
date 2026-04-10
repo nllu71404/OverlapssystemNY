@@ -1,0 +1,46 @@
+﻿using System.Net.Http.Json;
+using OverlapssystemDomain.Entities;
+using OverlapssystemShared;
+
+namespace Overlapssystem.Services
+{
+    public class MedicinApiService
+    {
+        private readonly HttpClient _http;
+        public MedicinApiService(HttpClient http)
+        {
+            _http = http;
+        }
+
+        //Hent
+        public async Task<List<MedicinModel>> GetMedicinByResidentId(int residentId)
+        {
+            return await _http.GetFromJsonAsync<List<MedicinModel>>($"api/Medicin/HentMedicinForBorger/{residentId}");
+        }
+
+        //Tilføj
+        public async Task AddMedicinTime(AddMedicinTimeDTO addMedicinTimeDTO)
+        {
+            await _http.PostAsJsonAsync("api/Medicin/TilføjMedicin", addMedicinTimeDTO);
+        }
+
+        //Update
+        public async Task UpdateMedicin(int medicinTimeId, MedicinModel medicinModel)
+        {
+            await _http.PutAsJsonAsync($"api/Medicin/{medicinTimeId}", medicinModel);
+        }
+
+        //Delete
+        public async Task DeleteMedicin(int medicinTimeId)
+        {
+            await _http.DeleteAsync($"api/Medicin/{medicinTimeId}");
+        }
+
+
+        public async Task SetMedicinChecked(int medicinTimeId, bool isChecked)
+        {
+            await _http.PutAsJsonAsync($"api/Medicin/AngivMedicinTid", new { medicinTimeId, isChecked });
+        }
+
+    }
+}
