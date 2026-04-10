@@ -44,12 +44,12 @@ namespace OverlapssystemAPI.Controllers
             return Ok(resident);
         }
 
-        [HttpDelete("{residentid}")]
-        public async Task<ActionResult> DeleteResident(int residentId) 
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteResident(int Id) 
         {
             // Placeholder for updating a resident logic
-            await _residentServices.DeleteResidentAsync(residentId);
-            return Ok(residentId);
+            await _residentServices.DeleteResidentAsync(Id);
+            return Ok(Id);
 
         }
 

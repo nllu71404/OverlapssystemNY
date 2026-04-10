@@ -49,14 +49,8 @@ namespace OverlapssytemApplication.Services
         {
             var medicin = await _medicinRepository.GetMedicinByIdAsync(medicinTimeId);
 
-            if (isChecked)
-            {
-                medicin.MedicinCheckTimeStamp = DateTime.UtcNow;
-            }
-            else
-            {
-                medicin.MedicinCheckTimeStamp = null;
-            }
+            medicin.IsChecked = isChecked;
+            medicin.MedicinCheckTimeStamp = isChecked ? DateTime.UtcNow : null;
 
             await _medicinRepository.UpdateMedicinAsync(medicin);
         }
