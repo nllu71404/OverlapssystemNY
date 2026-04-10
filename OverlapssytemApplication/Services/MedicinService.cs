@@ -43,7 +43,7 @@ namespace OverlapssytemApplication.Services
         {
             await _medicinRepository.UpdateMedicinAsync(medicinModel);
         }
-
+        // TEST
         // Marker medicin som givet eller ikke givet ved at opdatere MedicinCheckTimeStamp
         public async Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked) 
         {
