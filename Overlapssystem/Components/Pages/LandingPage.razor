@@ -6,8 +6,11 @@
 @using OverlapssystemDomain.Enums
 @using OverlapssystemDomain.Interfaces
 @using Overlapssystem.Services
+@using OverlapssystemShared
+
 
 @inject ResidentApiService api
+@inject MedicinApiService medicinApi
 
 <h5>Overlapsseddel</h5>
 
@@ -115,7 +118,7 @@ else
                                    @onchange="async e =>
                                    {
                                        medTime.IsChecked = (bool)((ChangeEventArgs)e).Value;
-                                       await api.SetMedicinChecked(medTime.MedicinTimeID, medTime.IsChecked);
+                                       await medicinApi.SetMedicinChecked(medTime.MedicinTimeID, medTime.IsChecked);
                                    }" />
                             @medTime.MedicinTime.ToString(@"hh\:mm")
                             @if (medTime.MedicinCheckTimeStamp.HasValue)
@@ -160,7 +163,12 @@ else
     }
     private async Task AddMedicinTimeAsync(int residentid, DateTime dateTime)
     {
-        await api.AddMedicinTime(residentid, dateTime);
+        AddMedicinTimeDTO addMedicinTimeDTO = new AddMedicinTimeDTO
+        {
+            ResidentId = residentid,
+            DateTime = dateTime
+        };
+        await medicinApi.AddMedicinTime(addMedicinTimeDTO);
     }
 
     private async Task CreateResidentAsync()
