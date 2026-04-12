@@ -13,9 +13,9 @@ namespace OverlapssytemApplication.Services
 
         private readonly IDepartmentService _departmentService;
 
-        public DepartmentService(IDepartmentService departmentService)
+        public DepartmentService()
         {
-            _departmentService = departmentService;
+           
         }
 
         public List<DepartmentModel> Departments { get; private set; } = new();
