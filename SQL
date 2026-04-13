@@ -34,6 +34,10 @@ MedicinTime DATETIME NULL,
 MedicinCheckTimeStamp DATETIME NULL,
 IsChecked BIT NOT NULL DEFAULT 0
 
+CONSTRAINT FK_MedicinTime_Resident
+        FOREIGN KEY (ResidentID)
+        REFERENCES Resident(ResidentID)
+        ON DELETE CASCADE
 );
 GO
 
@@ -237,7 +241,6 @@ GO
 CREATE OR ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
     @MedicinTime DATETIME,
     @MedicinTimeID INT,
-    @ResidentID INT,
     @IsChecked BIT,
     @MedicinCheckTimeStamp DATETIME = NULL
 AS
@@ -245,7 +248,6 @@ BEGIN
     UPDATE dbo.MedicinTime
     SET 
     MedicinTime = @MedicinTime,
-    ResidentID = @ResidentID,
     IsChecked = @IsChecked,
     MedicinCheckTimeStamp = @MedicinCheckTimeStamp
     WHERE MedicinTimeID = @MedicinTimeID;
@@ -258,6 +260,23 @@ CREATE OR ALTER PROCEDURE [dbo].[uspDeleteMedicinTime]
 AS
 BEGIN
 DELETE FROM dbo.MedicinTime WHERE MedicinTimeID = @MedicinTimeID
+END;
+GO
+
+-- Sets MedicinCheckTimeStamp and IsChecked
+CREATE OR ALTER PROCEDURE [dbo].[uspSetMedicinChecked]
+    @MedicinTimeID INT,
+    @IsChecked BIT
+AS
+BEGIN
+    UPDATE MedicinTime
+    SET 
+        IsChecked = @IsChecked,
+        MedicinCheckTimeStamp = CASE 
+            WHEN @IsChecked = 1 THEN GETDATE()
+            ELSE NULL
+        END
+    WHERE MedicinTimeID = @MedicinTimeID;
 END;
 GO
 
