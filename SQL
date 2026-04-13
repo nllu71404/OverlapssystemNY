@@ -302,6 +302,7 @@ GO
 CREATE OR ALTER  PROCEDURE [dbo].[uspCreatePNMedicinTime]
 @PNTime DATETIME,
 @ResidentID INT = NULL,
+@Reason NVARCHAR(255) = NULL,
 @PNTimeStamp DATETIME = NULL
 AS
 BEGIN
@@ -311,12 +312,14 @@ INSERT INTO dbo.PNMedicin
 (
     PNTime,
     ResidentID,
+    Reason,
     PNTimeStamp
 )
 VALUES
 (
     @PNTime,
     @ResidentID,
+    @Reason,
     @PNTimeStamp
 );
 
@@ -327,14 +330,14 @@ GO
 -- Updates a PNmedicin time by id in the PNMedicin table
 CREATE OR ALTER  PROCEDURE [dbo].[uspUpdatePNMedicinTimeById]
 @PNTime DATETIME,
-@ResidentID INT = NULL,
+@Reason NVARCHAR(250) = NULL,
 @PNTimeStamp DATETIME = NULL,
 @PNID INT
 AS
 BEGIN
     UPDATE dbo.PNMedicin
     SET PNTime = @PNTime, 
-    ResidentID = @ResidentID, 
+    Reason = @Reason,
     PNTimeStamp = @PNTimeStamp
     WHERE PNID = @PNID;
 
