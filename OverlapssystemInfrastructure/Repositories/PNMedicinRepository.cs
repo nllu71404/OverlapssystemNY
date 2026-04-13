@@ -37,19 +37,21 @@ namespace OverlapssystemInfrastructure.Repositories
             {
                 PNMedicinModel pNMedicinTime = new PNMedicinModel
                 {
-                    // Konverter PNMedicinTimeID til int, da det ikke er nullable i modellen
                     PNMedicinID = Convert.ToInt32(reader["PNID"]),
 
-                    // Hvis ResidentID er null i databasen, sæt det til null i modellen, ellers konverter det til int
-                    ResidentID = reader["ResidentID"] == DBNull.Value ? null : Convert.ToInt32(reader["ResidentID"]),
+                    ResidentID = reader["ResidentID"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(reader["ResidentID"]),
 
-                    // Hent PNTime som DateTime, og hvis det er null, sæt det til DateTime.MinValue
-                    PNTime = reader["PNTime"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(reader["PNTime"]),
+                    PNTime = reader["PNTime"] == DBNull.Value
+                        ? (DateTime?)null
+                        : Convert.ToDateTime(reader["PNTime"]),
 
+                    PNTimeStamp = reader["PNTimeStamp"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(reader["PNTimeStamp"]),
 
-                    // Hent PNTimeStamp som DateTime?, og hvis det er null, sæt det til null i modellen
-                    PNTimeStamp = reader["PNTimeStamp"] == DBNull.Value ? null : Convert.ToDateTime(reader["PNTimeStamp"])
-
+                    Reason = reader["Reason"]?.ToString() ?? ""
                 };
 
                 pNMedicinTimes.Add(pNMedicinTime);
@@ -57,7 +59,6 @@ namespace OverlapssystemInfrastructure.Repositories
 
             return pNMedicinTimes;
         }
-        
 
         public async Task<List<PNMedicinModel>> GetPNMedicinByResidentIdAsync(int residentId)
         {
@@ -77,9 +78,20 @@ namespace OverlapssystemInfrastructure.Repositories
                 PNMedicinModel medicinTime = new PNMedicinModel
                 {
                     PNMedicinID = Convert.ToInt32(reader["PNID"]),
-                    ResidentID = reader["ResidentID"] == DBNull.Value ? null : Convert.ToInt32(reader["ResidentID"]),
-                    PNTime = reader["PNTime"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(reader["PNTime"]),
-                    PNTimeStamp = reader["PNTimeStamp"] == DBNull.Value ? null : Convert.ToDateTime(reader["PNTimeStamp"])
+
+                    ResidentID = reader["ResidentID"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(reader["ResidentID"]),
+
+                    PNTime = reader["PNTime"] == DBNull.Value
+                        ? (DateTime?)null
+                        : Convert.ToDateTime(reader["PNTime"]),
+
+                    PNTimeStamp = reader["PNTimeStamp"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(reader["PNTimeStamp"]),
+
+                    Reason = reader["Reason"]?.ToString() ?? ""
                 };
 
                 pNMedicinTimes.Add(medicinTime);
@@ -96,11 +108,21 @@ namespace OverlapssystemInfrastructure.Repositories
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@ResidentID", SqlDbType.Int).Value = pNMedicin.ResidentID;
-            command.Parameters.Add("@PNTime", SqlDbType.DateTime).Value = pNMedicin.PNTime;
+
+            command.Parameters.Add("@PNTime", SqlDbType.DateTime).Value =
+                pNMedicin.PNTime.HasValue
+                    ? pNMedicin.PNTime.Value
+                    : DBNull.Value;
+
             command.Parameters.Add("@PNTimeStamp", SqlDbType.DateTime).Value =
                 pNMedicin.PNTimeStamp.HasValue
                     ? pNMedicin.PNTimeStamp.Value
                     : DBNull.Value;
+
+            command.Parameters.Add("@Reason", SqlDbType.NVarChar, 250).Value =
+                string.IsNullOrWhiteSpace(pNMedicin.Reason)
+                    ? DBNull.Value
+                    : pNMedicin.Reason;
 
             await connection.OpenAsync();
             object? result = await command.ExecuteScalarAsync();
@@ -114,12 +136,22 @@ namespace OverlapssystemInfrastructure.Repositories
 
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add("@ResidentID", SqlDbType.Int).Value = pNMedicin.ResidentID;
-            command.Parameters.Add("@PNTime", SqlDbType.DateTime).Value = pNMedicin.PNTime;
+            command.Parameters.Add("@PNID", SqlDbType.Int).Value = pNMedicin.PNMedicinID;
+
+            command.Parameters.Add("@PNTime", SqlDbType.DateTime).Value =
+                pNMedicin.PNTime.HasValue
+                    ? pNMedicin.PNTime.Value
+                    : DBNull.Value;
+
             command.Parameters.Add("@PNTimeStamp", SqlDbType.DateTime).Value =
                 pNMedicin.PNTimeStamp.HasValue
                     ? pNMedicin.PNTimeStamp.Value
                     : DBNull.Value;
+
+            command.Parameters.Add("@Reason", SqlDbType.NVarChar, 250).Value =
+                string.IsNullOrWhiteSpace(pNMedicin.Reason)
+                    ? DBNull.Value
+                    : pNMedicin.Reason;
 
             await connection.OpenAsync();
             await command.ExecuteNonQueryAsync();

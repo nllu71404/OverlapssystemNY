@@ -36,7 +36,7 @@ namespace Overlapssystem.Services
             await _http.DeleteAsync($"api/Resident/{id}");
         }
 
-        public async Task<List<ResidentModel>> GetByDepartment(int id)
+        public async Task<List<ResidentModel>> GetByDepartment(int? id)
         {
             return await _http.GetFromJsonAsync<List<ResidentModel>>($"api/Resident/Department/{id}");
         }

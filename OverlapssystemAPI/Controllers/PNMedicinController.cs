@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
+using OverlapssystemShared;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
 
@@ -26,10 +27,10 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj
         [HttpPost("TilføjPNMedicin")]
-        public async Task<ActionResult> SaveNewPNMedicinTime([FromBody] PNMedicinModel pnMedicin)
+        public async Task<ActionResult<int>> AddPNMedicinTime([FromBody] AddPNMedicinDTO addPNMedicinDTO)
         {
-            await _pNMedicinService.SaveNewPNMedicinAsync(pnMedicin);
-            return Ok(pnMedicin);
+            var id = await _pNMedicinService.AddPNMedicinAsync(addPNMedicinDTO.ResidentID, addPNMedicinDTO.PNTime, addPNMedicinDTO.Reason);
+            return Ok(id);
         }
 
         //Update
@@ -37,7 +38,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult<PNMedicinModel>> UpdatePNMedicinAsync(int pNMedicinId, [FromBody] PNMedicinModel pNMedicin)
         {
             await _pNMedicinService.UpdatePNMedicinAsync(pNMedicin);
-            return Ok(pNMedicin);
+            return Ok(pNMedicinId);
 
         }
         

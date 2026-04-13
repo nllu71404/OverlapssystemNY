@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OverlapssystemDomain.Entities
+namespace OverlapssystemShared
 {
-    public class PNMedicinModel
+    public class AddPNMedicinDTO
     {
-        public int PNMedicinID { get; set; }
-        public int? ResidentID { get; set; }
+        public int ResidentID { get; set; }
         public DateTime? PNTime { get; set; }
         public string Reason { get; set; } = "";
-        public DateTime? PNTimeStamp { get; set; }
     }
 }

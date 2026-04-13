@@ -19,9 +19,10 @@ namespace Overlapssystem.Services
         }
 
         //Tilføj
-        public async Task AddMedicinTime(AddMedicinTimeDTO addMedicinTimeDTO)
+        public async Task<int> AddMedicinTime(AddMedicinTimeDTO addMedicinTimeDTO)
         {
-            await _http.PostAsJsonAsync("api/Medicin/TilføjMedicin", addMedicinTimeDTO);
+            var response = await _http.PostAsJsonAsync("api/Medicin/TilføjMedicin", addMedicinTimeDTO);
+            return await response.Content.ReadFromJsonAsync<int>();
         }
 
         //Update
@@ -39,7 +40,7 @@ namespace Overlapssystem.Services
 
         public async Task SetMedicinChecked(int medicinTimeId, bool isChecked)
         {
-            await _http.PutAsJsonAsync($"api/Medicin/AngivMedicinTid", new { medicinTimeId, isChecked });
+            await _http.PutAsJsonAsync($"api/Medicin/SetChecked/{medicinTimeId}", new { isChecked });
         }
 
     }
