@@ -131,10 +131,17 @@ SELECT
     m.MedicinTimeID,
     m.MedicinTime,
     m.IsChecked,
-    m.MedicinCheckTimeStamp
+    m.MedicinCheckTimeStamp,
+
+    pn.PNID,
+        pn.PNTime,
+        pn.PNTimeStamp,
+        pn.Reason
 
 FROM Resident r
 LEFT JOIN MedicinTime m ON r.ResidentID = m.ResidentID
+LEFT JOIN PNMedicin pn 
+        ON r.ResidentID = pn.ResidentID
 END;
 GO
 
@@ -172,20 +179,35 @@ CREATE OR ALTER   PROCEDURE [dbo].[uspGetResidentsByDepartmentID]
 AS
 BEGIN
 SET NOCOUNT ON;
-SELECT 
-    r.ResidentID,
-    r.ResidentName,
-    r.ResidentStatus,
-    r.DepartmentID,
-    r.Risk,
 
-    m.MedicinTimeID,
-    m.MedicinTime,
-    m.IsChecked,
-    m.MedicinCheckTimeStamp
+    SELECT 
+        r.ResidentID,
+        r.ResidentName,
+        r.ResidentStatus,
+        r.DepartmentID,
+        r.Risk,
 
-FROM Resident r
-LEFT JOIN MedicinTime m ON r.ResidentID = m.ResidentID WHERE DepartmentID = @DepartmentID
+        -- Medicin
+        m.MedicinTimeID,
+        m.MedicinTime,
+        m.IsChecked,
+        m.MedicinCheckTimeStamp,
+
+        -- PN Medicin
+        pn.PNID,
+        pn.PNTime,
+        pn.PNTimeStamp,
+        pn.Reason
+
+    FROM Resident r
+
+    LEFT JOIN MedicinTime m 
+        ON r.ResidentID = m.ResidentID
+
+    LEFT JOIN PNMedicin pn 
+        ON r.ResidentID = pn.ResidentID
+
+    WHERE r.DepartmentID = @DepartmentID
 END;
 GO
 
