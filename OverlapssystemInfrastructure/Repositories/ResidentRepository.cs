@@ -62,17 +62,50 @@ namespace OverlapssystemInfrastructure.Repositories
                 // Hvis der findes medicintid
                 if (reader["MedicinTimeID"] != DBNull.Value)
                 {
-                    residentDict[residentId].MedicinTimes.Add(new MedicinModel
+                    var medicinId = Convert.ToInt32(reader["MedicinTimeID"]);
+
+                    if (!residentDict[residentId].MedicinTimes
+                        .Any(m => m.MedicinTimeID == medicinId))
                     {
-                        MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
-                        MedicinTime = Convert.ToDateTime(reader["MedicinTime"]),
-                        IsChecked = Convert.ToBoolean(reader["IsChecked"]),
-                        MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
-                            ? null
-                            : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
-                    });
+                        residentDict[residentId].MedicinTimes.Add(new MedicinModel
+                        {
+                            MedicinTimeID = medicinId,
+                            ResidentID = residentId,
+                            MedicinTime = reader["MedicinTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["MedicinTime"]),
+                            IsChecked = Convert.ToBoolean(reader["IsChecked"]),
+                            MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
+                                ? null
+                                : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
+                        });
+                    }
+                }
+
+                // Hvis der findes PN medicin
+                if (reader["PNID"] != DBNull.Value)
+                {
+                    var pnId = Convert.ToInt32(reader["PNID"]);
+
+                    if (!residentDict[residentId].PNMedicin
+                        .Any(p => p.PNMedicinID == pnId))
+                    {
+                        residentDict[residentId].PNMedicin.Add(new PNMedicinModel
+                        {
+                            PNMedicinID = pnId,
+                            ResidentID = residentId,
+                            PNTime = reader["PNTime"] == DBNull.Value
+                                ? (DateTime?)null
+                                : Convert.ToDateTime(reader["PNTime"]),
+
+                            PNTimeStamp = reader["PNTimeStamp"] == DBNull.Value
+                                ? null
+                                : Convert.ToDateTime(reader["PNTimeStamp"]),
+
+                            Reason = reader["Reason"]?.ToString() ?? ""
+                        });
+                    }
                 }
             }
+        
 
             return residentDict.Values.ToList();
         }
@@ -116,17 +149,49 @@ namespace OverlapssystemInfrastructure.Repositories
                 // Hvis der findes medicintid
                 if (reader["MedicinTimeID"] != DBNull.Value)
                 {
-                    residentDict[residentId].MedicinTimes.Add(new MedicinModel
+                    var medicinId = Convert.ToInt32(reader["MedicinTimeID"]);
+
+                    if (!residentDict[residentId].MedicinTimes
+                        .Any(m => m.MedicinTimeID == medicinId))
                     {
-                        MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
-                        MedicinTime = Convert.ToDateTime(reader["MedicinTime"]),
-                        IsChecked = Convert.ToBoolean(reader["IsChecked"]),
-                        MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
-                            ? null
-                            : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
-                    });
+                        residentDict[residentId].MedicinTimes.Add(new MedicinModel
+                        {
+                            MedicinTimeID = medicinId,
+                            ResidentID = residentId,
+                            MedicinTime = reader["MedicinTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["MedicinTime"]),
+                            IsChecked = Convert.ToBoolean(reader["IsChecked"]),
+                            MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
+                                ? null
+                                : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
+                        });
+                    }
                 }
-            }
+
+                // Hvis der findes PN medicin
+                if (reader["PNID"] != DBNull.Value)
+                {
+                    var pnId = Convert.ToInt32(reader["PNID"]);
+
+                    if (!residentDict[residentId].PNMedicin
+                        .Any(p => p.PNMedicinID == pnId))
+                    {
+                        residentDict[residentId].PNMedicin.Add(new PNMedicinModel
+                        {
+                            PNMedicinID = pnId,
+                            ResidentID = residentId,
+                            PNTime = reader["PNTime"] == DBNull.Value
+                                ? (DateTime?)null
+                                : Convert.ToDateTime(reader["PNTime"]),
+
+                            PNTimeStamp = reader["PNTimeStamp"] == DBNull.Value
+                                ? null
+                                : Convert.ToDateTime(reader["PNTimeStamp"]),
+
+                            Reason = reader["Reason"]?.ToString() ?? ""
+                        });
+                    }
+                }
+        }
 
             return residentDict.Values.ToList();
            
@@ -143,7 +208,7 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@ResidentName", SqlDbType.NVarChar, 100).Value = resident.Name;
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value =
                 resident.DepartmentId.HasValue ? resident.DepartmentId.Value : DBNull.Value;
-            command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 100).Value = resident.Status;
+            command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 250).Value = resident.Status;
             command.Parameters.Add("@Risk", SqlDbType.NVarChar, 100).Value = resident.Risiko.ToString();
             command.Parameters.Add("@ResidentId", SqlDbType.Int).Value = resident.ResidentId;
 
@@ -173,7 +238,7 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@ResidentName", SqlDbType.NVarChar, 100).Value = resident.Name;
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value =
                 resident.DepartmentId.HasValue ? resident.DepartmentId.Value : DBNull.Value;
-            command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 100).Value = resident.Status;
+            command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 250).Value = resident.Status;
             command.Parameters.Add("@Risk", SqlDbType.NVarChar, 100).Value = resident.Risiko.ToString();
 
             await connection.OpenAsync();

@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OverlapssystemShared
 {
-    public class AddMedicinTimeDTO
+    public class SetMedicinCheckedDTO
     {
-        public int ResidentId { get; set; }
-        public DateTime? DateTime { get; set; }
-
         public bool IsChecked { get; set; }
     }
 }

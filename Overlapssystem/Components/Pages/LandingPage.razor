@@ -154,14 +154,21 @@ else
 @code {
     protected override async Task OnInitializedAsync()
     {
-        selectedDepartmentId = 2;
-        residents = await api.GetByDepartment(selectedDepartmentId);
-        //await residentServices.LoadResidentsByDepartmentAsync();
+        try
+        {
+            selectedDepartmentId = 2;
+            residents = await api.GetByDepartment(selectedDepartmentId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            residents = new();
+        }
 
 
     }
 
-    private async Task LoadResidentsByDepartmentAsync()
+    private async Task LoadResidentsByDepartmentAsync()// Flyttet over i  ResidentCard.razor, da det er mere logisk at have det der, da det
     {
         //residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
         residents = await api.GetByDepartment(selectedDepartmentId);
@@ -171,7 +178,7 @@ else
     {
         residents = await api.GetAllResidents();
     }
-    private async Task AddMedicinTimeAsync(int residentid, DateTime dateTime)
+    private async Task AddMedicinTimeAsync(int residentid, DateTime dateTime) //Flyttet over i  ResidentCard.razor, da det er mere logisk at have det der, da
     {
         AddMedicinTimeDTO addMedicinTimeDTO = new AddMedicinTimeDTO
         {

@@ -17,6 +17,8 @@ namespace OverlapssystemDomain.Entities
 
         public List<MedicinModel> MedicinTimes { get; set; } = new();
 
+        public List<PNMedicinModel> PNMedicin { get; set; } = new();
+
         public ResidentModel() { }
 
         public ResidentModel(int residentId, int? departmentId, string name, string status, Risiko risiko)

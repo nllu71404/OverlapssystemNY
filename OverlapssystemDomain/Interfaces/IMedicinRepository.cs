@@ -15,6 +15,8 @@ namespace OverlapssystemDomain.Interfaces
         Task<int> SaveNewMedicinAsync(MedicinModel medicin);
         Task DeleteMedicinAsync(int medicinId);
         Task UpdateMedicinAsync(MedicinModel medicin);
-        
+        Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked);
+
+
     }
 }
