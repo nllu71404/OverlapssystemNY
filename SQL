@@ -48,6 +48,11 @@ PNTime DATETIME NULL,
 Reason NVARCHAR(250) NULL,
 PNTimeStamp DATETIME NULL
 
+CONSTRAINT FK_PNMedicin_Resident
+        FOREIGN KEY (ResidentID)
+        REFERENCES Resident(ResidentID)
+        ON DELETE CASCADE
+
 );
 GO
 
