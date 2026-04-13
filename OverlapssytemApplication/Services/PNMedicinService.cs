@@ -25,9 +25,15 @@ namespace OverlapssytemApplication.Services
         {
             await _pnmedicinrepository.DeletePNMedicinAsync(pNMedicinId);
         }
-        public async Task SaveNewPNMedicinAsync(PNMedicinModel pNMedicin)
+        public async Task<int> AddPNMedicinAsync(int residentId, DateTime? pNTime, string reason)
         {
-            await _pnmedicinrepository.SaveNewPNMedicinAsync(pNMedicin);
+            var pNMedicin = new PNMedicinModel
+            {
+                ResidentID = residentId,
+                PNTime = pNTime,
+                Reason = reason
+            };
+            return await _pnmedicinrepository.SaveNewPNMedicinAsync(pNMedicin);
         }
 
         public async Task UpdatePNMedicinAsync(PNMedicinModel pNMedicin)

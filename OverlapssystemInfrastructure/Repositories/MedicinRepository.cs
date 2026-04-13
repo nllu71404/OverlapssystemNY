@@ -73,7 +73,7 @@ namespace OverlapssystemInfrastructure.Repositories
                 {
                     MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
                     ResidentID = reader["ResidentID"] == DBNull.Value ? null : Convert.ToInt32(reader["ResidentID"]),
-                    MedicinTime = reader["MedicinTime"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(reader["MedicinTime"]),
+                    MedicinTime = reader["MedicinTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["MedicinTime"]),
                     MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value ? null : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
                 };
 
@@ -103,7 +103,10 @@ namespace OverlapssystemInfrastructure.Repositories
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@ResidentID", SqlDbType.Int).Value = medicin.ResidentID;
-            command.Parameters.Add("@MedicinTime", SqlDbType.DateTime).Value = medicin.MedicinTime;
+            command.Parameters.Add("@MedicinTime", SqlDbType.DateTime).Value =
+    medicin.MedicinTime.HasValue
+        ? medicin.MedicinTime.Value
+        : DBNull.Value;
             command.Parameters.Add("@MedicinCheckTimeStamp", SqlDbType.DateTime).Value =
                 medicin.MedicinCheckTimeStamp.HasValue
                     ? medicin.MedicinCheckTimeStamp.Value
@@ -123,8 +126,6 @@ namespace OverlapssystemInfrastructure.Repositories
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@MedicinTime", SqlDbType.DateTime).Value = medicin.MedicinTime;
-            command.Parameters.Add("@ResidentID", SqlDbType.Int).Value =
-                medicin.ResidentID.HasValue ? medicin.ResidentID.Value : DBNull.Value;
             command.Parameters.Add("@MedicinTimeID", SqlDbType.Int).Value = medicin.MedicinTimeID;
             command.Parameters.Add("@IsChecked", SqlDbType.Bit).Value = medicin.IsChecked;
             command.Parameters.Add("@MedicinCheckTimeStamp", SqlDbType.DateTime).Value =
@@ -166,7 +167,19 @@ namespace OverlapssystemInfrastructure.Repositories
 
         }
 
+        public async Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked)
+        {
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspSetMedicinChecked", connection);
 
-       
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.Add("@MedicinTimeID", SqlDbType.Int).Value = medicinTimeId;
+            command.Parameters.Add("@IsChecked", SqlDbType.Bit).Value = isChecked;
+
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
+        }
+
     }
 }

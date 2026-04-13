@@ -27,10 +27,10 @@ namespace OverlapssystemAPI.Controllers
 
         // Tilføjer medicintid 
         [HttpPost("TilføjMedicin")]
-        public async Task<ActionResult<AddMedicinTimeDTO>> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
+        public async Task<ActionResult<int>> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
         {
-            await _medicinServices.AddMedicinTimeAsync(medicinDTO.ResidentId, medicinDTO.DateTime);
-            return Ok(medicinDTO);
+            var id = await _medicinServices.AddMedicinTimeAsync(medicinDTO.ResidentId, medicinDTO.DateTime);
+            return Ok(id);
         }
 
         //Delete
@@ -51,11 +51,14 @@ namespace OverlapssystemAPI.Controllers
 
 
         //Put: api/MedicinTid
-        [HttpPut("AngivMedicinTid")]
-        public async Task<ActionResult> SetMedicinChecked(int medicinTimeId, bool isChecked)
+        [HttpPut("SetChecked/{id}")]
+        public async Task<IActionResult> SetMedicinChecked(int id, [FromBody] SetMedicinCheckedDTO dto)
         {
-            await _medicinServices.SetMedicinCheckedAsync(medicinTimeId, isChecked);
+            await _medicinServices.SetMedicinCheckedAsync(id, dto.IsChecked);
             return Ok();
         }
+
+
+
     }
 }

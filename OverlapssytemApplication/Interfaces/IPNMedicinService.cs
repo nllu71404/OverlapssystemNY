@@ -10,7 +10,7 @@ namespace OverlapssytemApplication.Interfaces
     public interface IPNMedicinService
     {
         Task<List<PNMedicinModel>> GetPNMedicinByResidentIdAsync(int residentId);
-        Task SaveNewPNMedicinAsync(PNMedicinModel pNMedicin);
+        Task<int> AddPNMedicinAsync(int residentId, DateTime? pNTime, string reason);
         Task UpdatePNMedicinAsync(PNMedicinModel pNMedicin);
         Task DeletePNMedicinAsync(int pNMedicinId);
     }

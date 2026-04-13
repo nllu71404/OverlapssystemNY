@@ -18,19 +18,20 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<PNMedicinModel>>($"api/PNMedicin/PNMedicintider/{residentId}");
         }
         //Tilføj
-        public async Task SaveNewPNMedicinTime(PNMedicinModel pnMedicin)
+        public async Task<int> AddPNMedicinTime(AddPNMedicinDTO addPNMedicinDTO)
         {
-            await _http.PostAsJsonAsync("api/PNMedicin/TilføjPNMedicin", pnMedicin);
+            var response = await _http.PostAsJsonAsync("api/PNMedicin/TilføjPNMedicin", addPNMedicinDTO);
+            return await response.Content.ReadFromJsonAsync<int>();
         }
 
         //Update
-        public async Task UpdatePNMedicinAsync(int pNMedicinId, PNMedicinModel pNMedicin)
+        public async Task UpdatePNMedicin(int pNMedicinId, PNMedicinModel pNMedicin)
         {
             await _http.PutAsJsonAsync($"api/PNMedicin/{pNMedicinId}", pNMedicin);
         }
 
         //Delete
-        public async Task DeletePNMedicinAsync(int pNMedicinId)
+        public async Task DeletePNMedicin(int pNMedicinId)
         {
             await _http.DeleteAsync($"api/PNMedicin/{pNMedicinId}");
         }
