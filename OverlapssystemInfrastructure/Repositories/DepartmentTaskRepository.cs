@@ -38,8 +38,8 @@ namespace OverlapssystemInfrastructure.Repositories
                 {
                     DepartmentTaskID = Convert.ToInt32(reader["DepartmentTaskID"]),
                     DepartmentID = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
-                    DepartmentTaskTopic = reader["DepartmentTaskTopic"] as string,
-                    EmployeeName = reader["EmployeeName"] as string
+                    DepartmentTaskTopic = reader["DepartmentTaskTopic"]?.ToString() ?? "",
+                    EmployeeName = reader["EmployeeName"]?.ToString() ?? ""
                 };
 
                 departmentTasks.Add(task);
@@ -66,8 +66,8 @@ namespace OverlapssystemInfrastructure.Repositories
                 {
                     DepartmentTaskID = Convert.ToInt32(reader["DepartmentTaskID"]),
                     DepartmentID = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
-                    DepartmentTaskTopic = reader["DepartmentTaskTopic"] as string,
-                    EmployeeName = reader["EmployeeName"] as string
+                    DepartmentTaskTopic = reader["DepartmentTaskTopic"]?.ToString() ?? "",
+                    EmployeeName = reader["EmployeeName"]?.ToString() ?? ""
                 };
             }
 
@@ -92,8 +92,8 @@ namespace OverlapssystemInfrastructure.Repositories
                 {
                     DepartmentTaskID = Convert.ToInt32(reader["DepartmentTaskID"]),
                     DepartmentID = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
-                    DepartmentTaskTopic = reader["DepartmentTaskTopic"] as string,
-                    EmployeeName = reader["EmployeeName"] as string
+                    DepartmentTaskTopic = reader["DepartmentTaskTopic"]?.ToString() ?? "",
+                    EmployeeName = reader["EmployeeName"]?.ToString() ?? ""
                 };
 
                 departmentTasks.Add(task);
@@ -109,7 +109,7 @@ namespace OverlapssystemInfrastructure.Repositories
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentTask.DepartmentID ?? (object)DBNull.Value;
-            command.Parameters.Add("@DepartmentTaskTopic", SqlDbType.NVarChar, 200).Value = departmentTask.DepartmentTaskTopic ?? (object)DBNull.Value;
+            command.Parameters.Add("@DepartmentTaskTopic", SqlDbType.NVarChar, 250).Value = departmentTask.DepartmentTaskTopic ?? (object)DBNull.Value;
             command.Parameters.Add("@EmployeeName", SqlDbType.NVarChar, 100).Value = departmentTask.EmployeeName ?? (object)DBNull.Value;
 
             await connection.OpenAsync();
@@ -125,7 +125,7 @@ namespace OverlapssystemInfrastructure.Repositories
 
             command.Parameters.Add("@DepartmentTaskID", SqlDbType.Int).Value = departmentTask.DepartmentTaskID;
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentTask.DepartmentID ?? (object)DBNull.Value;
-            command.Parameters.Add("@DepartmentTaskTopic", SqlDbType.NVarChar, 200).Value = departmentTask.DepartmentTaskTopic ?? (object)DBNull.Value;
+            command.Parameters.Add("@DepartmentTaskTopic", SqlDbType.NVarChar, 250).Value = departmentTask.DepartmentTaskTopic ?? (object)DBNull.Value;
             command.Parameters.Add("@EmployeeName", SqlDbType.NVarChar, 100).Value = departmentTask.EmployeeName ?? (object)DBNull.Value;
 
             await connection.OpenAsync();
@@ -137,6 +137,7 @@ namespace OverlapssystemInfrastructure.Repositories
             using SqlConnection connection = new SqlConnection(_connectionString);
             using SqlCommand command = new SqlCommand("dbo.uspDeleteDepartmentTask", connection);
             command.CommandType = CommandType.StoredProcedure;
+
             command.Parameters.Add("@DepartmentTaskID", SqlDbType.Int).Value = departmentTaskId;
 
             await connection.OpenAsync();
