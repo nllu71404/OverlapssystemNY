@@ -192,11 +192,12 @@ else
     private async Task SaveResidentAsync(ResidentModel resident)
     {
         await api.UpdateResident(resident.ResidentId, resident);
+        residents = await api.GetByDepartment(selectedDepartmentId);
     }
 
-    private async Task DeleteResidentAsync(int residentId)
+    private async Task DeleteResidentAsync(ResidentModel resident)
     {
-        await api.DeleteResident(residentId);
+        await api.DeleteResident(resident.ResidentId);
         residents = await api.GetByDepartment(selectedDepartmentId);
     }
 
