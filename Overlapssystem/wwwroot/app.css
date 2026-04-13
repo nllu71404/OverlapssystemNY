@@ -27,3 +27,43 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+
+/* UI til ResidentCard*/
+.resident-card {
+    border-radius: 12px;
+    padding: 10px;
+    border: 2px solid;
+    font-size: 13px;
+}
+
+/* FARVER */
+.resident-card.green {
+    border-color: #4CAF50;
+    background-color: #e8f5e9;
+}
+
+.resident-card.yellow {
+    border-color: #FFC107;
+    background-color: #fff8e1;
+}
+
+.resident-card.red {
+    border-color: #f44336;
+    background-color: #ffebee;
+}
+
+/* SECTIONS */
+.section {
+    background: #ffffffcc;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.resident-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
