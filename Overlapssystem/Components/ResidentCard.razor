@@ -4,9 +4,9 @@
 @using OverlapssystemShared
 
 @inject IJSRuntime JS
-@inject ResidentApiService api
 @inject MedicinApiService medicinApi
 @inject PNMedicinApiService PNmedicinApi
+@inject ShoppingApiService shoppingApi
 
 <div class="resident-card @GetRiskClass()">
     <!-- Viser UI/design for en beboer-->
@@ -38,23 +38,32 @@
         <ul>
         @foreach (var med in Resident.MedicinTimes)
         {
-            <li>
-                    <input type="datetime-local" @bind="med.MedicinTime" @bind:after="() => UpdateMedicinTimeAsync(med)" />
-        <input type="checkbox" checked="@med.IsChecked"  @onchange="async e =>
-                                   {
-                                         await ToggleMedicinAsync(med, (bool)e.Value!);
-                                   }" />
-                    @if (med.IsChecked && med.MedicinCheckTimeStamp.HasValue)
-                    {
-                        <span>
-                            Krydset af kl. @med.MedicinCheckTimeStamp.Value.ToString("HH:mm")
-                        </span>
-                    }
-                    <button class="btn btn-danger btn-sm"
-                            @onclick="() => DeleteMedicinTimeAsync(med)">
-                        Slet
-                    </button>
-                </li>
+                <li>
+                    <input type="time"
+                           value="@med.MedicinTime?.ToString(@"hh\:mm")"
+                           @onchange="async e => {
+                           med.MedicinTime = TimeSpan.TryParse(e.Value?.ToString(), out var ts) ? ts : null;
+                           await UpdateMedicinTimeAsync(med);
+                       }" />
+
+                <input type="checkbox"
+                       checked="@med.IsChecked"
+                       @onchange="async e => {
+                       await medicinApi.SetMedicinChecked(med.MedicinTimeID, (bool)e.Value!);
+                       med.IsChecked = (bool)e.Value!;
+                                  }" />
+
+                @if (med.IsChecked && med.MedicinCheckTimeStamp.HasValue)
+                {
+                    <span>
+                        Krydset af kl. @med.MedicinCheckTimeStamp.Value.ToString("HH:mm")
+                    </span>
+                }
+                <button class="btn btn-danger btn-sm"
+                        @onclick="() => DeleteMedicinTimeAsync(med)">
+                    Slet
+                </button>
+            </li>
             }
                 
         </ul>
@@ -90,44 +99,48 @@
         </ul>
     </div>
 
-   @*  <!-- PN MEDICIN -->
-    <div class="section">
-        <div class="section-header">
-            <strong>PN MEDICIN</strong>
-            <button class="btn-plus">+</button>
-        </div>
-
-        <input class="form-control" placeholder="PN tidspunkt"/>
-        <textarea class="form-control" placeholder="Årsag"></textarea>
-    </div> *@
-
     <!-- HANDLEDAG -->
     <div class="section">
         <div class="section-header">
             <strong>HANDLEDAG</strong>
-            <button class="btn-plus">+</button>
+            <button class="btn-plus" @onclick="() => SaveNewShopping(Resident.ResidentId)">+</button>
         </div>
 
-        <select class="form-select">
-            <option>Mandag</option>
-            <option>Tirsdag</option>
-            <option>Onsdag</option>
-            <option>Torsdag</option>
-            <option>Fredag</option>
-            <option>Lørdag</option>
-            <option>Søndag</option>
-        </select>
+        <ul>
+            @foreach (var shopping in Resident.Shopping)
+            {
+                <li>
+                    <select @bind="shopping.Day" @bind:after="() => UpdateShopping(shopping)">
+                        @foreach (var day in Enum.GetValues<Day>())
+                        {
+                            <option value="@day">@day</option>
+                        }
+                    </select>
 
-        <input type="datetime-local" class="form-control" />
-        <input class="form-control" placeholder="Betalingsmetode" />
+                    <input type="time"
+                           value="@shopping.Time?.ToString(@"hh\:mm")"
+                           @onchange="async e => {
+                           shopping.Time = TimeSpan.TryParse(e.Value?.ToString(), out var ts) ? ts : null;
+                           await UpdateShopping(shopping);
+                       }" />
+
+                <input class="form-control"
+                       @bind="shopping.PaymentMethod"
+                       @bind:after="() => UpdateShopping(shopping)"
+                       placeholder="Betalingsmetode" />
+
+                <button class="btn btn-danger btn-sm"
+                        @onclick="() => DeleteShopping(shopping.ShoppingID)">
+                    Slet
+                </button>
+            </li>
+                        }
+        </ul>
     </div>
 
     <!-- FOOTER -->
     <div class="footer">
-        <button class="btn-save" @onclick="() => OnSave.InvokeAsync(Resident)">
-            Gem ændringer
-        </button>
-
+        <!-- Får tilføjet brugeradgang senere, så se bort fra knappen for nu -->
         <button class="btn-delete" @onclick="() => ConfirmDeleteAsync()">
             Slet borger
         </button>
@@ -141,8 +154,6 @@
     [Parameter]
     public ResidentModel Resident { get; set; } = new();
 
-    public MedicinModel Medicin { get; set; } = new();
-    
     [Parameter]
     public EventCallback<ResidentModel> OnSave { get; set; }
 
@@ -157,23 +168,6 @@
         _ => ""
     };
 
-    List<ResidentModel> residents = new();
-
-    private TimeSpan selectedTime;
-
-    private List<TimeSpan> availableTimes = new List<TimeSpan>
-    {
-        new TimeSpan(8, 0, 0),
-        new TimeSpan(12, 0, 0),
-        new TimeSpan(18, 0, 0)
-    };
-
-    private async Task LoadResidentsByDepartmentAsync()// Flyttet over i  ResidentCard.razor, da det er mere logisk at have det der, da det
-    {
-        //residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
-        residents = await api.GetByDepartment(Resident.DepartmentId);
-
-    }
 
     private async Task ConfirmDeleteAsync()
     {
@@ -189,7 +183,7 @@
         AddMedicinTimeDTO addMedicinTimeDTO = new AddMedicinTimeDTO
         {
             ResidentId = residentid,
-            DateTime = null
+            MedicinTime = null
         };
         var newId = await medicinApi.AddMedicinTime(addMedicinTimeDTO);
 
@@ -207,25 +201,25 @@
         await medicinApi.UpdateMedicin(med.MedicinTimeID, med);
     }
 
-    private async Task ToggleMedicinAsync(MedicinModel med, bool isChecked)
-    {
-        med.IsChecked = isChecked;
+    // private async Task ToggleMedicinAsync(MedicinModel med, bool isChecked)
+    // {
+    //     med.IsChecked = isChecked;
 
-        await medicinApi.SetMedicinChecked(med.MedicinTimeID, isChecked);
+    //     await medicinApi.SetMedicinChecked(med.MedicinTimeID, isChecked);
 
-        if (isChecked)
-            med.MedicinCheckTimeStamp = DateTime.Now;
-        else
-            med.MedicinCheckTimeStamp = null;
-    }
+    //     if (isChecked)
+    //         med.MedicinCheckTimeStamp = DateTime.Now;
+    //     else
+    //         med.MedicinCheckTimeStamp = null;
+    // }
 
     private async Task DeleteMedicinTimeAsync(MedicinModel med)
     {
-        
+
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne medicintid?");
 
         if (!ok) return;
-        
+
         await medicinApi.DeleteMedicin(med.MedicinTimeID);
 
         Resident.MedicinTimes.Remove(med);
@@ -256,7 +250,7 @@
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne PN medicintid?");
 
         if (!ok) return;
-        
+
         await PNmedicinApi.DeletePNMedicin(pn.PNMedicinID);
         Resident.PNMedicin.Remove(pn);
     }
@@ -265,4 +259,39 @@
     {
         await PNmedicinApi.UpdatePNMedicin(pn.PNMedicinID, pn);
     }
+
+    private async Task SaveNewShopping(int residentid)
+    {
+
+        AddShoppingDTO addshoppingDTO = new AddShoppingDTO
+        {
+            ResidentID = residentid,
+            Day = Day.Monday,
+            Time = null,
+            PaymentMethod = ""
+		};
+        var newId = await shoppingApi.SaveNewShopping(addshoppingDTO);
+
+        Resident.Shopping.Add(new ShoppingModel
+        {
+            ShoppingID = newId,
+            ResidentID = residentid,
+            Time = null,
+            PaymentMethod = ""
+		}); 
+    }
+
+    private async Task DeleteShopping(int shoppingId)
+    {
+        var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne indkøbsliste?");
+        if (!ok) return;
+        await shoppingApi.DeleteShopping(shoppingId);
+        var shopping = Resident.Shopping.FirstOrDefault(s => s.ShoppingID == shoppingId);
+        if (shopping != null) Resident.Shopping.Remove(shopping);
+    }   
+
+    private async Task UpdateShopping(ShoppingModel shoppingModel)
+    {
+        await shoppingApi.UpdateShopping(shoppingModel.ShoppingID, shoppingModel);
+	}
 }

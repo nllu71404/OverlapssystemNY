@@ -1,0 +1,64 @@
+﻿@page "/HandoverScheme/{departmentId:int}"
+@rendermode InteractiveServer
+@using OverlapssystemDomain.Entities
+@using OverlapssystemDomain.Enums
+@using OverlapssystemDomain.Interfaces
+@using Overlapssystem.Services
+@using OverlapssystemShared
+
+<h3>HandoverScheme</h3>
+
+@inject ResidentApiService api
+
+<!-- Henter data fra API og er det overordnet layout-->
+<h5>Overlapsseddel</h5>
+
+
+@if (!residents.Any())
+{
+    <p>Ingen beboere fundet</p>
+}
+else
+{
+    <div class="resident-grid">
+        @foreach (var resident in residents)
+        {
+            <ResidentCard Resident="resident"
+                          OnSave="SaveResidentAsync"
+                          OnDelete="DeleteResidentAsync" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int departmentId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            residents = await api.GetByDepartment(departmentId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            residents = new();
+        }
+    }
+
+    private async Task SaveResidentAsync(ResidentModel resident)
+    {
+        await api.UpdateResident(resident.ResidentId, resident);
+        residents = await api.GetByDepartment(departmentId);
+    }
+
+    private async Task DeleteResidentAsync(ResidentModel resident)
+    {
+        await api.DeleteResident(resident.ResidentId);
+        residents = await api.GetByDepartment(departmentId);
+    }
+
+    List<ResidentModel> residents = new();
+    
+}

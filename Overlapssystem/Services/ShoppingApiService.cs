@@ -18,9 +18,10 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<ShoppingModel>>($"api/Shopping/Shopping/{residentId}");
         }
         //Tilføj
-        public async Task SaveNewShopping(ShoppingModel shoppingModel)
+        public async Task<int> SaveNewShopping(AddShoppingDTO addShoppingDTO)
         {
-            await _http.PostAsJsonAsync("api/Shopping/TilføjShopping", shoppingModel);
+            var response = await _http.PostAsJsonAsync("api/Shopping/TilføjShopping", addShoppingDTO);
+            return await response.Content.ReadFromJsonAsync<int>();
         }
 
         //Update
