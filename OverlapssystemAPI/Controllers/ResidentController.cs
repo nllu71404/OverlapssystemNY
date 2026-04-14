@@ -24,6 +24,7 @@ namespace OverlapssystemAPI.Controllers
             return Ok(residents);
         }
 
+        //Tilføj
         [HttpPost("OpretResident")]
         public async Task<ActionResult<ResidentModel>> CreateResident([FromBody] ResidentModel resident)
         {
