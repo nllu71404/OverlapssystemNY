@@ -71,7 +71,7 @@ namespace OverlapssystemInfrastructure.Repositories
                         {
                             MedicinTimeID = medicinId,
                             ResidentID = residentId,
-                            MedicinTime = reader["MedicinTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["MedicinTime"]),
+                            MedicinTime = reader["MedicinTime"] == DBNull.Value ? (TimeSpan?)null : (TimeSpan)reader["MedicinTime"],
                             IsChecked = Convert.ToBoolean(reader["IsChecked"]),
                             MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
                                 ? null
@@ -142,7 +142,9 @@ namespace OverlapssystemInfrastructure.Repositories
                         Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
                             ? risiko
                             : Risiko.Green,
-                        MedicinTimes = new List<MedicinModel>()
+                        MedicinTimes = new List<MedicinModel>(),
+                        PNMedicin = new List<PNMedicinModel>(),
+                        Shopping = new List<ShoppingModel>()
                     };
                 }
 
@@ -158,7 +160,7 @@ namespace OverlapssystemInfrastructure.Repositories
                         {
                             MedicinTimeID = medicinId,
                             ResidentID = residentId,
-                            MedicinTime = reader["MedicinTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["MedicinTime"]),
+                            MedicinTime = reader["MedicinTime"] == DBNull.Value ? (TimeSpan?)null : (TimeSpan)reader["MedicinTime"],
                             IsChecked = Convert.ToBoolean(reader["IsChecked"]),
                             MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value
                                 ? null
@@ -191,7 +193,26 @@ namespace OverlapssystemInfrastructure.Repositories
                         });
                     }
                 }
-        }
+                // Hvis der findes shopping
+                if (reader["ShoppingID"] != DBNull.Value)
+                {
+                    var shoppingId = Convert.ToInt32(reader["ShoppingID"]);
+                    if (!residentDict[residentId].Shopping
+                        .Any(s => s.ShoppingID == shoppingId))
+                    {
+                        residentDict[residentId].Shopping.Add(new ShoppingModel
+                        {
+                            ShoppingID = shoppingId,
+                            ResidentID = residentId,
+                            Day = Enum.TryParse<Day>(reader["ShoppingDay"]?.ToString(), out var day)
+                                ? day
+                                : Day.Monday,
+                            Time = reader["ShoppingTime"] == DBNull.Value ? (TimeSpan?)null : (TimeSpan)reader["ShoppingTime"],
+                            PaymentMethod = reader["PaymentMethod"]?.ToString() ?? ""
+                        });
+                    }
+                }
+            }
 
             return residentDict.Values.ToList();
            

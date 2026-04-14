@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Enums;
 using OverlapssystemDomain.Interfaces;
 
 namespace OverlapssystemInfrastructure.Repositories
@@ -42,9 +43,12 @@ namespace OverlapssystemInfrastructure.Repositories
                    
                     ResidentID = Convert.ToInt32(reader["ResidentID"]),
 
-                    Day = reader["ShoppingDay"]?.ToString() ?? "",
+                    
+                    Day = Enum.TryParse<Day>(reader["Risk"]?.ToString(), out var day)
+                            ? day:Day.Monday,
+                    Time = reader["ShoppingTime"] == DBNull.Value ? TimeSpan.Zero : (TimeSpan)reader["ShoppingTime"],
 
-                    DateAndTime = reader["ShoppingTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["ShoppingTime"]),
+                    //DateAndTime = reader["ShoppingTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["ShoppingTime"]),
 
                     PaymentMethod = reader["PaymentMethod"]?.ToString() ?? ""
 
@@ -78,9 +82,11 @@ namespace OverlapssystemInfrastructure.Repositories
 
                     ResidentID = Convert.ToInt32(reader["ResidentID"]),
 
-                    Day = reader["ShoppingDay"]?.ToString() ?? "",
+                    Day = Enum.TryParse<Day>(reader["Risk"]?.ToString(), out var day)
+                            ? day : Day.Monday,
+                    Time = reader["ShoppingTime"] == DBNull.Value ? TimeSpan.Zero : (TimeSpan)reader["ShoppingTime"],
 
-                    DateAndTime = reader["ShoppingTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["ShoppingTime"]),
+                    //DateAndTime = reader["ShoppingTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["ShoppingTime"]),
 
                     PaymentMethod = reader["PaymentMethod"]?.ToString() ?? ""
 
@@ -100,11 +106,8 @@ namespace OverlapssystemInfrastructure.Repositories
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@ResidentID", SqlDbType.Int).Value = shopping.ResidentID;
-            command.Parameters.Add("@ShoppingDay", SqlDbType.NVarChar, 100).Value = shopping.Day;
-            command.Parameters.Add("@ShoppingTime", SqlDbType.DateTime).Value =
-                shopping.DateAndTime.HasValue
-                    ? shopping.DateAndTime.Value
-                    : DBNull.Value;
+            command.Parameters.Add("@ShoppingDay", SqlDbType.NVarChar, 100).Value = shopping.Day.ToString();
+            command.Parameters.Add("@ShoppingTime", SqlDbType.Time).Value = shopping.Time;
             command.Parameters.Add("@PaymentMethod", SqlDbType.NVarChar, 100).Value = shopping.PaymentMethod;
 
             await connection.OpenAsync();
@@ -120,11 +123,8 @@ namespace OverlapssystemInfrastructure.Repositories
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@ResidentID", SqlDbType.Int).Value = shopping.ResidentID;
-            command.Parameters.Add("@ShoppingDay", SqlDbType.NVarChar, 100).Value = shopping.Day;
-            command.Parameters.Add("@ShoppingTime", SqlDbType.DateTime).Value =
-                shopping.DateAndTime.HasValue
-                    ? shopping.DateAndTime.Value
-                    : DBNull.Value;
+            command.Parameters.Add("@ShoppingDay", SqlDbType.NVarChar, 100).Value = shopping.Day.ToString();
+            command.Parameters.Add("@ShoppingTime", SqlDbType.Time).Value = shopping.Time;
             command.Parameters.Add("@PaymentMethod", SqlDbType.NVarChar, 100).Value = shopping.PaymentMethod;
             command.Parameters.Add("@ShoppingID", SqlDbType.Int).Value = shopping.ShoppingID;
 

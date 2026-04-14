@@ -23,15 +23,9 @@ namespace OverlapssytemApplication.Services
             return await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
         }
 
-        public async Task<int> AddMedicinTimeAsync(int residentId, DateTime? datetime)
+        public async Task<int> AddMedicinTimeAsync(MedicinModel medicinModel)
         {
-            var medTime = new MedicinModel
-            {
-                ResidentID = residentId,
-                MedicinTime = datetime,
-                MedicinCheckTimeStamp = null
-            };
-            return await _medicinRepository.SaveNewMedicinAsync(medTime);
+            return await _medicinRepository.SaveNewMedicinAsync(medicinModel);
         }
 
         public async Task DeleteMedicinAsync(int medicinId)
@@ -46,7 +40,10 @@ namespace OverlapssytemApplication.Services
 
         public async Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked)
         {
-            await _medicinRepository.SetMedicinCheckedAsync(medicinTimeId, isChecked);
+            var medicin = await _medicinRepository.GetMedicinByIdAsync(medicinTimeId);
+            medicin.IsChecked = isChecked;
+            medicin.MedicinCheckTimeStamp = isChecked ? DateTime.UtcNow : null;
+            await _medicinRepository.UpdateMedicinAsync(medicin);
         }
 
 

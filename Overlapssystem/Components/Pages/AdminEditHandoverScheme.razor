@@ -1,0 +1,103 @@
+﻿@page "/EditHandoverScheme/{departmentId:int}"
+@rendermode InteractiveServer
+@using OverlapssystemDomain.Entities
+@using OverlapssystemDomain.Enums
+@using OverlapssystemDomain.Interfaces
+@using Overlapssystem.Services
+@using OverlapssystemShared
+
+<h3>AdminEditHandoverScheme</h3>
+
+@inject ResidentApiService api
+
+<!-- Du opretter en ny beboer-->
+<h5>Opret ny beboer</h5>
+
+<div>
+    <label>Navn </label>
+    <input @bind="newResident.Name" />
+</div>
+
+
+<div>
+    <label>Status </label>
+    <input @bind="newResident.Status" />
+</div>
+
+<div>
+    <label>Risiko </label>
+    <select @bind="newResident.Risiko">
+        <option value="@Risiko.Green">Green</option>
+        <option value="@Risiko.Yellow">Yellow</option>
+        <option value="@Risiko.Red">Red</option>
+    </select>
+</div>
+
+<!-- Du gemmer en beboer-->
+<button @onclick="CreateResidentAsync">
+    Gem beboer
+</button>
+
+<h5>Oversigt over beboere</h5>
+<!-- Du gemmer ændringer og sletter en beboer-->
+@if (!residents.Any())
+{
+    <p> Ingen beboere fundet</p>
+}
+else
+
+{
+    <div class="resident-grid">
+        @foreach (var resident in residents)
+        {
+            <ResidentCard Resident="resident"
+                          OnSave="SaveResidentAsync"
+                          OnDelete="DeleteResidentAsync" />
+        }
+    </div>
+}
+
+@code {
+    
+	[Parameter]
+	public int departmentId { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+    {
+        residents = await api.GetByDepartment(departmentId);
+    }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fejl i åbning af afdeling");
+            residents = new();
+        }
+	}
+
+
+    private async Task LoadAllResidentsAsync()
+    {
+        residents = await api.GetAllResidents();
+    }
+    private async Task CreateResidentAsync()
+    {
+        newResident.DepartmentId = departmentId;
+        await api.CreateResident(newResident);
+        residents = await api.GetByDepartment(departmentId);
+        newResident = new ResidentModel { Risiko = Risiko.Green };
+    }
+    private async Task SaveResidentAsync(ResidentModel resident)
+    {
+        await api.UpdateResident(resident.ResidentId, resident);
+        residents = await api.GetByDepartment(departmentId);
+    }
+    private async Task DeleteResidentAsync(ResidentModel resident)
+    {
+        await api.DeleteResident(resident.ResidentId);
+        residents = await api.GetByDepartment(departmentId);
+    }
+
+    List<ResidentModel> residents = new();
+    ResidentModel newResident = new ResidentModel { Risiko = Risiko.Green };
+
+}

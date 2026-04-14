@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Interfaces;
+using OverlapssystemDomain.Enums;
 
 namespace OverlapssytemApplication.Services
 {
@@ -26,9 +27,9 @@ namespace OverlapssytemApplication.Services
             await _shoppingrepository.DeleteShoppingAsync(shoppingId);
         }
 
-        public async Task SaveNewShoppingAsync(ShoppingModel shopping)
+        public async Task<int> SaveNewShoppingAsync(ShoppingModel shoppingModel)
         {
-            await _shoppingrepository.SaveNewShoppingAsync(shopping);
+            return await _shoppingrepository.SaveNewShoppingAsync(shoppingModel);
         }
 
         public async Task UpdateShoppingAsync(ShoppingModel shopping)

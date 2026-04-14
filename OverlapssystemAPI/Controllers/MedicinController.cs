@@ -27,10 +27,17 @@ namespace OverlapssystemAPI.Controllers
 
         // Tilføjer medicintid 
         [HttpPost("TilføjMedicin")]
-        public async Task<ActionResult<int>> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
+        public async Task<ActionResult> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
         {
-            var id = await _medicinServices.AddMedicinTimeAsync(medicinDTO.ResidentId, medicinDTO.DateTime);
-            return Ok(id);
+            var medicinTime = new MedicinModel
+            {
+                ResidentID = medicinDTO.ResidentId,
+                MedicinTime = medicinDTO.MedicinTime,
+                IsChecked = false,
+            };
+
+            var time = await _medicinServices.AddMedicinTimeAsync(medicinTime);
+            return Ok(time);
         }
 
         //Delete
@@ -52,9 +59,9 @@ namespace OverlapssystemAPI.Controllers
 
         //Put: api/MedicinTid
         [HttpPut("SetChecked/{id}")]
-        public async Task<IActionResult> SetMedicinChecked(int id, [FromBody] SetMedicinCheckedDTO dto)
+        public async Task<IActionResult> SetMedicinChecked(int id, [FromBody] AddMedicinTimeDTO medicinDTO)
         {
-            await _medicinServices.SetMedicinCheckedAsync(id, dto.IsChecked);
+            await _medicinServices.SetMedicinCheckedAsync(id, medicinDTO.IsChecked);
             return Ok();
         }
 

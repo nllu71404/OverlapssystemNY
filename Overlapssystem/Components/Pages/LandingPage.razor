@@ -1,223 +1,33 @@
 ﻿@page "/"
 @page "/LandingPage"
 @rendermode InteractiveServer
+@inject NavigationManager Navigation
 
-@using OverlapssystemDomain.Entities
-@using OverlapssystemDomain.Enums
-@using OverlapssystemDomain.Interfaces
-@using Overlapssystem.Services
-@using OverlapssystemShared
-
-
-@inject ResidentApiService api
-@inject MedicinApiService medicinApi
-
-<!-- Henter data fra API og er det overordnet layout-->
-<h5>Overlapsseddel</h5>
-
-
-<!-- Du klikker på knappen og så henter den alle beboere ved at kalde funktion LoadResidentsAsync i ResidentService.cs-->
-<button @onclick="LoadAllResidentsAsync">
-    Hent alle beboere
-</button>
-
-<!-- Hent beboere for specifik afdeling-->
-<div>
-    <label>Afdelings ID: </label>
-    <input type="number" @bind="selectedDepartmentId" />
-    <button @onclick="LoadResidentsByDepartmentAsync">
-        Hent beboere for afdeling
-    </button>
-</div>
-
-<!-- Du opretter en ny beboer-->
-<h5>Opret ny beboer</h5>
+<h5>LoginSide</h5>
 
 <div>
-    <label>Navn </label>
-    <input @bind="newResident.Name" />
+    <label>Indtast kode</label>
+    <input @bind="accessCode" placeholder="Indtast kode" />
+    <button @onclick="EnterSystem">Bekræft</button>
 </div>
 
-<div>
-    <select @bind="selectedTime">
-        @foreach (var t in availableTimes)
-        {
-            <option value="@t">@t.ToString(@"hh\:mm")</option>
-        }
-    </select>
-</div>
-
-<div>
-    <label>Status </label>
-    <input @bind="newResident.Status" />
-</div>
-
-<div>
-    <label>Risiko </label>
-    <select @bind="newResident.Risiko">
-        <option value="@Risiko.Green">Green</option>
-        <option value="@Risiko.Yellow">Yellow</option>
-        <option value="@Risiko.Red">Red</option>
-    </select>
-</div>
-
-<!-- Du gemmer en beboer-->
-<button @onclick="CreateResidentAsync">
-    Gem beboer
-</button>
-
-<h5>Oversigt over beboere</h5>
-<!-- Du gemmer ændringer og sletter en beboer-->
-@if (!residents.Any())
+@code 
 {
-    <p> Ingen beboere fundet</p>
-}
-else
+    private string accessCode = "";
 
-{
-    <div class="resident-grid">
-        @foreach (var resident in residents)
+    private void EnterSystem()
+    {
+        if (accessCode == "1234")
         {
-            <ResidentCard Resident="resident"
-                 OnSave="SaveResidentAsync"
-                 OnDelete="DeleteResidentAsync" />
+            Navigation.NavigateTo("/HandoverScheme/1");
         }
-    </div>
-}
-   @*  <ul>
-        @foreach (var resident in residents)
+        else if (accessCode == "5678")
         {
-            <li style="margin-bottom: 15px;">
-                <div>
-                    <label>Navn </label>
-                    <input @bind="resident.Name" />
-                </div>
-
-                <div>
-                    <label>Status </label>
-                    <input @bind="resident.Status" />
-                </div>
-
-                <div>
-                    <label>Risiko </label>
-                    <select @bind="resident.Risiko">
-                        <option value="@Risiko.Green">Green</option>
-                        <option value="@Risiko.Yellow">Yellow</option>
-                        <option value="@Risiko.Red">Red</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Tilføj medicintid </label>
-                    <select @bind="selectedTime">
-                        @foreach (var t in availableTimes)
-                        {
-                            <option value="@t">@t.ToString(@"hh\:mm")</option>
-                        }
-                    </select>
-                    <button @onclick="() => AddMedicinTimeAsync(resident.ResidentId, DateTime.Today.Add(selectedTime))">
-                        Tilføj medicin tid
-                    </button>
-                </div>
-
-                <ul>
-                    @foreach (var medTime in resident.MedicinTimes)
-                    {
-                        <li>
-                            <input type="checkbox"
-                                   checked="@medTime.IsChecked"
-                                   @onchange="async e =>
-                                   {
-                                       medTime.IsChecked = (bool)((ChangeEventArgs)e).Value;
-                                       await medicinApi.SetMedicinChecked(medTime.MedicinTimeID, medTime.IsChecked);
-                                   }" />
-                            @medTime.MedicinTime.ToString(@"hh\:mm")
-                            @if (medTime.MedicinCheckTimeStamp.HasValue)
-                            {
-                                <span> - Givet: @medTime.MedicinCheckTimeStamp.Value.ToString("HH:mm")</span>
-                            }
-                        </li>
-                    } 
-                </ul>
-
-                <button @onclick='() => SaveResidentAsync(resident)'>
-                    Gem ændringer
-                </button>
-
-                <button @onclick='() => DeleteResidentAsync(resident.ResidentId)'>
-                    Slet beboer
-                </button>
-
-            </li>
+            Navigation.NavigateTo("/HandoverScheme/2");
         }
-    </ul>
- *@}
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        try
+        else
         {
-            selectedDepartmentId = 2;
-            residents = await api.GetByDepartment(selectedDepartmentId);
+            Console.WriteLine("Ugyldig kode. Prøv igen.");
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            residents = new();
-        }
-
-
     }
-
-    private async Task LoadResidentsByDepartmentAsync()// Flyttet over i  ResidentCard.razor, da det er mere logisk at have det der, da det
-    {
-        //residents = await residentServices.LoadResidentsByDepartmentAsync(selectedDepartmentId);
-        residents = await api.GetByDepartment(selectedDepartmentId);
-
-    }
-    private async Task LoadAllResidentsAsync()
-    {
-        residents = await api.GetAllResidents();
-    }
-    private async Task AddMedicinTimeAsync(int residentid, DateTime dateTime) //Flyttet over i  ResidentCard.razor, da det er mere logisk at have det der, da
-    {
-        AddMedicinTimeDTO addMedicinTimeDTO = new AddMedicinTimeDTO
-        {
-            ResidentId = residentid,
-            DateTime = dateTime
-        };
-        await medicinApi.AddMedicinTime(addMedicinTimeDTO);
-    }
-
-    private async Task CreateResidentAsync()
-    {
-        newResident.DepartmentId = selectedDepartmentId;
-        await api.CreateResident(newResident);
-        residents = await api.GetByDepartment(selectedDepartmentId);
-        newResident = new ResidentModel { Risiko = Risiko.Green };
-    }
-
-    private async Task SaveResidentAsync(ResidentModel resident)
-    {
-        await api.UpdateResident(resident.ResidentId, resident);
-        residents = await api.GetByDepartment(selectedDepartmentId);
-    }
-
-    private async Task DeleteResidentAsync(ResidentModel resident)
-    {
-        await api.DeleteResident(resident.ResidentId);
-        residents = await api.GetByDepartment(selectedDepartmentId);
-    }
-
-    private TimeSpan selectedTime;
-
-    private List<TimeSpan> availableTimes = new List<TimeSpan>
-    {
-        new TimeSpan(8, 0, 0),
-        new TimeSpan(12, 0, 0),
-        new TimeSpan(18, 0, 0)
-    };
-
-    List<ResidentModel> residents = new();
-    int selectedDepartmentId = 2;
-    ResidentModel newResident = new ResidentModel { Risiko = Risiko.Green };
 }

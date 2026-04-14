@@ -10,7 +10,7 @@ namespace OverlapssytemApplication.Interfaces
     public interface IMedicinService
     {
         Task<List<MedicinModel>> GetMedicinByResidentIdAsync(int residentId);
-        Task<int> AddMedicinTimeAsync(int residentId, DateTime? datetime);
+        Task<int> AddMedicinTimeAsync(MedicinModel medicinModel);
         Task DeleteMedicinAsync(int medicinId);
         Task UpdateMedicinAsync(MedicinModel medicinModel);
         Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked);
