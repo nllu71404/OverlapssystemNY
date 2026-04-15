@@ -606,8 +606,9 @@ CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentTaskById]
 AS
 BEGIN
     UPDATE dbo.DepartmentTask
-    SET EmployeeName = @EmployeeName
-    SET DepartmentTaskTopic = @DepartmentTaskTopic
+    SET 
+    EmployeeName = @EmployeeName,
+    DepartmentTaskTopic = @DepartmentTaskTopic
     WHERE DepartmentTaskID = @DepartmentTaskID;
 
 END;
@@ -699,9 +700,10 @@ CREATE OR ALTER PROCEDURE [dbo].[uspUpdateEmployeePhoneById]
 AS
 BEGIN
     UPDATE dbo.DepartmentTask
-    SET Test = @Test
-    SET EmployeeName = @EmployeeName
-    SET PhoneNumber = @PhoneNumber
+    SET
+    Test = @Test,
+    EmployeeName = @EmployeeName,
+    PhoneNumber = @PhoneNumber
     WHERE DepartmentID = @DepartmentID;
 
 END;
