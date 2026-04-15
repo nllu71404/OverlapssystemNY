@@ -16,21 +16,43 @@ namespace OverlapssystemAPI.Controllers
         }
 
         //Hent alle
+        [HttpGet("HentDepartmentTasks")]
+        public async Task<ActionResult> GetAllDepartmentTasksAsync()
+        {
+            var departmentTasks = await _departmentTaskService.GetAllDepartmentTasksAsync();
+            return Ok(departmentTasks);
+        }
 
-
-        //[HttpGet("HenterResident")]
-        //public async Task<ActionResult> GetResidents()
-        //{
-        //    //Skal kalde LoadResidentAsync og returnerer resultatet
-        //    var residents = await _residentServices.LoadResidentsAsync();
-        //    return Ok(residents);
-        //}
         //Hent departmentTask på id
+        [HttpGet("HentDepartmentTasksID/{departmentId}")]
+        public async Task<ActionResult> GetDepartmentTaskByIdAsync(int departmentTaskId)
+        {
+            var departmentTasks = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
+            return Ok(departmentTasks);
+        }
 
         //Tilføj
+        [HttpDelete("TilføjDepartmentTask")]
+        public async Task<ActionResult<DepartmentTaskModel>> SaveNewDepartmentTaskAsync([FromBody] DepartmentTaskModel departmentTaskModel)
+        {
+            await _departmentTaskService.SaveNewDepartmentTaskAsync(departmentTaskModel);
+            return Ok(departmentTaskModel);
+        }
 
         //Update
+        [HttpPut("{id}")]
+        public async Task<ActionResult<DepartmentTaskModel>> UpdateDepartmentTaskAsync(int id,[FromBody] DepartmentTaskModel departmentTaskModel)
+        {
+            await _departmentTaskService.UpdateDepartmentTaskAsync(departmentTaskModel);
+            return Ok(departmentTaskModel);
+        }
 
         //Delete
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteDepartmentTaskAsync(int id)
+        {
+            await _departmentTaskService.DeleteDepartmentTaskAsync(id);
+            return Ok(id);
+        }
     }
 }

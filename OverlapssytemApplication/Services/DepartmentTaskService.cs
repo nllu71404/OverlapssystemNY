@@ -17,28 +17,30 @@ namespace OverlapssytemApplication.Services
         {
             _departmentTaskRepository = departmentTaskRepository;
         }
-
-        public async Task DeleteDepartmentTaskAsync(int departmentTaskId)
-        {
-            await _departmentTaskRepository.DeleteDepartmentTaskAsync(departmentTaskId);
-        }
         public List<DepartmentTaskModel> DepartmentTasks { get; private set; } = new();
 
+        //Hent alle
         public async Task<List<DepartmentTaskModel>> GetAllDepartmentTasksAsync()
         {
             return DepartmentTasks = await _departmentTaskRepository.GetAllDepartmentTasksAsync();
         }
-
+        // Hent på ID
         public async Task<DepartmentTaskModel> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
             return await _departmentTaskRepository.GetDepartmentTaskByIdAsync(departmentTaskId);
         }
 
+        //Slet
+        public async Task DeleteDepartmentTaskAsync(int departmentTaskId)
+        {
+            await _departmentTaskRepository.DeleteDepartmentTaskAsync(departmentTaskId);
+        }
+        //Tilføj ny
         public async Task SaveNewDepartmentTaskAsync(DepartmentTaskModel departmentTask)
         {
             await _departmentTaskRepository.SaveNewDepartmentTaskAsync(departmentTask);
         }
-
+        //Update
         public async Task UpdateDepartmentTaskAsync(DepartmentTaskModel departmentTask)
         {
             await _departmentTaskRepository.UpdateDepartmentTaskAsync(departmentTask);

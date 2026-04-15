@@ -15,7 +15,7 @@ namespace OverlapssystemAPI.Controllers
             _residentServices = residentServices;
         }
         
-        // GET: api/resident
+        //Hent
         [HttpGet("HenterResident")]
         public async Task<ActionResult> GetResidents()
         {
@@ -33,6 +33,7 @@ namespace OverlapssystemAPI.Controllers
             return Ok(resident);
         }
 
+        //Update
         [HttpPut("{id}")]
         public async Task<ActionResult<ResidentModel>> UpdateResident(int id, [FromBody] ResidentModel resident)
         {
@@ -41,6 +42,7 @@ namespace OverlapssystemAPI.Controllers
             return Ok(resident);
         }
 
+        //Delete
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteResident(int Id) 
         {
@@ -49,8 +51,7 @@ namespace OverlapssystemAPI.Controllers
             return Ok(Id);
 
         }
-
-        // Tilføjet så API service og frontend kan bruge denne
+        //Hent på afdeling
         [HttpGet("Department/{id}")]
         public async Task<ActionResult> GetByDepartment(int id)
         {
