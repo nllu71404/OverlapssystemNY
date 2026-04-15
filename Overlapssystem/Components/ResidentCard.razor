@@ -201,18 +201,6 @@
         await medicinApi.UpdateMedicin(med.MedicinTimeID, med);
     }
 
-    // private async Task ToggleMedicinAsync(MedicinModel med, bool isChecked)
-    // {
-    //     med.IsChecked = isChecked;
-
-    //     await medicinApi.SetMedicinChecked(med.MedicinTimeID, isChecked);
-
-    //     if (isChecked)
-    //         med.MedicinCheckTimeStamp = DateTime.Now;
-    //     else
-    //         med.MedicinCheckTimeStamp = null;
-    // }
-
     private async Task DeleteMedicinTimeAsync(MedicinModel med)
     {
 

@@ -24,10 +24,16 @@ namespace OverlapssytemApplication.Services
         {
             return DepartmentTasks = await _departmentTaskRepository.GetAllDepartmentTasksAsync();
         }
-        // Hent på ID
+        // Hent på TaskID
         public async Task<DepartmentTaskModel> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
             return await _departmentTaskRepository.GetDepartmentTaskByIdAsync(departmentTaskId);
+        }
+
+        //Hent på DepartmentID
+        public Task<List<DepartmentTaskModel>> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
+        {
+            throw new NotImplementedException();
         }
 
         //Slet
@@ -46,5 +52,6 @@ namespace OverlapssytemApplication.Services
             await _departmentTaskRepository.UpdateDepartmentTaskAsync(departmentTask);
             
         }
+
     }
 }

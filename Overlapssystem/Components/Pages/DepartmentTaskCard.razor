@@ -1,0 +1,53 @@
+﻿@using OverlapssystemDomain.Entities
+@using Overlapssystem.Services
+@inject DepartmentTaskApiService departmentTaskApiService
+@inject IJSRuntime JS
+
+<div class="section">
+    <div class="section-header">
+        <strong>AFDELINGSOPGAVER</strong>
+        <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync()">+</button>
+    </div>
+    <ul>
+        @foreach (var task in Tasks)
+        {
+            <li>
+                <input class="form-control"
+                       @bind="task.DepartmentTaskTopic"
+                       @bind:after="() => UpdateDepartmentTask(task)"
+                       placeholder="Opgave emne" />
+                <input class="form-control"
+                       @bind="task.EmployeeName"
+                       @bind:after="() => UpdateDepartmentTask(task)"
+                       placeholder="Medarbejder navn" />
+                <button class="btn btn-danger btn-sm"
+                        @onclick="() => OnDelete.InvokeAsync(task)">
+                    Slet
+                </button>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public int DepartmentId { get; set; }
+
+    [Parameter]
+    public EventCallback OnAdd { get; set; }
+
+    [Parameter]
+    public EventCallback<DepartmentTaskModel> OnDelete { get; set; }
+
+    public List<DepartmentTaskModel> Tasks { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Tasks = await departmentTaskApiService.GetDepartmentTask(DepartmentId);
+    }
+
+    private async Task UpdateDepartmentTask(DepartmentTaskModel task)
+    {
+        await departmentTaskApiService.UpdateDepartmentTask(task.DepartmentTaskID, task);
+    }
+}

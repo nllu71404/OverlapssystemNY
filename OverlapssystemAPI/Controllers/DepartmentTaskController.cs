@@ -31,6 +31,14 @@ namespace OverlapssystemAPI.Controllers
             return Ok(departmentTasks);
         }
 
+        //Hent departmentTask på departmentID
+        [HttpGet("HentDepartmentTaskBtDepartmentId/{departmentId}")]
+        public async Task<ActionResult> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
+        {
+            var departmentTasks = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
+            return Ok(departmentTasks);
+        }
+
         //Tilføj
         [HttpPut("TilføjDepartmentTask")]
         public async Task<ActionResult<DepartmentTaskModel>> SaveNewDepartmentTaskAsync([FromBody] DepartmentTaskModel departmentTaskModel)
