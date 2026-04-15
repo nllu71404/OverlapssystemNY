@@ -582,10 +582,10 @@ GO
 
 -- Gets DepartmentTask by DepartmentTaskID
 CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByDepartmentID]
-@DepartmentTaskID INT
+@DepartmentID INT
 AS
 BEGIN
-SELECT * FROM dbo.DepartmentTask WHERE DepartmentTaskID = @DepartmentTaskID
+SELECT * FROM dbo.DepartmentTask WHERE DepartmentID = @DepartmentID
 END;
 GO
 
