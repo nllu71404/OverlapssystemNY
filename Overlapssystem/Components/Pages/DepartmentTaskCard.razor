@@ -43,7 +43,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Tasks = await departmentTaskApiService.GetDepartmentTask(DepartmentId);
+        Tasks = await departmentTaskApiService.GetDepartmentTasksByDepartmentId(DepartmentId);
     }
 
     private async Task UpdateDepartmentTask(DepartmentTaskModel task)
