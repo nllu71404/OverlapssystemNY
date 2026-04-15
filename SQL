@@ -607,7 +607,7 @@ AS
 BEGIN
     UPDATE dbo.DepartmentTask
     SET 
-    EmployeeName = @EmployeeName,
+    EmployeeName = @EmployeeName, 
     DepartmentTaskTopic = @DepartmentTaskTopic
     WHERE DepartmentTaskID = @DepartmentTaskID;
 
