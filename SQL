@@ -644,7 +644,7 @@ AS
 BEGIN
 SET NOCOUNT ON;
 
-INSERT INTO dbo.DepartmentTask
+INSERT INTO dbo.EmployeePhone
 (
     DepartmentID,
     PhoneNumber,
@@ -699,7 +699,7 @@ CREATE OR ALTER PROCEDURE [dbo].[uspUpdateEmployeePhoneById]
 @Test BIT
 AS
 BEGIN
-    UPDATE dbo.DepartmentTask
+    UPDATE dbo.EmployeePhone
     SET
     Test = @Test,
     EmployeeName = @EmployeeName,
@@ -711,10 +711,10 @@ GO
 
 -- Delete an EmployeePhone entry in the EmployeePhone table
 CREATE OR ALTER PROCEDURE [dbo].[uspDeleteEmployeePhone]
-@EmployeePhone NVARCHAR(100)
+@EmployeePhoneID NVARCHAR(100)
 AS
 BEGIN
-DELETE FROM dbo.EmployeePhone WHERE EmployeePhone = @EmployeePhone
+DELETE FROM dbo.EmployeePhone WHERE EmployeePhoneID = @EmployeePhoneID
 END;
 GO
 
