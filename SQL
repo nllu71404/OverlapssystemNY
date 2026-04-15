@@ -30,7 +30,7 @@ GO
 CREATE TABLE dbo.MedicinTime (
 MedicinTimeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
-MedicinTime DATETIME NULL,
+MedicinTime TIME NULL,
 MedicinCheckTimeStamp DATETIME NULL,
 IsChecked BIT NOT NULL DEFAULT 0
 
@@ -60,26 +60,26 @@ CREATE TABLE dbo.Shopping (
 ShoppingID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
 ShoppingDay NVARCHAR(100) NULL,
-ShoppingTime DATETIME NULL,
+ShoppingTime TIME NULL,
 PaymentMethod NVARCHAR(100) NULL
 
 );
 GO
 
-CREATE TABLE dbo.DepartmentAssignment (
+CREATE TABLE dbo.DepartmentTask (
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
-DepartmentAssignmentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-DepartmentAssignmentTopic NVARCHAR(250) NULL,
-DepartmentAssignmentWorkerName NVARCHAR(100) NULL
+DepartmentTaskID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+DepartmentTaskTopic NVARCHAR(250) NULL,
+EmployeeName NVARCHAR(100) NULL
 
 );
 GO
 
-CREATE TABLE dbo.WorkerTelefon (
+CREATE TABLE dbo.EmployeePhone (
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
-TelefonID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-TelefonNumber INT NULL,
-WorkerName NVARCHAR(100) NULL,
+EmployeePhoneID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+PhoneNumber INT NULL,
+EmployeeName NVARCHAR(100) NULL,
 Test BIT NULL
 
 );
@@ -136,12 +136,20 @@ SELECT
     pn.PNID,
         pn.PNTime,
         pn.PNTimeStamp,
-        pn.Reason
+        pn.Reason,
+
+    -- Shopping
+    s.ShoppingID,
+    s.ShoppingDay,
+    s.ShoppingTime,
+    s.PaymentMethod
 
 FROM Resident r
 LEFT JOIN MedicinTime m ON r.ResidentID = m.ResidentID
 LEFT JOIN PNMedicin pn 
         ON r.ResidentID = pn.ResidentID
+LEFT JOIN Shopping s
+    ON r.ResidentID = s.ResidentID
 END;
 GO
 
@@ -197,7 +205,13 @@ SET NOCOUNT ON;
         pn.PNID,
         pn.PNTime,
         pn.PNTimeStamp,
-        pn.Reason
+        pn.Reason,
+
+        -- Shopping
+        s.ShoppingID,
+        s.ShoppingDay,
+        s.ShoppingTime,
+        s.PaymentMethod
 
     FROM Resident r
 
@@ -206,6 +220,9 @@ SET NOCOUNT ON;
 
     LEFT JOIN PNMedicin pn 
         ON r.ResidentID = pn.ResidentID
+
+    LEFT JOIN Shopping s
+    ON r.ResidentID = s.ResidentID
 
     WHERE r.DepartmentID = @DepartmentID
 END;
@@ -240,7 +257,7 @@ GO
 
 -- Creates a Medicin Time to the MedicinTime table.
 CREATE OR ALTER PROCEDURE [dbo].[uspCreateMedicinTime]
-@MedicinTime DATETIME,
+@MedicinTime TIME,
 @ResidentID INT = NULL,
 @MedicinCheckTimeStamp DATETIME = NULL
 AS
@@ -266,7 +283,7 @@ GO
 
 -- Updates a medicin time by id in the MedicinTime table
 CREATE OR ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
-    @MedicinTime DATETIME,
+    @MedicinTime TIME,
     @MedicinTimeID INT,
     @IsChecked BIT,
     @MedicinCheckTimeStamp DATETIME = NULL
@@ -402,7 +419,7 @@ GO
 CREATE OR ALTER    PROCEDURE [dbo].[uspCreateShoppingTime]
 @ResidentID INT = NULL,
 @ShoppingDay NVARCHAR(100) NULL,
-@ShoppingTime DATETIME = NULL,
+@ShoppingTime TIME = NULL,
 @PaymentMethod NVARCHAR(100) NULL
 
 AS
@@ -432,7 +449,7 @@ GO
 CREATE OR ALTER    PROCEDURE [dbo].[uspUpdateShoppingTimeById]
 @ResidentID INT = NULL,
 @ShoppingDay NVARCHAR(100) NULL,
-@ShoppingTime DATETIME = NULL,
+@ShoppingTime TIME = NULL,
 @PaymentMethod NVARCHAR(100) NULL,
 @ShoppingID INT
 
@@ -478,7 +495,7 @@ GO
 
 -- Gets departments by departmentName
 CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartmentsByDepartmentName]
-@DepartmentName INT
+@DepartmentName nvarchar(100)
 AS
 BEGIN
 SELECT * FROM dbo.Department WHERE DepartmentName = @DepartmentName
@@ -527,6 +544,187 @@ DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
 END;
 GO
 
+-- DepartmentTask stored procedures
+-- Creates a DepartmentTask to the table of DepartmentTasks.
+CREATE OR ALTER PROCEDURE dbo.uspCreateDepartmentTask
+@DepartmentID INT = NULL,
+@DepartmentTaskTopic NVARCHAR(250) = NULL,
+@EmployeeName NVARCHAR(100) = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.DepartmentTask
+(
+    DepartmentID,
+    DepartmentTaskTopic,
+    EmployeeName
+)
+VALUES
+(
+    @DepartmentID,
+    @DepartmentTaskTopic,
+    @EmployeeName
+);
+
+SELECT SCOPE_IDENTITY() AS DepartmentTaskID;
+END;
+GO
+
+-- Gets all Departments from the Department table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTasks]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.DepartmentTask
+END;
+GO
+
+-- Gets DepartmentTask by DepartmentTaskID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByDepartmentID]
+@DepartmentTaskID INT
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE DepartmentTaskID = @DepartmentTaskID
+END;
+GO
+
+-- Gets Employee by EmployeeName
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
+@EmployeeName nvarchar(100)
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+-- Updates a Department by id in the Department table
+CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentTaskById]
+@DepartmentTaskID INT,
+@DepartmentTaskTopic NVARCHAR(250),
+@EmployeeName NVARCHAR(100)
+AS
+BEGIN
+    UPDATE dbo.DepartmentTask
+    SET EmployeeName = @EmployeeName
+    SET DepartmentTaskTopic = @DepartmentTaskTopic
+    WHERE DepartmentTaskID = @DepartmentTaskID;
+
+END;
+GO
+
+-- Delete an DepartmentTaskTopic entry in the DepartmentTask table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentTaskTopic]
+@DepartmentTaskTopic NVARCHAR(250)
+AS
+BEGIN
+DELETE FROM dbo.DepartmentTask WHERE DepartmentTaskTopic = @DepartmentTaskTopic
+END;
+GO
+
+-- Delete an Employee entry in the DepartmentTask table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentEmployeeName]
+@EmployeeName NVARCHAR(100)
+AS
+BEGIN
+DELETE FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+
+-- EmployeePhone stored procedures
+-- Creates a EmployeePhone to the table of EmployeePhones.
+CREATE OR ALTER PROCEDURE dbo.uspCreateEmployeePhone
+@DepartmentID INT = NULL,
+@PhoneNumber NVARCHAR(100) = NULL,
+@EmployeeName NVARCHAR(100) = NULL,
+@Test BIT = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.DepartmentTask
+(
+    DepartmentID,
+    PhoneNumber,
+    EmployeeName,
+    Test
+
+)
+VALUES
+(
+    @DepartmentID,
+    @PhoneNumber,
+    @EmployeeName,
+    @Test
+);
+
+SELECT SCOPE_IDENTITY() AS EmployeePhoneID;
+END;
+GO
+
+-- Gets all EmployeePhoneNumbers from the EmployeePhone table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetEmployeePhoneNumbers]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.EmployeePhone
+END;
+GO
+
+-- Gets EmployeePhone by EmployeePhoneID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetEmployeePhoneTaskByEmployeePhoneID]
+@EmployeePhoneID INT
+AS
+BEGIN
+SELECT * FROM dbo.EmployeePhone WHERE EmployeePhoneID = @EmployeePhoneID
+END;
+GO
+
+-- Gets Employee by EmployeeName
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
+@EmployeeName nvarchar(100)
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+-- Updates a EmployeePhone by id in the EmployeePhone table
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateEmployeePhoneById]
+@DepartmentID INT,
+@PhoneNumber NVARCHAR(100),
+@EmployeeName NVARCHAR(100),
+@Test BIT
+AS
+BEGIN
+    UPDATE dbo.DepartmentTask
+    SET Test = @Test
+    SET EmployeeName = @EmployeeName
+    SET PhoneNumber = @PhoneNumber
+    WHERE DepartmentID = @DepartmentID;
+
+END;
+GO
+
+-- Delete an EmployeePhone entry in the EmployeePhone table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteEmployeePhone]
+@EmployeePhone NVARCHAR(100)
+AS
+BEGIN
+DELETE FROM dbo.EmployeePhone WHERE EmployeePhone = @EmployeePhone
+END;
+GO
+
+-- Delete an Employee entry in the EmployeePhone table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteEmployeePhoneEmployeeName]
+@EmployeeName NVARCHAR(100)
+AS
+BEGIN
+DELETE FROM dbo.EmployeePhone WHERE EmployeeName = @EmployeeName
+END;
+GO
+
 --Fast data
 
 --Departments 
@@ -538,3 +736,17 @@ INSERT INTO Department (DepartmentName)
 VALUES ('Slottet');
 GO
 
+-- MOCK DATA
+-- Borgere til Skoven (DepartmentID = 1)
+INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
+VALUES ('Anders Hansen', 1, 'Stabil', 'Green');
+
+INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
+VALUES ('Mette Nielsen', 1, 'Behøver hjælp', 'Yellow');
+
+-- Borgere til Slottet (DepartmentID = 2)
+INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
+VALUES ('Ole Pedersen', 2, 'Kritisk', 'Red');
+
+INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
+VALUES ('Karen Jensen', 2, 'Stabil', 'Green');
