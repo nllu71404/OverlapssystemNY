@@ -544,6 +544,93 @@ DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
 END;
 GO
 
+-- DepartmentTask stored procedures
+-- Creates a DepartmentTask to the table of DepartmentTasks.
+CREATE OR ALTER PROCEDURE dbo.uspCreateDepartmentTask
+@DepartmentID INT = NULL,
+@DepartmentTaskTopic NVARCHAR(250) = NULL,
+@EmployeeName NVARCHAR(100) = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.DepartmentTask
+(
+    DepartmentID,
+    DepartmentTaskTopic,
+    EmployeeName
+)
+VALUES
+(
+    @DepartmentID,
+    @DepartmentTaskTopic,
+    @EmployeeName
+);
+
+SELECT SCOPE_IDENTITY() AS DepartmentTaskID;
+END;
+GO
+
+-- Gets all Departments from the Department table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTasks]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.DepartmentTask
+END;
+GO
+
+-- Gets DepartmentTask by DepartmentTaskID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByDepartmentID]
+@DepartmentTaskID INT
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE DepartmentTaskID = @DepartmentTaskID
+END;
+GO
+
+-- Gets Employee by EmployeeName
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
+@EmployeeName nvarchar(100)
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+-- Updates a Department by id in the Department table
+CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentTaskById]
+@DepartmentTaskID INT,
+@DepartmentTaskTopic NVARCHAR(250),
+@EmployeeName NVARCHAR(100)
+AS
+BEGIN
+    UPDATE dbo.DepartmentTask
+    SET EmployeeName = @EmployeeName
+    SET DepartmentTaskTopic = @DepartmentTaskTopic
+    WHERE DepartmentTaskID = @DepartmentTaskID;
+
+END;
+GO
+
+-- Delete an DepartmentTaskTopic entry in the DepartmentTask table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentTaskTopic]
+@DepartmentTaskTopic NVARCHAR(250)
+AS
+BEGIN
+DELETE FROM dbo.DepartmentTask WHERE DepartmentTaskTopic = @DepartmentTaskTopic
+END;
+GO
+
+-- Delete an Employee entry in the DepartmentTask table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentEmployeeName]
+@EmployeeName NVARCHAR(100)
+AS
+BEGIN
+DELETE FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
 --Fast data
 
 --Departments 
