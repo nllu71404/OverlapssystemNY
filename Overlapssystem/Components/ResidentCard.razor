@@ -219,7 +219,7 @@
         {
             ResidentID = residentId,
             PNTime = null,
-            Reason = ""
+            Reason = "Ingen årsag angivet"
         };
 
         var newId = await PNmedicinApi.AddPNMedicinTime(addPnMedicinDTO);
@@ -229,7 +229,7 @@
             PNMedicinID = newId,
             ResidentID = residentId,
             PNTime = null,
-            Reason = ""
+            Reason = "Ingen årsag angivet"
         });
     }
 

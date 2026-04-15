@@ -6,20 +6,30 @@
 <div class="section">
     <div class="section-header">
         <strong>AFDELINGSOPGAVER</strong>
-        <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync(DepartmentId)">+</button>
-    </div>
+        <!-- Laver "Afdelingsopgave knappen" til readonly for medarbejder -->
+        @if (!IsReadOnly) 
+        {
+            <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync(DepartmentId)">+</button>
+        }    </div>
     <ul>
         @foreach (var task in Tasks)
         {
             <li>
-                <input class="form-control"
+                @if (IsReadOnly)
+                {
+                    <span>@task.DepartmentTaskTopic</span>
+                } else
+                {
+                    <input class="form-control"
                        value="@task.DepartmentTaskTopic"
                        @onchange="async e => {
                        task.DepartmentTaskTopic = e.Value?.ToString();
                        await UpdateDepartmentTask(task);
                    }"
-                     placeholder="Opgave emne" />
+                   placeholder="Opgave emne" />
+                }
 
+              <!-- Tilføj medarbejder navn -->
             <input class="form-control"
                    value="@task.EmployeeName"
                    @onchange="async e => {
@@ -27,11 +37,14 @@
                    await UpdateDepartmentTask(task);
                           }"
                    placeholder="Medarbejder navn" />
-                
-                   <button class="btn btn-danger btn-sm"
+                @if (!IsReadOnly)
+            {
+                <button class="btn btn-danger btn-sm"
                         @onclick="() => OnDelete.InvokeAsync(task)">
                     Slet
                 </button>
+            }
+                
             </li>
         }
     </ul>
@@ -40,6 +53,8 @@
 @code {
     [Parameter]
     public int DepartmentId { get; set; }
+    [Parameter]
+	public bool IsReadOnly { get; set; } = false;   
 
     // Parent will handle creation; we invoke it with the DepartmentId.
     [Parameter]
