@@ -24,7 +24,7 @@ namespace OverlapssystemAPI.Controllers
         }
 
         //Hent departmentTask på id
-        [HttpGet("HentDepartmentTasksID/{departmentId}")]
+        [HttpGet("HentDepartmentTasksID/{departmentTaskId}")]
         public async Task<ActionResult> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
             var departmentTasks = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
@@ -32,7 +32,7 @@ namespace OverlapssystemAPI.Controllers
         }
 
         //Tilføj
-        [HttpDelete("TilføjDepartmentTask")]
+        [HttpPut("TilføjDepartmentTask")]
         public async Task<ActionResult<DepartmentTaskModel>> SaveNewDepartmentTaskAsync([FromBody] DepartmentTaskModel departmentTaskModel)
         {
             await _departmentTaskService.SaveNewDepartmentTaskAsync(departmentTaskModel);
