@@ -22,6 +22,7 @@ builder.Services.AddScoped<MedicinApiService>();
 builder.Services.AddScoped<DepartmentApiService>();
 builder.Services.AddScoped<PNMedicinApiService>();
 builder.Services.AddScoped<ShoppingApiService>();
+builder.Services.AddScoped<DepartmentTaskApiService>();
 
 
 var app = builder.Build();

@@ -16,9 +16,9 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<DepartmentTaskModel>>("api/DepartmentTask/HentDepartmentsTasks");
         }
         //Hent på ID
-        public async Task<List<DepartmentTaskModel>> GetDepartmentTaskById(int? id)
+        public async Task<DepartmentTaskModel> GetDepartmentTaskById(int id)
         {
-            return await _http.GetFromJsonAsync<List<DepartmentTaskModel>>($"api/DepartmentTask/HentDepartmentTasksID/{id}");
+            return await _http.GetFromJsonAsync<DepartmentTaskModel>($"api/DepartmentTask/HentDepartmentTasksID/{id}");
         }
 
         //Tilføj
