@@ -6,21 +6,29 @@
 <div class="section">
     <div class="section-header">
         <strong>AFDELINGSOPGAVER</strong>
-        <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync()">+</button>
+        <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync(DepartmentId)">+</button>
     </div>
     <ul>
         @foreach (var task in Tasks)
         {
             <li>
                 <input class="form-control"
-                       @bind="task.DepartmentTaskTopic"
-                       @bind:after="() => UpdateDepartmentTask(task)"
-                       placeholder="Opgave emne" />
-                <input class="form-control"
-                       @bind="task.EmployeeName"
-                       @bind:after="() => UpdateDepartmentTask(task)"
-                       placeholder="Medarbejder navn" />
-                <button class="btn btn-danger btn-sm"
+                       value="@task.DepartmentTaskTopic"
+                       @onchange="async e => {
+                       task.DepartmentTaskTopic = e.Value?.ToString();
+                       await UpdateDepartmentTask(task);
+                   }"
+                     placeholder="Opgave emne" />
+
+            <input class="form-control"
+                   value="@task.EmployeeName"
+                   @onchange="async e => {
+                   task.EmployeeName = e.Value?.ToString();
+                   await UpdateDepartmentTask(task);
+                          }"
+                   placeholder="Medarbejder navn" />
+                
+                   <button class="btn btn-danger btn-sm"
                         @onclick="() => OnDelete.InvokeAsync(task)">
                     Slet
                 </button>
@@ -33,8 +41,9 @@
     [Parameter]
     public int DepartmentId { get; set; }
 
+    // Parent will handle creation; we invoke it with the DepartmentId.
     [Parameter]
-    public EventCallback OnAdd { get; set; }
+    public EventCallback<int> OnAdd { get; set; }
 
     [Parameter]
     public EventCallback<DepartmentTaskModel> OnDelete { get; set; }
@@ -44,6 +53,13 @@
     protected override async Task OnInitializedAsync()
     {
         Tasks = await departmentTaskApiService.GetDepartmentTasksByDepartmentId(DepartmentId);
+    }
+
+    // Allow parent to ask this component to refresh its list after parent creates/updates.
+    public async Task RefreshAsync()
+    {
+        Tasks = await departmentTaskApiService.GetDepartmentTasksByDepartmentId(DepartmentId);
+        StateHasChanged();
     }
 
     private async Task UpdateDepartmentTask(DepartmentTaskModel task)

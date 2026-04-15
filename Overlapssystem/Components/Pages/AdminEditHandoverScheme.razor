@@ -5,10 +5,12 @@
 @using OverlapssystemDomain.Interfaces
 @using Overlapssystem.Services
 @using OverlapssystemShared
+@inject IJSRuntime JS
 
 <h3>AdminEditHandoverScheme</h3>
 
 @inject ResidentApiService api
+@inject DepartmentTaskApiService departmentTaskApi
 
 <!-- Du opretter en ny beboer-->
 <h5>Opret ny beboer</h5>
@@ -55,12 +57,23 @@ else
                           OnDelete="DeleteResidentAsync" />
         }
     </div>
+    
 }
+<DepartmentTaskCard @ref="departmentTaskCardRef"
+                    DepartmentId="departmentId"
+                    OnAdd="AddDepartmentTask"
+                    OnDelete="DeleteDepartmentTask" />
+
+
+
 
 @code {
     
 	[Parameter]
 	public int departmentId { get; set; }
+
+    private DepartmentTaskCard? departmentTaskCardRef;
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -96,6 +109,38 @@ else
         await api.DeleteResident(resident.ResidentId);
         residents = await api.GetByDepartment(departmentId);
     }
+
+    // Parent creates the task and then asks the child to refresh.
+    private async Task AddDepartmentTask(int deptId)
+    {
+        var newTask = new DepartmentTaskModel
+        {
+            DepartmentID = deptId,
+            DepartmentTaskTopic = string.Empty,
+            EmployeeName = string.Empty
+        };
+
+        await departmentTaskApi.CreateDepartmentTask(newTask);
+
+        // Ask the child component to refresh its list
+        if (departmentTaskCardRef is not null)
+        {
+            await departmentTaskCardRef.RefreshAsync();
+        }
+    }
+
+    private async Task DeleteDepartmentTask(DepartmentTaskModel task)
+    {
+        var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne opgave?");
+        if (!ok) return;
+        await departmentTaskApi.DeleteDepartmentTask(task.DepartmentTaskID);
+
+        if (departmentTaskCardRef is not null)
+        {
+            await departmentTaskCardRef.RefreshAsync();
+        }
+    }
+
 
     List<ResidentModel> residents = new();
     ResidentModel newResident = new ResidentModel { Risiko = Risiko.Green };

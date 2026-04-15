@@ -1,4 +1,5 @@
-﻿using OverlapssystemDomain.Entities;
+﻿using System.Net.Http.Json;
+using OverlapssystemDomain.Entities;
 
 namespace Overlapssystem.Services
 {
@@ -30,7 +31,7 @@ namespace Overlapssystem.Services
         //Tilføj
         public async Task CreateDepartmentTask(DepartmentTaskModel departmentTaskModel)
         {
-            await _http.PostAsJsonAsync("api/DepartmentTask/TilføjDepartmentTask", departmentTaskModel);
+            await _http.PutAsJsonAsync($"api/DepartmentTask/TilføjDepartmentTask", departmentTaskModel);
         }
 
         //Update

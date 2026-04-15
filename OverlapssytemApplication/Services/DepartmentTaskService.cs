@@ -31,9 +31,9 @@ namespace OverlapssytemApplication.Services
         }
 
         //Hent på DepartmentID
-        public Task<List<DepartmentTaskModel>> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
+        public async Task<List<DepartmentTaskModel>> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
         {
-            throw new NotImplementedException();
+            return DepartmentTasks = await _departmentTaskRepository.GetDepartmentTaskByDepartmentIdAsync(departmentId);
         }
 
         //Slet

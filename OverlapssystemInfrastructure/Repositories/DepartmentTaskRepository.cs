@@ -79,7 +79,7 @@ namespace OverlapssystemInfrastructure.Repositories
             List<DepartmentTaskModel> departmentTasks = new();
 
             using SqlConnection connection = new SqlConnection(_connectionString);
-            using SqlCommand command = new SqlCommand("dbo.uspGetDepartmentTasksByDepartmentId", connection);
+            using SqlCommand command = new SqlCommand("dbo.uspGetDepartmentTaskByDepartmentID", connection);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentId;
 
@@ -124,7 +124,6 @@ namespace OverlapssystemInfrastructure.Repositories
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@DepartmentTaskID", SqlDbType.Int).Value = departmentTask.DepartmentTaskID;
-            command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentTask.DepartmentID ?? (object)DBNull.Value;
             command.Parameters.Add("@DepartmentTaskTopic", SqlDbType.NVarChar, 250).Value = departmentTask.DepartmentTaskTopic ?? (object)DBNull.Value;
             command.Parameters.Add("@EmployeeName", SqlDbType.NVarChar, 100).Value = departmentTask.EmployeeName ?? (object)DBNull.Value;
 
