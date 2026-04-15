@@ -32,7 +32,7 @@ namespace OverlapssystemAPI.Controllers
         }
 
         //Hent departmentTask på departmentID
-        [HttpGet("HentDepartmentTaskBtDepartmentId/{departmentId}")]
+        [HttpGet("HentDepartmentTaskByDepartmentId/{departmentId}")]
         public async Task<ActionResult> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
         {
             var departmentTasks = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
