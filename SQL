@@ -66,20 +66,20 @@ PaymentMethod NVARCHAR(100) NULL
 );
 GO
 
-CREATE TABLE dbo.DepartmentAssignment (
+CREATE TABLE dbo.DepartmentTask (
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
-DepartmentAssignmentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-DepartmentAssignmentTopic NVARCHAR(250) NULL,
-DepartmentAssignmentWorkerName NVARCHAR(100) NULL
+DepartmentTaskID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+DepartmentTaskTopic NVARCHAR(250) NULL,
+EmployeeName NVARCHAR(100) NULL
 
 );
 GO
 
-CREATE TABLE dbo.WorkerTelefon (
+CREATE TABLE dbo.EmployeePhone (
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
-TelefonID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-TelefonNumber INT NULL,
-WorkerName NVARCHAR(100) NULL,
+EmployeePhoneID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+PhoneNumber INT NULL,
+EmployeeName NVARCHAR(100) NULL,
 Test BIT NULL
 
 );
