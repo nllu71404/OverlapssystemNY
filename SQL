@@ -549,7 +549,8 @@ GO
 CREATE OR ALTER PROCEDURE dbo.uspCreateDepartmentTask
 @DepartmentID INT = NULL,
 @DepartmentTaskTopic NVARCHAR(250) = NULL,
-@EmployeeName NVARCHAR(100) = NULL
+@EmployeeName NVARCHAR(100) = NULL, 
+@ShiftType NVARCHAR(100) = NULL
 AS
 BEGIN
 SET NOCOUNT ON;
@@ -558,20 +559,22 @@ INSERT INTO dbo.DepartmentTask
 (
     DepartmentID,
     DepartmentTaskTopic,
-    EmployeeName
+    EmployeeName,
+    ShiftType
 )
 VALUES
 (
     @DepartmentID,
     @DepartmentTaskTopic,
-    @EmployeeName
+    @EmployeeName,
+    @ShiftType
 );
 
 SELECT SCOPE_IDENTITY() AS DepartmentTaskID;
 END;
 GO
 
--- Gets all Departments from the Department table.
+-- Gets all DepartmentTasks from the DepartmentTask table.
 CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTasks]
 AS
 BEGIN
@@ -589,7 +592,7 @@ SELECT * FROM dbo.DepartmentTask WHERE DepartmentID = @DepartmentID
 END;
 GO
 
--- Gets Employee by EmployeeName
+-- Gets DepartmentTasks by EmployeeName
 CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
 @EmployeeName nvarchar(100)
 AS
@@ -598,17 +601,19 @@ SELECT * FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
 END;
 GO
 
--- Updates a Department by id in the Department table
+-- Updates a DepartmentTask by id in the Department table
 CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentTaskById]
 @DepartmentTaskID INT,
 @DepartmentTaskTopic NVARCHAR(250),
-@EmployeeName NVARCHAR(100)
+@EmployeeName NVARCHAR(100),
+@ShiftType NVARCHAR(100)
 AS
 BEGIN
     UPDATE dbo.DepartmentTask
     SET 
     EmployeeName = @EmployeeName,  
-    DepartmentTaskTopic = @DepartmentTaskTopic
+    DepartmentTaskTopic = @DepartmentTaskTopic,
+    ShiftType = @ShiftType
     WHERE DepartmentTaskID = @DepartmentTaskID;
 
 END;
@@ -623,7 +628,7 @@ DELETE FROM dbo.DepartmentTask WHERE DepartmentTaskTopic = @DepartmentTaskTopic
 END;
 GO
 
--- Delete an Employee entry in the DepartmentTask table
+-- Delete an EmployeeName entry in the DepartmentTask table
 CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentEmployeeName]
 @EmployeeName NVARCHAR(100)
 AS
