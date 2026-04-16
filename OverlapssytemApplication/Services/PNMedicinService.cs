@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OverlapssytemApplication.Common;
+using System.Reflection.Metadata.Ecma335;
 
 namespace OverlapssytemApplication.Services
 {
@@ -14,36 +16,43 @@ namespace OverlapssytemApplication.Services
     {
 
         private readonly IPNMedicinRepository _pnmedicinrepository;
+
         public PNMedicinService(IPNMedicinRepository pnmedicinrepository)
         {
             _pnmedicinrepository = pnmedicinrepository;
         }
-        public async Task<List<PNMedicinModel>> GetPNMedicinByResidentIdAsync(int residentId)
+
+        public async Task<Result<List<PNMedicinModel>>> GetPNMedicinByResidentIdAsync(int residentId)
         {
-            //Henter kun PN medicin for de sidste 48 timer
             var pnList = await _pnmedicinrepository.GetPNMedicinByResidentIdAsync(residentId);
+
+            if (pnList == null)
+                return Result<List<PNMedicinModel>>.Fail("Ingen PN Medicin tider");
 
             var cutoff = DateTime.Now.AddHours(-48);
 
-            return pnList
+            var filtered = pnList
                 .Where(x => x.PNTime >= cutoff)
                 .OrderByDescending(x => x.PNTime)
                 .ToList();
-        }
-        public async Task DeletePNMedicinAsync(int pNMedicinId)
-        {
-            await _pnmedicinrepository.DeletePNMedicinAsync(pNMedicinId);
-        }
-        public async Task<int> AddPNMedicinAsync(int residentId, DateTime? pNTime, string reason)
-        {
-           
-            //Hvis årsag ikke er udfyldt 
-            if (string.IsNullOrWhiteSpace(reason))
-                throw new ArgumentException("Årsag er påkrævet");
 
-            //Hvis tid er sat i fremtiden
-            if (pNTime > DateTime.Now)
-                throw new InvalidOperationException("Tid kan ikke registreres i fremtiden");
+            return Result<List<PNMedicinModel>>.Ok(filtered);
+        }
+
+        public async Task<Result> DeletePNMedicinAsync(int pNMedicinId)
+        {
+            if (pNMedicinId <= 0)
+                return Result.Fail("Ugyldigt ID");
+
+            await _pnmedicinrepository.DeletePNMedicinAsync(pNMedicinId);
+
+            return Result.Ok();
+        }
+
+        public async Task<Result<int>> AddPNMedicinAsync(
+            int residentId, DateTime? pNTime, string reason)
+        {
+            //Ikke noget validering i serviceklassen da objektet oprettes med tomme værdier - skal valideres i UI pga automatisk opdatering
 
             var pNMedicin = new PNMedicinModel
             {
@@ -51,20 +60,19 @@ namespace OverlapssytemApplication.Services
                 PNTime = pNTime,
                 Reason = reason
             };
-            return await _pnmedicinrepository.SaveNewPNMedicinAsync(pNMedicin);
+
+            var id = await _pnmedicinrepository.SaveNewPNMedicinAsync(pNMedicin);
+
+            return Result<int>.Ok(id);
         }
 
-        public async Task UpdatePNMedicinAsync(PNMedicinModel pNMedicin)
+        public async Task<Result> UpdatePNMedicinAsync(PNMedicinModel pNMedicin)
         {
-            //Hvis årsag ikke er udfyldt
-            if (string.IsNullOrWhiteSpace(pNMedicin.Reason))
-                throw new ArgumentException("Årsag er påkrævet");
-
-            //Hvis tid er sat i fremtiden
-            if (pNMedicin.PNTime > DateTime.Now)
-                throw new Exception("Tid kan ikke registreres i fremtiden");
+            //ikke noget validering i serviceklassen da objektet opdateres automatisk i UI - validering skal ske i UI
 
             await _pnmedicinrepository.UpdatePNMedicinAsync(pNMedicin);
+
+            return Result.Ok();
         }
     }
 }

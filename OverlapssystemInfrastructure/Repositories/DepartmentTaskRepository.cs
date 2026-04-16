@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Enums;
 using OverlapssystemDomain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,14 @@ namespace OverlapssystemInfrastructure.Repositories
                 ?? throw new InvalidOperationException("Connection string 'ProjektDB' not found.");
         }
 
+        //Helper method til at parse ShiftType (Enum) fra database, da den gemmes som string i databasen
+        private ShiftType ParseShiftType(object value)
+        {
+            return Enum.TryParse(value?.ToString(), true, out ShiftType shift)
+                ? shift
+                : throw new Exception($"Ugyldig ShiftType værdi i databasen: {value}");
+        }
+
         public async Task<List<DepartmentTaskModel>> GetAllDepartmentTasksAsync()
         {
             List<DepartmentTaskModel> departmentTasks = new();
@@ -39,7 +48,8 @@ namespace OverlapssystemInfrastructure.Repositories
                     DepartmentTaskID = Convert.ToInt32(reader["DepartmentTaskID"]),
                     DepartmentID = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
                     DepartmentTaskTopic = reader["DepartmentTaskTopic"]?.ToString() ?? "",
-                    EmployeeName = reader["EmployeeName"]?.ToString() ?? ""
+                    EmployeeName = reader["EmployeeName"]?.ToString() ?? "",
+                    ShiftType = ParseShiftType(reader["ShiftType"])
                 };
 
                 departmentTasks.Add(task);
@@ -67,7 +77,8 @@ namespace OverlapssystemInfrastructure.Repositories
                     DepartmentTaskID = Convert.ToInt32(reader["DepartmentTaskID"]),
                     DepartmentID = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
                     DepartmentTaskTopic = reader["DepartmentTaskTopic"]?.ToString() ?? "",
-                    EmployeeName = reader["EmployeeName"]?.ToString() ?? ""
+                    EmployeeName = reader["EmployeeName"]?.ToString() ?? "",
+                    ShiftType = ParseShiftType(reader["ShiftType"])
                 };
             }
 
@@ -93,7 +104,8 @@ namespace OverlapssystemInfrastructure.Repositories
                     DepartmentTaskID = Convert.ToInt32(reader["DepartmentTaskID"]),
                     DepartmentID = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
                     DepartmentTaskTopic = reader["DepartmentTaskTopic"]?.ToString() ?? "",
-                    EmployeeName = reader["EmployeeName"]?.ToString() ?? ""
+                    EmployeeName = reader["EmployeeName"]?.ToString() ?? "",
+                    ShiftType = ParseShiftType(reader["ShiftType"])
                 };
 
                 departmentTasks.Add(task);
@@ -111,6 +123,7 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentTask.DepartmentID ?? (object)DBNull.Value;
             command.Parameters.Add("@DepartmentTaskTopic", SqlDbType.NVarChar, 250).Value = departmentTask.DepartmentTaskTopic ?? (object)DBNull.Value;
             command.Parameters.Add("@EmployeeName", SqlDbType.NVarChar, 100).Value = departmentTask.EmployeeName ?? (object)DBNull.Value;
+            command.Parameters.Add("@ShiftType", SqlDbType.NVarChar, 100).Value = departmentTask.ShiftType.ToString();
 
             await connection.OpenAsync();
             object? result = await command.ExecuteScalarAsync();
@@ -126,6 +139,7 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@DepartmentTaskID", SqlDbType.Int).Value = departmentTask.DepartmentTaskID;
             command.Parameters.Add("@DepartmentTaskTopic", SqlDbType.NVarChar, 250).Value = departmentTask.DepartmentTaskTopic ?? (object)DBNull.Value;
             command.Parameters.Add("@EmployeeName", SqlDbType.NVarChar, 100).Value = departmentTask.EmployeeName ?? (object)DBNull.Value;
+            command.Parameters.Add("@ShiftType", SqlDbType.NVarChar, 100).Value = departmentTask.ShiftType.ToString();
 
             await connection.OpenAsync();
             await command.ExecuteNonQueryAsync();

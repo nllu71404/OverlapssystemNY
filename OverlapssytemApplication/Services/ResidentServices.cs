@@ -7,68 +7,108 @@ using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Enums;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Interfaces;
+using OverlapssytemApplication.Common;
 
 
 namespace OverlapssytemApplication.Services
 {
-    public class ResidentServices : IResidentServices
-    {
-        private readonly IResidentRepository _residentRepository;
 
-        public ResidentServices(IResidentRepository residentRepository)
+        public class ResidentServices : IResidentServices
         {
-            _residentRepository = residentRepository;
-        }
+            private readonly IResidentRepository _residentRepository;
 
-
-        public List<ResidentModel> Residents { get; private set; } = new();
-        public int SelectedDepartmentId { get; set; } = 1;
-
-        public ResidentModel NewResident { get; set; } = new ResidentModel
-        {
-            Risiko = Risiko.Green
-        };
-
-        //Hent
-        public async Task<List<ResidentModel>> LoadResidentsAsync()
-        {
-            return Residents = await _residentRepository.GetAllResidentsAsync();
-        }
-
-        //Hent på id
-        public async Task<List<ResidentModel>> LoadResidentsByDepartmentAsync(int departmentId)
-        {
-            return Residents = await _residentRepository.GetResidentByDepartmentIdAsync(departmentId);
-        }
-        //Update
-        public async Task UpdateResidentAsync(ResidentModel resident)
-        {
-            await _residentRepository.UpdateResidentAsync(resident);
-            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(resident.DepartmentId ?? 1);
-        }
-        //Delete
-        public async Task DeleteResidentAsync(int residentId)
-        {
-            await _residentRepository.DeleteResidentAsync(residentId);
-        }
-
-        //Opret
-        public async Task CreateResidentAsync(ResidentModel resident)
-        {
-            await _residentRepository.SaveNewResidentAsync(resident);
-            Residents = await _residentRepository.GetResidentByDepartmentIdAsync(resident.DepartmentId ?? 1);
-        }
-        //Tildel department
-        public void SetDepartment(int departmentId)
-        {
-            SelectedDepartmentId = departmentId;
-            NewResident = new ResidentModel
+            public ResidentServices(IResidentRepository residentRepository)
             {
-                DepartmentId = departmentId
-            };
-        }
+                _residentRepository = residentRepository;
+            }
 
-        
-        
+            public List<ResidentModel> Residents { get; private set; } = new();
+
+            public int SelectedDepartmentId { get; set; } = 1;
+
+            public ResidentModel NewResident { get; set; } = new ResidentModel
+            {
+                Risiko = Risiko.Green
+            };
+
+            public async Task<Result<List<ResidentModel>>> LoadResidentsAsync()
+            {
+                var data = await _residentRepository.GetAllResidentsAsync();
+
+                Residents = data ?? new List<ResidentModel>();
+
+                return Result<List<ResidentModel>>.Ok(Residents);
+            }
+
+            public async Task<Result<List<ResidentModel>>> LoadResidentsByDepartmentAsync(int departmentId)
+            {
+                if (departmentId <= 0 || departmentId > 2 )
+                    return Result<List<ResidentModel>>.Fail("Ugyldigt afdelingsID");
+
+                var data = await _residentRepository.GetResidentByDepartmentIdAsync(departmentId);
+
+                Residents = data ?? new List<ResidentModel>();
+
+                return Result<List<ResidentModel>>.Ok(Residents);
+            }
+
+            public async Task<Result<int>> CreateResidentAsync(ResidentModel resident)
+            {
+
+                if (string.IsNullOrWhiteSpace(resident.Name))
+                    return Result<int>.Fail("Navn er påkrævet");
+
+                if (resident.DepartmentId == null || resident.DepartmentId <= 0)
+                    return Result<int>.Fail("Afdelings ID er ikke sat");
+
+                var id = await _residentRepository.SaveNewResidentAsync(resident);
+
+                Residents = await _residentRepository.GetResidentByDepartmentIdAsync(resident.DepartmentId.Value);
+
+                return Result<int>.Ok(id);
+            }
+
+            public async Task<Result> UpdateResidentAsync(ResidentModel resident)
+            {
+
+                if (resident.ResidentId <= 0)
+                    return Result.Fail("Ugyldigt beboer ID");
+
+                if (string.IsNullOrWhiteSpace(resident.Name))
+                    return Result.Fail("Navn er påkrævet");
+
+                await _residentRepository.UpdateResidentAsync(resident);
+
+                Residents = await _residentRepository.GetResidentByDepartmentIdAsync(resident.DepartmentId ?? SelectedDepartmentId);
+
+                return Result.Ok();
+            }
+
+            public async Task<Result> DeleteResidentAsync(int residentId)
+            {
+                if (residentId <= 0)
+                    return Result.Fail("Ugyldigt ID");
+
+                await _residentRepository.DeleteResidentAsync(residentId);
+
+                Residents = await _residentRepository.GetResidentByDepartmentIdAsync(SelectedDepartmentId);
+
+                return Result.Ok();
+            }
+
+            public void SetDepartment(int departmentId)
+            {
+                if (departmentId <= 0)
+                    return;
+
+                SelectedDepartmentId = departmentId;
+
+                NewResident = new ResidentModel
+                {
+                    DepartmentId = departmentId,
+                    Risiko = Risiko.Green
+                };
+            }
+        }
     }
-}
+

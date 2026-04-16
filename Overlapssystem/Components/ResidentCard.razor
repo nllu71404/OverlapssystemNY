@@ -201,6 +201,8 @@
         await medicinApi.UpdateMedicin(med.MedicinTimeID, med);
     }
 
+  
+
     private async Task DeleteMedicinTimeAsync(MedicinModel med)
     {
 
@@ -219,7 +221,7 @@
         {
             ResidentID = residentId,
             PNTime = null,
-            Reason = "Ingen årsag angivet"
+            Reason = ""
         };
 
         var newId = await PNmedicinApi.AddPNMedicinTime(addPnMedicinDTO);
@@ -229,7 +231,7 @@
             PNMedicinID = newId,
             ResidentID = residentId,
             PNTime = null,
-            Reason = "Ingen årsag angivet"
+            Reason = ""
         });
     }
 
