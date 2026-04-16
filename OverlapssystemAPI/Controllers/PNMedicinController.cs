@@ -22,7 +22,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult> GetPNMedicinByResidentIdAsync(int residentId)
         {
             var pnmedicin = await _pNMedicinService.GetPNMedicinByResidentIdAsync(residentId);
-            return Ok(pnmedicin);
+            return Ok(pnmedicin.Value);
         }
 
         //Tilføj
@@ -30,7 +30,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult<int>> AddPNMedicinTime([FromBody] AddPNMedicinDTO addPNMedicinDTO)
         {
             var id = await _pNMedicinService.AddPNMedicinAsync(addPNMedicinDTO.ResidentID, addPNMedicinDTO.PNTime, addPNMedicinDTO.Reason);
-            return Ok(id);
+            return Ok(id.Value);
         }
 
         //Update
