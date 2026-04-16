@@ -1,11 +1,12 @@
-﻿using System;
+﻿using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Enums;
+using OverlapssystemDomain.Interfaces;
+using OverlapssytemApplication.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OverlapssystemDomain.Entities;
-using OverlapssystemDomain.Interfaces;
-using OverlapssytemApplication.Interfaces;
 
 
 namespace OverlapssytemApplication.Services
@@ -53,5 +54,18 @@ namespace OverlapssytemApplication.Services
             
         }
 
+        //Helper metode til at bestemme ShiftType baseret på det aktuelle tidspunkt
+        public async Task<ShiftType> GetTimeOfDayAsync()
+        {
+            var now = DateTime.Now.TimeOfDay;
+
+            if (now >= TimeSpan.FromHours(6) && now < TimeSpan.FromHours(18))
+                return ShiftType.Dag;
+
+            if (now >= TimeSpan.FromHours(18) && now < TimeSpan.FromHours(22))
+                return ShiftType.Aften;
+
+            return ShiftType.Nat;
+        }
     }
 }
