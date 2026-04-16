@@ -1,11 +1,12 @@
-﻿using System;
+﻿using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Interfaces;
+using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OverlapssystemDomain.Entities;
-using OverlapssystemDomain.Interfaces;
-using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssytemApplication.Services
 {
@@ -18,34 +19,77 @@ namespace OverlapssytemApplication.Services
             _medicinRepository = medicinRepository;
         }
 
-        public async Task<List<MedicinModel>> GetMedicinByResidentIdAsync(int residentId)
+        //Hent medicin
+        public async Task<Result<List<MedicinModel>>> GetMedicinByResidentIdAsync(int residentId)
         {
-            return await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
+            var result = await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
+
+            return Result<List<MedicinModel>>.Ok(result ?? new List<MedicinModel>());
         }
 
-        public async Task<int> AddMedicinTimeAsync(MedicinModel medicinModel)
+        //Tilføj medicin
+        public async Task<Result<int>> AddMedicinTimeAsync(MedicinModel medicinModel)
         {
-            return await _medicinRepository.SaveNewMedicinAsync(medicinModel);
+            try
+            {
+                var id = await _medicinRepository.SaveNewMedicinAsync(medicinModel);
+                return Result<int>.Ok(id);
+            }
+            catch (Exception ex)
+            {
+                return Result<int>.Fail(ex.Message);
+            }
         }
 
-        public async Task DeleteMedicinAsync(int medicinId)
+        //Slet medicin
+        public async Task<Result> DeleteMedicinAsync(int medicinId)
         {
-            await _medicinRepository.DeleteMedicinAsync(medicinId);
+            try
+            {
+                await _medicinRepository.DeleteMedicinAsync(medicinId);
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
 
-        public async Task UpdateMedicinAsync(MedicinModel medicinModel)
+        //Opdater medicin
+        public async Task<Result> UpdateMedicinAsync(MedicinModel medicinModel)
         {
-            await _medicinRepository.UpdateMedicinAsync(medicinModel);
+            try
+            {
+                await _medicinRepository.UpdateMedicinAsync(medicinModel);
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
 
-        public async Task SetMedicinCheckedAsync(int medicinTimeId, bool isChecked)
+        //Marker medicin som taget/ikke taget
+        public async Task<Result> SetMedicinCheckedAsync(int medicinTimeId, bool isChecked)
         {
-            var medicin = await _medicinRepository.GetMedicinByIdAsync(medicinTimeId);
-            medicin.IsChecked = isChecked;
-            medicin.MedicinCheckTimeStamp = isChecked ? DateTime.UtcNow : null;
-            await _medicinRepository.UpdateMedicinAsync(medicin);
+            try
+            {
+                var medicin = await _medicinRepository.GetMedicinByIdAsync(medicinTimeId);
+
+                if (medicin == null)
+                    return Result.Fail("Medicin blev ikke fundet");
+
+                medicin.IsChecked = isChecked;
+                medicin.MedicinCheckTimeStamp = isChecked ? DateTime.UtcNow : null;
+
+                await _medicinRepository.UpdateMedicinAsync(medicin);
+
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
-
-
     }
 }

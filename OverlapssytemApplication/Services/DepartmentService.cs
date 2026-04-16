@@ -6,48 +6,93 @@ using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssystemDomain.Interfaces;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssytemApplication.Services
 {
     public class DepartmentService : IDepartmentService
     {
-
         private readonly IDepartmentRepository _departmentRepository;
 
         public DepartmentService(IDepartmentRepository departmentRepository)
         {
-           _departmentRepository = departmentRepository;
+            _departmentRepository = departmentRepository;
         }
 
         public List<DepartmentModel> Departments { get; private set; } = new();
 
-        public async Task<List<DepartmentModel>> GetAllDepartmentsAsync()
+        //Get all
+        public async Task<Result<List<DepartmentModel>>> GetAllDepartmentsAsync()
         {
-            return Departments = await _departmentRepository.GetAllDepartmentsAsync();
+            var result = await _departmentRepository.GetAllDepartmentsAsync();
+
+            Departments = result ?? new List<DepartmentModel>();
+
+            return Result<List<DepartmentModel>>.Ok(Departments);
         }
 
-        public async Task<DepartmentModel> GetDepartmentByIdAsync(int departmentId)
+        //Get by id
+        public async Task<Result<DepartmentModel>> GetDepartmentByIdAsync(int departmentId)
         {
-            return await _departmentRepository.GetDepartmentByIdAsync(departmentId);
+            var result = await _departmentRepository.GetDepartmentByIdAsync(departmentId);
+
+            if (result == null)
+                return Result<DepartmentModel>.Fail("Department blev ikke fundet");
+
+            return Result<DepartmentModel>.Ok(result);
         }
 
-        public async Task<DepartmentModel> GetDepartmentByNameAsync(string departmentName)
+        //Get by name
+        public async Task<Result<DepartmentModel>> GetDepartmentByNameAsync(string departmentName)
         {
-            return await _departmentRepository.GetDepartmentByNameAsync(departmentName);
+            var result = await _departmentRepository.GetDepartmentByNameAsync(departmentName);
+
+            if (result == null)
+                return Result<DepartmentModel>.Fail("Department blev ikke fundet");
+
+            return Result<DepartmentModel>.Ok(result);
         }
 
-        public async Task SaveNewDepartmentAsync(DepartmentModel department)
+        //Create
+        public async Task<Result> SaveNewDepartmentAsync(DepartmentModel department)
         {
-            await _departmentRepository.SaveNewDepartmentAsync(department);
+            try
+            {
+                await _departmentRepository.SaveNewDepartmentAsync(department);
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
 
-        public async Task DeleteDepartmentAsync(int departmentId)
+        //Delete
+        public async Task<Result> DeleteDepartmentAsync(int departmentId)
         {
-            await _departmentRepository.DeleteDepartmentAsync(departmentId);
+            try
+            {
+                await _departmentRepository.DeleteDepartmentAsync(departmentId);
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
-        public async Task UpdateDepartmentAsync(DepartmentModel department)
+
+        //Update
+        public async Task<Result> UpdateDepartmentAsync(DepartmentModel department)
         {
-             await _departmentRepository.UpdateDepartmentAsync(department);
+            try
+            {
+                await _departmentRepository.UpdateDepartmentAsync(department);
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
     }
 }
