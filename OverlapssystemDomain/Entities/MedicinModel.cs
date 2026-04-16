@@ -12,19 +12,7 @@ namespace OverlapssystemDomain.Entities
         public int? ResidentID { get; set; }
         public TimeSpan? MedicinTime { get; set; }
         public DateTime? MedicinCheckTimeStamp { get; set; }
-
         public bool IsChecked { get; set; } 
 
-        //public bool IsChecked
-        //{
-        //    get => _isChecked;
-        //    set
-        //    {
-        //        _isChecked = value;
-        //        MedicinCheckTimeStamp = value ? DateTime.UtcNow : null;
-        //    }
-        //}
-        //private bool _isChecked;
- 
     }
 }
