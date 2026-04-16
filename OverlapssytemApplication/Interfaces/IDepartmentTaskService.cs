@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Enums;
 
 namespace OverlapssytemApplication.Interfaces
 {
@@ -14,6 +15,7 @@ namespace OverlapssytemApplication.Interfaces
             Task SaveNewDepartmentTaskAsync(DepartmentTaskModel departmentTask);
             Task DeleteDepartmentTaskAsync(int departmentTaskId);
             Task UpdateDepartmentTaskAsync(DepartmentTaskModel departmentTask);
+            Task<ShiftType> GetTimeOfDayAsync();
 
     }
 }
