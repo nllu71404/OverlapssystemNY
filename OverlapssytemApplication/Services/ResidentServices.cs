@@ -31,7 +31,8 @@ namespace OverlapssytemApplication.Services
                 Risiko = Risiko.Green
             };
 
-            public async Task<Result<List<ResidentModel>>> LoadResidentsAsync()
+        //Hent
+        public async Task<Result<List<ResidentModel>>> LoadResidentsAsync()
             {
                 var data = await _residentRepository.GetAllResidentsAsync();
 
@@ -40,7 +41,8 @@ namespace OverlapssytemApplication.Services
                 return Result<List<ResidentModel>>.Ok(Residents);
             }
 
-            public async Task<Result<List<ResidentModel>>> LoadResidentsByDepartmentAsync(int departmentId)
+        //Hent på DepartmentId
+        public async Task<Result<List<ResidentModel>>> LoadResidentsByDepartmentAsync(int departmentId)
             {
                 if (departmentId <= 0 || departmentId > 2 )
                     return Result<List<ResidentModel>>.Fail("Ugyldigt afdelingsID");
@@ -51,8 +53,8 @@ namespace OverlapssytemApplication.Services
 
                 return Result<List<ResidentModel>>.Ok(Residents);
             }
-
-            public async Task<Result<int>> CreateResidentAsync(ResidentModel resident)
+        //Opret
+        public async Task<Result<int>> CreateResidentAsync(ResidentModel resident)
             {
 
                 if (string.IsNullOrWhiteSpace(resident.Name))
@@ -68,7 +70,8 @@ namespace OverlapssytemApplication.Services
                 return Result<int>.Ok(id);
             }
 
-            public async Task<Result> UpdateResidentAsync(ResidentModel resident)
+        //Update
+        public async Task<Result> UpdateResidentAsync(ResidentModel resident)
             {
 
                 if (resident.ResidentId <= 0)
@@ -83,8 +86,8 @@ namespace OverlapssytemApplication.Services
 
                 return Result.Ok();
             }
-
-            public async Task<Result> DeleteResidentAsync(int residentId)
+        //Delete
+        public async Task<Result> DeleteResidentAsync(int residentId)
             {
                 if (residentId <= 0)
                     return Result.Fail("Ugyldigt ID");
@@ -96,7 +99,8 @@ namespace OverlapssytemApplication.Services
                 return Result.Ok();
             }
 
-            public void SetDepartment(int departmentId)
+        //Tildel department
+        public void SetDepartment(int departmentId)
             {
                 if (departmentId <= 0)
                     return;
@@ -105,8 +109,8 @@ namespace OverlapssytemApplication.Services
 
                 NewResident = new ResidentModel
                 {
-                    DepartmentId = departmentId,
-                    Risiko = Risiko.Green
+                    DepartmentId = departmentId
+                    
                 };
             }
         }
