@@ -70,7 +70,8 @@ CREATE TABLE dbo.DepartmentTask (
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
 DepartmentTaskID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 DepartmentTaskTopic NVARCHAR(250) NULL,
-EmployeeName NVARCHAR(100) NULL
+EmployeeName NVARCHAR(100) NULL,
+ShiftType NVARCHAR(100)
 
 );
 GO
@@ -82,6 +83,19 @@ PhoneNumber INT NULL,
 EmployeeName NVARCHAR(100) NULL,
 Test BIT NULL
 
+);
+GO
+
+CREATE TABLE dbo.SpecialEvent (
+SpecialEventID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+SpecialEventNote NVARCHAR(250),
+SpecialEventDateTime DATETIME NULL
+
+CONSTRAINT FK_SpecialEvent_Resident
+        FOREIGN KEY (ResidentID)
+        REFERENCES Resident(ResidentID)
+        ON DELETE CASCADE
 );
 GO
 
@@ -732,8 +746,76 @@ DELETE FROM dbo.EmployeePhone WHERE EmployeeName = @EmployeeName
 END;
 GO
 
---Fast data
+-- SpecialEvent stored procedures
+-- Creates a SpecialEvent to the table of SpecialEvents.
+CREATE OR ALTER PROCEDURE [dbo].[uspCreateSpecialEvent]
+@SpecialEventNote NVARCHAR(250),
+@ResidentID INT = NULL,
+@SpecialEventDateTime DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
 
+INSERT INTO dbo.SpecialEvent
+(
+    SpecialEventNote,
+    ResidentID,
+    SpecialEventDateTime
+)
+VALUES
+(
+    @SpecialEventNote,
+    @ResidentID,
+    @SpecialEventDateTime
+);
+
+SELECT SCOPE_IDENTITY() AS SpecialEventID;
+END;
+GO
+
+-- Update
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateSpecialEventById]
+    @SpecialEventID INT,
+    @SpecialEventNote NVARCHAR(250),
+    @SpecialEventDateTime DATETIME = NULL
+AS
+BEGIN
+    UPDATE dbo.SpecialEvent
+    SET 
+    SpecialEventNote = @SpecialEventNote,
+    SpecialEventDateTime = @SpecialEventDateTime
+    WHERE SpecialEventID = @SpecialEventID;
+END;
+GO
+
+-- Delete 
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteSpecialEvent]
+@SpecialEventID INT
+AS
+BEGIN
+DELETE FROM dbo.SpecialEvent WHERE SpecialEventID = @SpecialEventID
+END;
+GO
+ 
+-- Get SpecialEvent by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetSpecialEventByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.SpecialEvent WHERE ResidentID = @ResidentID
+END;
+GO
+ 
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllSpecialEvent]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.SpecialEvent
+END;
+GO
+
+--Fast data
 --Departments 
 INSERT INTO Department (DepartmentName)
 VALUES ('Skoven');
