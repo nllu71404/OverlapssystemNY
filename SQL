@@ -849,7 +849,164 @@ SELECT * FROM dbo.SpecialEvent
 END;
 GO
 
+-- Activity stored procedures
+-- Creates a Activity to the table of Activities.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateActivityByResidentId]
+    @ResidentID INT,
+    @Activity NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    UPDATE dbo.Resident
+    SET Activity = @Activity
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteActivity]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET Activity = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get Activity by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetActivityByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT Activity
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllActivities]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, Activity
+    FROM dbo.Resident
+    WHERE Activity IS NOT NULL;
+END;
+GO
+
+-- Family stored procedures
+-- Creates a Family to the table of Families.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateFamilyById]
+    @ResidentID INT,
+    @FamilyNote NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET FamilyNote = @FamilyNote
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteFamily]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET FamilyNote = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get Family by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetFamilyByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT FamilyNote
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllFamilies]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, FamilyNote
+    FROM dbo.Resident
+    WHERE FamilyNote IS NOT NULL;
+END;
+GO
+
+-- ResidentEmployee stored procedures
+-- Creates a ResidentEmployee to the table of ResidentEmployees.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateResidentEmployee]
+    @ResidentID INT,
+    @ResidentEmployee NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET ResidentEmployee = @ResidentEmployee
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteResidentEmployee]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET ResidentEmployee = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get ResidentEmployee by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetResidentEmployeeByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentEmployee
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllResidentEmployees]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, ResidentEmployee
+    FROM dbo.Resident
+    WHERE ResidentEmployee IS NOT NULL;
+END;
+GO
 
 --Fast data
 --Departments 
