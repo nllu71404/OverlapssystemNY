@@ -8,7 +8,7 @@ namespace OverlapssystemDomain.Enums
 {
     public enum Mood
     {
-        Good, 
+        Happy, 
         Neutral,
         Sad
     }

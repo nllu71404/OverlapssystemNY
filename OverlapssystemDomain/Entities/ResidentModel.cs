@@ -23,16 +23,21 @@ namespace OverlapssystemDomain.Entities
 
         public List<PNMedicinModel> PNMedicin { get; set; } = new();
         public List<ShoppingModel> Shopping { get; set; } = new();
-        public List<SpecialEventModel> SpecialEvents { get; set; } = new();
+        public List<SpecialEventModel> SpecialEvent { get; set; } = new();
         public ResidentModel() { }
 
-        public ResidentModel(int residentId, int? departmentId, string name, string status, Risiko risiko)
+        public ResidentModel(int residentId, int? departmentId, string name, string status, string activity, string family, string residentemployee , Risiko risiko, Mood mood)
         {
             ResidentId = residentId;
             DepartmentId = departmentId;
             Name = name;
             Status = status;
+            Activity = activity;
+            Family = family;
+            ResidentEmployee = residentemployee;
             Risiko = risiko;
+            Mood = mood;
+
         }
     }
 }
