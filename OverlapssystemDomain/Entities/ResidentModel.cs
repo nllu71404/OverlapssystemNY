@@ -13,13 +13,17 @@ namespace OverlapssystemDomain.Entities
         public int? DepartmentId { get; set; }
         public string Name { get; set; } = "";
         public string Status { get; set; } = "";
+        public string Activity { get; set; } = "";
+        public string Family { get; set; } = "";
+        public string ResidentEmployee { get; set; } = "";
         public Risiko Risiko { get; set; } = Risiko.Green;
+        public Mood Mood { get; set; } = Mood.Neutral;
 
         public List<MedicinModel> MedicinTimes { get; set; } = new();
 
         public List<PNMedicinModel> PNMedicin { get; set; } = new();
         public List<ShoppingModel> Shopping { get; set; } = new();
-
+        public List<SpecialEventModel> SpecialEvents { get; set; } = new();
         public ResidentModel() { }
 
         public ResidentModel(int residentId, int? departmentId, string name, string status, Risiko risiko)
