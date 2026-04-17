@@ -23,7 +23,10 @@ ResidentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
 ResidentStatus NVARCHAR(250),
 Risk NVARCHAR(100) NULL,
-Mood NVARCHAR(100) NULL
+Mood NVARCHAR(100) NULL,
+Activity NVARCHAR(250) NULL,
+FamilyNote NVARCHAR(250) NULL,
+ResidentEmployee NVARCHAR(250) NULL
 
 );
 GO
@@ -100,29 +103,7 @@ CONSTRAINT FK_SpecialEvent_Resident
 );
 GO
 
-CREATE TABLE dbo.Activity (
-ActivityID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
-Activity NVARCHAR(250) NULL
 
-);
-GO
-
-CREATE TABLE dbo.Family (
-FamilyID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
-FamilyName NVARCHAR(250) NULL
-
-);
-GO
-
-CREATE TABLE dbo.ResidentEmployee (
-ResidentEmployeeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
-ResidentEmployee NVARCHAR(250) NULL
-
-);
-GO
 
 
 -- Creates Stored Procedures
@@ -132,7 +113,10 @@ CREATE OR ALTER PROCEDURE dbo.uspCreateResident
 @DepartmentID INT = NULL,
 @ResidentStatus NVARCHAR(100) = NULL,
 @Risk NVARCHAR(100) = NULL,
-@Mood NVARCHAR(100) = NULL
+@Mood NVARCHAR(100) = NULL,
+@Activity NVARCHAR(250) NULL,
+@FamilyNote NVARCHAR(250) NULL,
+@ResidentEmployee NVARCHAR(250) NULL
 AS
 BEGIN
 SET NOCOUNT ON;
@@ -143,7 +127,10 @@ INSERT INTO dbo.Resident
     DepartmentID,
     ResidentStatus,
     Risk,
-    Mood
+    Mood,
+    Activity,
+    FamilyNote,
+    ResidentEmployee
 )
 VALUES
 (
@@ -151,7 +138,10 @@ VALUES
     @DepartmentID,
     @ResidentStatus,
     @Risk,
-    @Mood
+    @Mood,
+    @Activity,
+    @FamilyNote,
+    @ResidentEmployee
 );
 
 SELECT SCOPE_IDENTITY() AS ResidentID;
@@ -170,6 +160,9 @@ SELECT
     r.DepartmentID,
     r.Risk,
     r.Mood,
+    r.Activity,
+    r.FamilyNote,
+    r.ResidentEmployee,
 
     m.MedicinTimeID,
     m.MedicinTime,
@@ -203,7 +196,10 @@ CREATE OR ALTER PROCEDURE dbo.uspUpdateResidentById
 @ResidentStatus NVARCHAR(100) = NULL,
 @Risk NVARCHAR(100) = NULL,
 @Mood NVARCHAR(100) = NULL,
-@ResidentId INT
+@ResidentId INT,
+@Activity NVARCHAR(250) NULL,
+@FamilyNote NVARCHAR(250) NULL,
+@ResidentEmployee NVARCHAR(250) NULL
 AS
 BEGIN
     UPDATE dbo.Resident
@@ -211,6 +207,9 @@ BEGIN
     ResidentStatus = @ResidentStatus, 
     Risk = @Risk,
     Mood = @Mood,
+    Activity = @Activity,
+    FamilyNote = @FamilyNote,
+    ResidentEmployee = @ResidentEmployee,
     DepartmentID = @DepartmentID
     WHERE ResidentID = @ResidentId;
 
@@ -240,6 +239,9 @@ SET NOCOUNT ON;
         r.DepartmentID,
         r.Risk,
         r.Mood,
+        r.Activity,
+        r.FamilyNote,
+        r.ResidentEmployee,
 
         -- Medicin
         m.MedicinTimeID,
@@ -847,197 +849,6 @@ SELECT * FROM dbo.SpecialEvent
 END;
 GO
 
--- Activity stored procedures
--- Creates a Activity to the table of Activities.
-CREATE OR ALTER PROCEDURE [dbo].[uspCreateActivity]
-@Activity NVARCHAR(250),
-@ResidentID INT = NULL
-AS
-BEGIN
-SET NOCOUNT ON;
-
-INSERT INTO dbo.Activity
-(
-    Activity,
-    ResidentID
-)
-VALUES
-(
-    @Activity,
-    @ResidentID
-);
-
-SELECT SCOPE_IDENTITY() AS ActivityID;
-END;
-GO
-
--- Update
-CREATE OR ALTER PROCEDURE [dbo].[uspUpdateActivityById]
-    @ActivityID INT,
-    @Activity NVARCHAR(250)
-AS
-BEGIN
-    UPDATE dbo.Activity
-    SET 
-    Activity = @Activity
-    WHERE ActivityID = @ActivityID;
-END;
-GO
-
--- Delete 
-CREATE OR ALTER PROCEDURE [dbo].[uspDeleteActivity]
-@AcitivityID INT
-AS
-BEGIN
-DELETE FROM dbo.Activity WHERE ActivityID = @AcitivityID
-END;
-GO
- 
--- Get Activity by ResidentID
-CREATE OR ALTER PROCEDURE [dbo].[uspGetActivityByResidentID]
-@ResidentID INT
-AS
-BEGIN
-SELECT * FROM dbo.Activity WHERE ResidentID = @ResidentID
-END;
-GO
- 
--- Get all
-CREATE OR ALTER PROCEDURE [dbo].[uspGetAllActivities]
-AS
-BEGIN
-SET NOCOUNT ON;
-SELECT * FROM dbo.Activity
-END;
-GO
-
--- Family stored procedures
--- Creates a Family to the table of Families.
-CREATE OR ALTER PROCEDURE [dbo].[uspCreateFamily]
-@FamilyName NVARCHAR(250),
-@ResidentID INT = NULL
-AS
-BEGIN
-SET NOCOUNT ON;
-
-INSERT INTO dbo.Family
-(
-    FamilyName,
-    ResidentID
-)
-VALUES
-(
-    @FamilyName,
-    @ResidentID
-);
-
-SELECT SCOPE_IDENTITY() AS FamilyID;
-END;
-GO
-
--- Update
-CREATE OR ALTER PROCEDURE [dbo].[uspUpdateFamilyById]
-    @FamilyID INT,
-    @FamilyName NVARCHAR(250)
-AS
-BEGIN
-    UPDATE dbo.Family
-    SET 
-    FamilyName = @FamilyName
-    WHERE FamilyID = @FamilyID;
-END;
-GO
-
--- Delete 
-CREATE OR ALTER PROCEDURE [dbo].[uspDeleteFamily]
-@FamilyID INT
-AS
-BEGIN
-DELETE FROM dbo.Family WHERE FamilyID = @FamilyID
-END;
-GO
- 
--- Get Family by ResidentID
-CREATE OR ALTER PROCEDURE [dbo].[uspGetFamilyByResidentID]
-@ResidentID INT
-AS
-BEGIN
-SELECT * FROM dbo.Family WHERE ResidentID = @ResidentID
-END;
-GO
- 
--- Get all
-CREATE OR ALTER PROCEDURE [dbo].[uspGetAllFamilies]
-AS
-BEGIN
-SET NOCOUNT ON;
-SELECT * FROM dbo.Family
-END;
-GO
-
--- ResidentEmployee stored procedures
--- Creates a ResidentEmployee to the table of ResidentEmployees.
-CREATE OR ALTER PROCEDURE [dbo].[uspCreateResidentEmployee]
-@ResidentEmployee NVARCHAR(250),
-@ResidentID INT = NULL
-AS
-BEGIN
-SET NOCOUNT ON;
-
-INSERT INTO dbo.ResidentEmployee
-(
-    ResidentEmployee,
-    ResidentID
-)
-VALUES
-(
-    @ResidentEmployee,
-    @ResidentID
-);
-
-SELECT SCOPE_IDENTITY() AS ResidentEmployeeID;
-END;
-GO
-
--- Update
-CREATE OR ALTER PROCEDURE [dbo].[uspUpdateResidentEmployeeById]
-    @ResidentEmployeeID INT,
-    @ResidentEmployee NVARCHAR(250)
-AS
-BEGIN
-    UPDATE dbo.ResidentEmployee
-    SET 
-    ResidentEmployee = @ResidentEmployee
-    WHERE ResidentEmployeeID = @ResidentEmployeeID;
-END;
-GO
-
--- Delete 
-CREATE OR ALTER PROCEDURE [dbo].[uspDeleteResidentEmployee]
-@ResidentEmployeeID INT
-AS
-BEGIN
-DELETE FROM dbo.ResidentEmployee WHERE ResidentEmployeeID = @ResidentEmployeeID
-END;
-GO
- 
--- Get ResidentEmployee by ResidentID
-CREATE OR ALTER PROCEDURE [dbo].[uspGetResidentEmployeeByResidentID]
-@ResidentID INT
-AS
-BEGIN
-SELECT * FROM dbo.ResidentEmployee WHERE ResidentID = @ResidentID
-END;
-GO
- 
--- Get all
-CREATE OR ALTER PROCEDURE [dbo].[uspGetAllResidentEmployees]
-AS
-BEGIN
-SET NOCOUNT ON;
-SELECT * FROM dbo.ResidentEmployee
-END;
-GO
 
 
 --Fast data
