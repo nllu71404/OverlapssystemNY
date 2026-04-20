@@ -1,15 +1,15 @@
 ﻿@using OverlapssystemDomain.Entities
 @using Overlapssystem.Services
+@using OverlapssystemDomain.Enums;
 @inject DepartmentTaskApiService departmentTaskApiService
 @inject IJSRuntime JS
 
 <div class="department-task-card">
     <div class="task-card-header">
         <select class="shift-select" @bind="selectedShift">
-            <option value="">-- Vælg vagttype --</option>
-            <option value="Dagvagt">Dagvagt</option>
-            <option value="Aftenvagt">Aftenvagt</option>
-            <option value="Nattevagt">Nattevagt</option>
+            <option value="@ShiftType.Dag">Dagvagt</option>
+            <option value="@ShiftType.Aften">Aftenvagt</option>
+            <option value="@ShiftType.Nat">Nattevagt</option>
         </select>
         @if (!IsReadOnly)
         {
@@ -56,8 +56,7 @@
 </div>
 
 @code {
-    
-    private string selectedShift = "";
+    private ShiftType selectedShift = ShiftType.Dag;
     [Parameter]
     public int DepartmentId { get; set; }
     [Parameter]
