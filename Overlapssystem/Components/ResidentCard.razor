@@ -142,7 +142,7 @@
     <div class="footer">
         <!-- Får tilføjet brugeradgang senere, så se bort fra knappen for nu -->
         <button class="btn-delete" @onclick="() => ConfirmDeleteAsync()">
-            Slet borger
+            Slet beboer
         </button>
     </div>
 
@@ -171,7 +171,7 @@
 
     private async Task ConfirmDeleteAsync()
     {
-        var ok = await JS.InvokeAsync<bool>("confirm", "Er du sikker på, at du vil slette denne borger?");
+        var ok = await JS.InvokeAsync<bool>("confirm", "Er du sikker på, at du vil slette denne beboer?");
 
         if (!ok) return;
 
@@ -273,7 +273,7 @@
 
     private async Task DeleteShopping(int shoppingId)
     {
-        var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne indkøbsliste?");
+        var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne handledag?");
         if (!ok) return;
         await shoppingApi.DeleteShopping(shoppingId);
         var shopping = Resident.Shopping.FirstOrDefault(s => s.ShoppingID == shoppingId);
