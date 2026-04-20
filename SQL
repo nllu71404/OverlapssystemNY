@@ -264,7 +264,11 @@ SET NOCOUNT ON;
         s.ShoppingID,
         s.ShoppingDay,
         s.ShoppingTime,
-        s.PaymentMethod
+        s.PaymentMethod,
+
+        se.SpecialEventID,
+         se.SpecialEventNote,
+        se.SpecialEventDateTime
 
     FROM Resident r
 
@@ -276,6 +280,9 @@ SET NOCOUNT ON;
 
     LEFT JOIN Shopping s
     ON r.ResidentID = s.ResidentID
+
+    LEFT JOIN SpecialEvent se
+    ON r.ResidentID = se.ResidentID
 
     WHERE r.DepartmentID = @DepartmentID
 END;
