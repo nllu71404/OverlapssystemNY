@@ -178,7 +178,11 @@ SELECT
     s.ShoppingID,
     s.ShoppingDay,
     s.ShoppingTime,
-    s.PaymentMethod
+    s.PaymentMethod,
+
+    se.SpecialEventID,
+    se.SpecialEventNote,
+    se.SpecialEventDateTime
 
 FROM Resident r
 LEFT JOIN MedicinTime m ON r.ResidentID = m.ResidentID
@@ -186,6 +190,8 @@ LEFT JOIN PNMedicin pn
         ON r.ResidentID = pn.ResidentID
 LEFT JOIN Shopping s
     ON r.ResidentID = s.ResidentID
+LEFT JOIN SpecialEvent se
+    ON r.ResidentID = se.ResidentID
 END;
 GO
 
@@ -212,6 +218,20 @@ BEGIN
     ResidentEmployee = @ResidentEmployee,
     DepartmentID = @DepartmentID
     WHERE ResidentID = @ResidentId;
+
+    UPDATE r
+SET r.ResidentName = @ResidentName, 
+    r.ResidentStatus = @ResidentStatus, 
+    r.Risk = @Risk,
+    r.Mood = @Mood,
+    r.Activity = @Activity,
+    r.FamilyNote = @FamilyNote,
+    r.ResidentEmployee = @ResidentEmployee,
+    r.DepartmentID = @DepartmentID
+FROM dbo.Resident r
+LEFT JOIN SpecialEvent se
+    ON r.ResidentID = se.ResidentID
+WHERE r.ResidentID = @ResidentId;
 
 END;
 GO
