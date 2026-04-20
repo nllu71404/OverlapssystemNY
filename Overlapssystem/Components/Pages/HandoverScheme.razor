@@ -6,11 +6,12 @@
 @using Overlapssystem.Services
 @using OverlapssystemShared
 
-<h3>Overlapsseddel</h3>
-
 @inject ResidentApiService api
+@inject NavigationManager Navigation
 
-<!-- Henter data fra API og er det overordnet layout-->
+
+
+<h3>Overlapsseddel</h3>
 <h5>Beboere</h5>
 
 
@@ -32,7 +33,14 @@ else
             <DepartmentTaskCard DepartmentId="departmentId"
                             IsReadOnly="true" />
 
+<!-- Log ud knap nederst -->
+<div class="logout-bar">
+    <button class="logout-btn" @onclick="LogOut">Log ud</button>
+</div>
+
 @code {
+    
+    
     [Parameter]
     public int departmentId { get; set; }
 
@@ -60,7 +68,10 @@ else
         await api.DeleteResident(resident.ResidentId);
         residents = await api.GetByDepartment(departmentId);
     }
+    private void LogOut()
+    {
+        Navigation.NavigateTo("/");
+    }
 
     List<ResidentModel> residents = new();
-    
 }

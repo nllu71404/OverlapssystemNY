@@ -21,6 +21,8 @@ builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IDepartmentTaskRepository, DepartmentTaskRepository>();
 builder.Services.AddScoped<IDepartmentTaskService, DepartmentTaskService>();
+builder.Services.AddScoped<ISpecialEventRepository,  SpecialEventRepository>();
+builder.Services.AddScoped<ISpecialEventService, SpecialEventService>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

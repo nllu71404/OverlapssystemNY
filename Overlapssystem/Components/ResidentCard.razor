@@ -7,25 +7,55 @@
 @inject MedicinApiService medicinApi
 @inject PNMedicinApiService PNmedicinApi
 @inject ShoppingApiService shoppingApi
+@inject SpecialEventApiService specialEventApi
 
 <div class="resident-card @GetRiskClass()">
     <!-- Viser UI/design for en beboer-->
-    <!-- TOP -->
-    <div class="section">
-        <label>Vælg status</label>
+    <!-- TOP 1 -->
+    <div class="top-row">
         <select @bind="Resident.Risiko" class="form-select">
             <option value="@Risiko.Green">Grøn</option>
             <option value="@Risiko.Yellow">Gul</option>
             <option value="@Risiko.Red">Rød</option>
         </select>
-    </div>
 
-    <div class="section">
-        <input class="form-control" @bind="Resident.Name" />
+        <div class="mood-buttons">
+            <button class="@(Resident.Mood == Mood.Happy ? "mood-selected" : "mood-btn")"
+                    @onclick="async () => { Resident.Mood = Mood.Happy; await SaveResident(); }">
+                😊
+            </button>
+            <button class="@(Resident.Mood == Mood.Neutral ? "mood-selected" : "mood-btn")"
+                    @onclick="async () => { Resident.Mood = Mood.Neutral; await SaveResident(); }">
+                😐
+            </button>
+            <button class="@(Resident.Mood == Mood.Sad ? "mood-selected" : "mood-btn")"
+                    @onclick="async () => { Resident.Mood = Mood.Sad; await SaveResident(); }">
+                😢
+            </button>
+        </div>
     </div>
-
-    <div class="section">
-        <textarea class="form-control" @bind="Resident.Status"></textarea>
+    
+    <!-- Opdater navn når man klikker væk -->
+    <input class="form-control"
+           value="@Resident.Name"
+           @onchange="OnNameChanged" />
+    
+           <!-- Opdater status når man klikker væk -->
+<textarea class="form-control"
+          @onchange="OnStatusChanged" placeholder="Udfyld status for beboer">@Resident.Status</textarea>
+    
+          <!-- Opdater Activity + Family når man klikker væk -->
+    <div class="two-column">
+        <textarea @onchange="OnActivityChanged" placeholder="Udfyld aktivitet">@Resident.Activity</textarea>
+        <textarea @onchange="OnFamilyChanged" placeholder="Udfyld familie kontakt">@Resident.Family</textarea>
+    </div>
+    
+          <!-- Opdater ResidentEmployee når man klikker væk -->
+    <div class="two-column">
+        <label class="resident-label">Beboer ansvarlig</label>
+        <textarea class="form-control"
+                  placeholder="Skriv medarbejder navn"
+                  @onchange="OnResidentEmployeeChanged">@Resident.ResidentEmployee</textarea>
     </div>
 
     <!-- MEDICIN -->
@@ -138,6 +168,29 @@
         </ul>
     </div>
 
+    <!-- Specialt Event del -->
+    <div class="section">
+        <div class="section-header">
+            <strong>Særlig Hændelse</strong>
+            <button class="btn-plus" @onclick="() => SaveSpecialEvent(Resident.ResidentId)">+</button>
+            </div>
+
+            <ul>
+            @foreach(var specialEvent in Resident.SpecialEvent)
+            {
+                <input type="datetime-local"
+                       @bind="specialEvent.SpecialEventDateTime"
+                       @bind:after="() => UpdateSpecialEvent(specialEvent)" />
+
+                <textarea class="form-control"
+                          @bind="specialEvent.SpecialEventNote"
+                          @bind:after="() => UpdateSpecialEvent(specialEvent)"
+                          placeholder="Udfyld forløb for særlig hændelse"></textarea>
+
+            }
+        </ul>
+    </div>
+
     <!-- FOOTER -->
     <div class="footer">
         <!-- Får tilføjet brugeradgang senere, så se bort fra knappen for nu -->
@@ -168,6 +221,39 @@
         _ => ""
     };
 
+
+    private async Task OnNameChanged(ChangeEventArgs e)
+    {
+        Resident.Name = e.Value?.ToString() ?? "";
+        await SaveResident();
+    }
+
+    private async Task OnStatusChanged(ChangeEventArgs e)
+    {
+        Resident.Status = e.Value?.ToString() ?? "";
+        await SaveResident();
+    }
+    private async Task OnActivityChanged(ChangeEventArgs e)
+    {
+        Resident.Activity = e.Value?.ToString() ?? "";
+        await SaveResident();
+    }
+
+    private async Task OnFamilyChanged(ChangeEventArgs e)
+    {
+        Resident.Family = e.Value?.ToString() ?? "";
+        await SaveResident();
+    }
+
+    private async Task OnResidentEmployeeChanged(ChangeEventArgs e)
+    {
+        Resident.ResidentEmployee = e.Value?.ToString() ?? "";
+        await SaveResident();
+    }
+    private async Task SaveResident()
+    {
+        await OnSave.InvokeAsync(Resident);
+    }
 
     private async Task ConfirmDeleteAsync()
     {
@@ -283,5 +369,28 @@
     private async Task UpdateShopping(ShoppingModel shoppingModel)
     {
         await shoppingApi.UpdateShopping(shoppingModel.ShoppingID, shoppingModel);
-	}
+    }
+    private async Task SaveSpecialEvent(int residentId)
+    {
+        AddSpecialEventDTO addSpecialEventDTO = new AddSpecialEventDTO
+        {
+            ResidentID = residentId,
+            SpecialEventNote = "",
+            SpecialEventDateTime = null
+        };
+        var newId = await specialEventApi.AddSpecialEvent(addSpecialEventDTO);
+
+        Resident.SpecialEvent.Add(new SpecialEventModel
+            {
+                SpecialEventID = newId,
+                ResidentID = residentId,
+                SpecialEventNote = "",
+                SpecialEventDateTime = null
+
+            });
+    }
+    private async Task UpdateSpecialEvent(SpecialEventModel specialEventModel)
+    {
+        await specialEventApi.UpdateSpecialEvent(specialEventModel.SpecialEventID, specialEventModel);
+    }
 }

@@ -21,9 +21,10 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<ResidentModel>>("api/Resident/HenterResident");
         }
 
-        public async Task CreateResident(ResidentModel resident)
+        public async Task<int> CreateResident(ResidentModel resident)
         {
-            await _http.PostAsJsonAsync("api/Resident/OpretResident", resident);
+            var response = await _http.PostAsJsonAsync("api/Resident/OpretResident", resident);
+            return await response.Content.ReadFromJsonAsync<int>();
         }
 
         public async Task UpdateResident(int id, ResidentModel resident)

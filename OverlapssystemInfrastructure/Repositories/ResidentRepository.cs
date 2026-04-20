@@ -52,10 +52,19 @@ namespace OverlapssystemInfrastructure.Repositories
                         DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
                         Name = reader["ResidentName"]?.ToString() ?? "",
                         Status = reader["ResidentStatus"]?.ToString() ?? "",
+                        Activity = reader["Activity"]?.ToString() ?? "",
+                        Family = reader["FamilyNote"]?.ToString() ?? "",
+                        ResidentEmployee = reader["ResidentEmployee"]?.ToString() ?? "",
                         Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
                             ? risiko
                             : Risiko.Green,
-                        MedicinTimes = new List<MedicinModel>()
+                        Mood = Enum.TryParse<Mood>(reader["Mood"]?.ToString(), out var mood)
+                            ? mood
+                            : Mood.Neutral,
+                        MedicinTimes = new List<MedicinModel>(),
+                        SpecialEvent = new List<SpecialEventModel>(),
+                        PNMedicin = new List<PNMedicinModel>(),
+                        Shopping = new List<ShoppingModel>()
                     };
                 }
 
@@ -104,6 +113,41 @@ namespace OverlapssystemInfrastructure.Repositories
                         });
                     }
                 }
+                //Hvis der findes shopping
+                if (reader["ShoppingID"] != DBNull.Value)
+                {
+                    var shoppingId = Convert.ToInt32(reader["ShoppingID"]);
+                    if (!residentDict[residentId].Shopping
+                        .Any(s => s.ShoppingID == shoppingId))
+                    {
+                        residentDict[residentId].Shopping.Add(new ShoppingModel
+                        {
+                            ShoppingID = shoppingId,
+                            ResidentID = residentId,
+                            Day = Enum.TryParse<Day>(reader["ShoppingDay"]?.ToString(), out var day)
+                                ? day
+                                : Day.Monday,
+                            Time = reader["ShoppingTime"] == DBNull.Value ? (TimeSpan?)null : (TimeSpan)reader["ShoppingTime"],
+                            PaymentMethod = reader["PaymentMethod"]?.ToString() ?? ""
+                        });
+                    }
+                }
+                //Hvis der findes specialEvent
+                if (reader["SpecialEventID"] != DBNull.Value)
+                {
+                    var specialEventID = Convert.ToInt32(reader["SpecialEventID"]);
+                    if (!residentDict[residentId].SpecialEvent
+                        .Any(se => se.SpecialEventID == specialEventID))
+                    {
+                        residentDict[residentId].SpecialEvent.Add(new SpecialEventModel
+                        {
+                            SpecialEventID = specialEventID,
+                            ResidentID = residentId,
+                            SpecialEventNote = reader["SpecialEventNote"]?.ToString() ?? "",
+                            SpecialEventDateTime = reader["SpecialEventDateTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["SpecialEventDateTime"])
+                        });
+                    }
+                }
             }
         
 
@@ -139,10 +183,17 @@ namespace OverlapssystemInfrastructure.Repositories
                         DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
                         Name = reader["ResidentName"]?.ToString() ?? "",
                         Status = reader["ResidentStatus"]?.ToString() ?? "",
+                        Activity = reader["Activity"]?.ToString() ?? "",
+                        Family = reader["FamilyNote"]?.ToString() ?? "",
+                        ResidentEmployee = reader["ResidentEmployee"]?.ToString() ?? "",
                         Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
                             ? risiko
                             : Risiko.Green,
+                        Mood = Enum.TryParse<Mood>(reader["Mood"]?.ToString(), out var mood)
+                            ? mood
+                            : Mood.Neutral,
                         MedicinTimes = new List<MedicinModel>(),
+                        SpecialEvent = new List<SpecialEventModel>(),
                         PNMedicin = new List<PNMedicinModel>(),
                         Shopping = new List<ShoppingModel>()
                     };
@@ -212,6 +263,23 @@ namespace OverlapssystemInfrastructure.Repositories
                         });
                     }
                 }
+
+                //Hvis der findes specialEvent
+                if (reader["SpecialEventID"] != DBNull.Value)
+                {
+                    var specialEventID = Convert.ToInt32(reader["SpecialEventID"]);
+                    if (!residentDict[residentId].SpecialEvent
+                        .Any(se => se.SpecialEventID == specialEventID)){
+                        residentDict[residentId].SpecialEvent.Add(new SpecialEventModel
+                        {
+                            SpecialEventID = specialEventID,
+                            ResidentID = residentId,
+                            SpecialEventNote = reader["SpecialEventNote"]?.ToString() ?? "",
+                            SpecialEventDateTime = reader["SpecialEventDateTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["SpecialEventDateTime"])
+                        });
+                    }
+                }
+
             }
 
             return residentDict.Values.ToList();
@@ -230,7 +298,11 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value =
                 resident.DepartmentId.HasValue ? resident.DepartmentId.Value : DBNull.Value;
             command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 250).Value = resident.Status;
+            command.Parameters.Add("@Activity", SqlDbType.NVarChar, 250).Value = resident.Activity; //Tjek her!!
+            command.Parameters.Add("@FamilyNote", SqlDbType.NVarChar, 250).Value = resident.Family; //Tjek her!! 
+            command.Parameters.Add("@ResidentEmployee", SqlDbType.NVarChar, 250).Value = resident.ResidentEmployee; //Tjek her!!
             command.Parameters.Add("@Risk", SqlDbType.NVarChar, 100).Value = resident.Risiko.ToString();
+            command.Parameters.Add("@Mood", SqlDbType.NVarChar, 100).Value = resident.Mood.ToString();
             command.Parameters.Add("@ResidentId", SqlDbType.Int).Value = resident.ResidentId;
 
             await connection.OpenAsync();
@@ -260,7 +332,11 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value =
                 resident.DepartmentId.HasValue ? resident.DepartmentId.Value : DBNull.Value;
             command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 250).Value = resident.Status;
+            command.Parameters.Add("@Activity", SqlDbType.NVarChar, 250).Value = resident.Activity; //Tjek her!!
+            command.Parameters.Add("@FamilyNote", SqlDbType.NVarChar, 250).Value = resident.Family; //Tjek her!!
+            command.Parameters.Add("@ResidentEmployee", SqlDbType.NVarChar, 250).Value = resident.ResidentEmployee; //Tjek her!!
             command.Parameters.Add("@Risk", SqlDbType.NVarChar, 100).Value = resident.Risiko.ToString();
+            command.Parameters.Add("@Mood", SqlDbType.NVarChar, 100).Value = resident.Mood.ToString();
 
             await connection.OpenAsync();
 

@@ -1,0 +1,95 @@
+﻿.resident-card {
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px;
+    width: 350px;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.mood-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.mood-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    opacity: 0.4;
+    cursor: pointer;
+}
+
+.mood-selected {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    opacity: 1;
+    cursor: pointer;
+}
+/* Navn felt */
+.resident-card input.form-control {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.resident-label {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+/* Status og andre textareas */
+.resident-card textarea.form-control {
+    width: 100%;
+    margin-bottom: 8px;
+    resize: vertical;
+}
+
+/* To-kolonne layout til Aktivitet og Familie kontakt */
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+/* Sektioner med header og indhold */
+.section {
+    margin-bottom: 12px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+/* Plus knap */
+.btn-plus {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+

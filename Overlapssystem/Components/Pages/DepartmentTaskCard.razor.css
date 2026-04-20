@@ -1,0 +1,53 @@
+﻿.department-task-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px;
+    width: 500px;
+}
+
+.task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.task-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .task-table th {
+        background-color: #f0f0f0;
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .task-table td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .task-table input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        outline: none;
+    }
+.shift-select {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border: 1px solid #b0b8c1;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+    .shift-select:focus {
+        outline: none;
+        border-color: #4a90d9;
+        box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+    }
