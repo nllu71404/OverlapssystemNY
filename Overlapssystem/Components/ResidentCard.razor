@@ -42,7 +42,7 @@
     
            <!-- Opdater status når man klikker væk -->
 <textarea class="form-control"
-          @onchange="OnStatusChanged">@Resident.Status</textarea>
+          @onchange="OnStatusChanged" placeholder="Udfyld status for beboer">@Resident.Status</textarea>
     
           <!-- Opdater Activity + Family når man klikker væk -->
     <div class="two-column">
@@ -51,8 +51,12 @@
     </div>
     
           <!-- Opdater ResidentEmployee når man klikker væk -->
-<textarea class="form-control"
-          @onchange="OnResidentEmployeeChanged">@Resident.ResidentEmployee</textarea>
+    <div class="two-column">
+        <label class="resident-label">Beboer ansvarlig</label>
+        <textarea class="form-control"
+                  placeholder="Skriv medarbejder navn"
+                  @onchange="OnResidentEmployeeChanged">@Resident.ResidentEmployee</textarea>
+    </div>
 
     <!-- MEDICIN -->
     <div class="section">
@@ -167,7 +171,7 @@
     <!-- Specialt Event del -->
     <div class="section">
         <div class="section-header">
-            <strong>Speciel Hændelse</strong>
+            <strong>Særlig Hændelse</strong>
             <button class="btn-plus" @onclick="() => SaveSpecialEvent(Resident.ResidentId)">+</button>
             </div>
 
@@ -181,7 +185,7 @@
                 <textarea class="form-control"
                           @bind="specialEvent.SpecialEventNote"
                           @bind:after="() => UpdateSpecialEvent(specialEvent)"
-                          placeholder="Udfyld forløb for special hændelse"></textarea>
+                          placeholder="Udfyld forløb for særlig hændelse"></textarea>
 
             }
         </ul>

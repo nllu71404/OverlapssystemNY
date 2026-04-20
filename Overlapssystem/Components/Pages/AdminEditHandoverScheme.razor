@@ -13,31 +13,8 @@
 @inject DepartmentTaskApiService departmentTaskApi
 
 <!-- Du opretter en ny beboer-->
-<h5>Opret ny beboer</h5>
-
-<div>
-    <label>Navn </label>
-    <input @bind="newResident.Name" />
-</div>
-
-
-<div>
-    <label>Status </label>
-    <input @bind="newResident.Status" />
-</div>
-
-<div>
-    <label>Risiko </label>
-    <select @bind="newResident.Risiko">
-        <option value="@Risiko.Green">Green</option>
-        <option value="@Risiko.Yellow">Yellow</option>
-        <option value="@Risiko.Red">Red</option>
-    </select>
-</div>
-
-<!-- Du gemmer en beboer-->
-<button @onclick="CreateResidentAsync">
-    Gem beboer
+<button @onclick="() => showCreateResident = !showCreateResident">
+    Opret beboer
 </button>
 
 <h5>Oversigt over beboere</h5>
@@ -56,9 +33,16 @@ else
                           OnSave="SaveResidentAsync"
                           OnDelete="DeleteResidentAsync" />
         }
+        @if (showCreateResident)
+        {
+            <ResidentCard Resident="newResident"
+                          OnSave="CreateResidentAsync"
+                          OnDelete="DeleteResidentAsync" />
+        }
     </div>
     
 }
+
 <DepartmentTaskCard @ref="departmentTaskCardRef"
                     DepartmentId="departmentId"
                     IsReadOnly="false"
@@ -69,36 +53,38 @@ else
 
 
 @code {
-    
-	[Parameter]
-	public int departmentId { get; set; }
+    private bool showCreateResident = false;
+    [Parameter]
+    public int departmentId { get; set; }
 
     private DepartmentTaskCard? departmentTaskCardRef;
 
     protected override async Task OnInitializedAsync()
     {
         try
-    {
-        residents = await api.GetByDepartment(departmentId);
-    }
+        {
+            residents = await api.GetByDepartment(departmentId);
+        }
         catch (Exception ex)
         {
             Console.WriteLine("Fejl i åbning af afdeling");
             residents = new();
         }
-	}
+    }
 
 
     private async Task LoadAllResidentsAsync()
     {
         residents = await api.GetAllResidents();
     }
-    private async Task CreateResidentAsync()
+    private async Task CreateResidentAsync(ResidentModel resident)
     {
         newResident.DepartmentId = departmentId;
-        await api.CreateResident(newResident);
-        residents = await api.GetByDepartment(departmentId);
+        var newID = await api.CreateResident(resident);
+        resident.ResidentId = newID;
+        residents.Add(resident);
         newResident = new ResidentModel { Risiko = Risiko.Green };
+        showCreateResident = false;
     }
     private async Task SaveResidentAsync(ResidentModel resident)
     {

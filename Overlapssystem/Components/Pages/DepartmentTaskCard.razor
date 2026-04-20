@@ -3,54 +3,61 @@
 @inject DepartmentTaskApiService departmentTaskApiService
 @inject IJSRuntime JS
 
-<div class="section">
-    <div class="section-header">
-        <strong>AFDELINGSOPGAVER</strong>
-        <!-- Laver "Afdelingsopgave knappen" til readonly for medarbejder -->
-        @if (!IsReadOnly) 
+<div class="department-task-card">
+    <div class="task-card-header">
+        <select class="shift-select" @bind="selectedShift">
+            <option value="">-- Vælg vagttype --</option>
+            <option value="Dagvagt">Dagvagt</option>
+            <option value="Aftenvagt">Aftenvagt</option>
+            <option value="Nattevagt">Nattevagt</option>
+        </select>
+        @if (!IsReadOnly)
         {
             <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync(DepartmentId)">+</button>
-        }    </div>
-    <ul>
-        @foreach (var task in Tasks)
-        {
-            <li>
-                @if (IsReadOnly)
-                {
-                    <span>@task.DepartmentTaskTopic</span>
-                } else
-                {
-                    <input class="form-control"
-                       value="@task.DepartmentTaskTopic"
-                       @onchange="async e => {
-                       task.DepartmentTaskTopic = e.Value?.ToString();
-                       await UpdateDepartmentTask(task);
-                   }"
-                   placeholder="Opgave emne" />
-                }
-
-              <!-- Tilføj medarbejder navn -->
-            <input class="form-control"
-                   value="@task.EmployeeName"
-                   @onchange="async e => {
-                   task.EmployeeName = e.Value?.ToString();
-                   await UpdateDepartmentTask(task);
-                          }"
-                   placeholder="Medarbejder navn" />
-                @if (!IsReadOnly)
-            {
-                <button class="btn btn-danger btn-sm"
-                        @onclick="() => OnDelete.InvokeAsync(task)">
-                    Slet
-                </button>
-            }
-                
-            </li>
         }
-    </ul>
+    </div>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Særligt ansvarlige</th>
+                <th>Navn</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var task in Tasks)
+            {
+                <tr>
+                    <td>
+                        @if (IsReadOnly)
+                        {
+                            <span>@task.DepartmentTaskTopic</span>
+                        }
+                        else
+                        {
+                            <input value="@task.DepartmentTaskTopic"
+                                   @onchange="async e => {
+                                   task.DepartmentTaskTopic = e.Value?.ToString();
+                                   await UpdateDepartmentTask(task);
+                               }" />
+                    }
+                </td>
+                <td>
+                    <input value="@task.EmployeeName"
+                           @onchange="async e => {
+                           task.EmployeeName = e.Value?.ToString();
+                           await UpdateDepartmentTask(task);
+                                                          }"
+                           placeholder="Navn" />
+                </td>
+            </tr>
+                        }
+        </tbody>
+    </table>
 </div>
 
 @code {
+    
+    private string selectedShift = "";
     [Parameter]
     public int DepartmentId { get; set; }
     [Parameter]

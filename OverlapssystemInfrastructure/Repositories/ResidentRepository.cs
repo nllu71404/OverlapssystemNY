@@ -52,8 +52,8 @@ namespace OverlapssystemInfrastructure.Repositories
                         DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
                         Name = reader["ResidentName"]?.ToString() ?? "",
                         Status = reader["ResidentStatus"]?.ToString() ?? "",
-                        Activity = reader["ResidentActivity"]?.ToString() ?? "",
-                        Family = reader["ResidentFamily"]?.ToString() ?? "",
+                        Activity = reader["Activity"]?.ToString() ?? "",
+                        Family = reader["FamilyNote"]?.ToString() ?? "",
                         ResidentEmployee = reader["ResidentEmployee"]?.ToString() ?? "",
                         Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
                             ? risiko
@@ -183,8 +183,8 @@ namespace OverlapssystemInfrastructure.Repositories
                         DepartmentId = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
                         Name = reader["ResidentName"]?.ToString() ?? "",
                         Status = reader["ResidentStatus"]?.ToString() ?? "",
-                        Activity = reader["ResidentActivity"]?.ToString() ?? "",
-                        Family = reader["ResidentFamily"]?.ToString() ?? "",
+                        Activity = reader["Activity"]?.ToString() ?? "",
+                        Family = reader["FamilyNote"]?.ToString() ?? "",
                         ResidentEmployee = reader["ResidentEmployee"]?.ToString() ?? "",
                         Risiko = Enum.TryParse<Risiko>(reader["Risk"]?.ToString(), out var risiko)
                             ? risiko
@@ -298,8 +298,8 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value =
                 resident.DepartmentId.HasValue ? resident.DepartmentId.Value : DBNull.Value;
             command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 250).Value = resident.Status;
-            command.Parameters.Add("@ResidentActivity", SqlDbType.NVarChar, 250).Value = resident.Activity; //Tjek her!!
-            command.Parameters.Add("@ResidentFamily", SqlDbType.NVarChar, 250).Value = resident.Family; //Tjek her!! 
+            command.Parameters.Add("@Activity", SqlDbType.NVarChar, 250).Value = resident.Activity; //Tjek her!!
+            command.Parameters.Add("@FamilyNote", SqlDbType.NVarChar, 250).Value = resident.Family; //Tjek her!! 
             command.Parameters.Add("@ResidentEmployee", SqlDbType.NVarChar, 250).Value = resident.ResidentEmployee; //Tjek her!!
             command.Parameters.Add("@Risk", SqlDbType.NVarChar, 100).Value = resident.Risiko.ToString();
             command.Parameters.Add("@Mood", SqlDbType.NVarChar, 100).Value = resident.Mood.ToString();
@@ -332,8 +332,8 @@ namespace OverlapssystemInfrastructure.Repositories
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value =
                 resident.DepartmentId.HasValue ? resident.DepartmentId.Value : DBNull.Value;
             command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 250).Value = resident.Status;
-            command.Parameters.Add("@ResidentActivity", SqlDbType.NVarChar, 250).Value = resident.Activity; //Tjek her!!
-            command.Parameters.Add("@ResidentFamily", SqlDbType.NVarChar, 250).Value = resident.Family; //Tjek her!!
+            command.Parameters.Add("@Activity", SqlDbType.NVarChar, 250).Value = resident.Activity; //Tjek her!!
+            command.Parameters.Add("@FamilyNote", SqlDbType.NVarChar, 250).Value = resident.Family; //Tjek her!!
             command.Parameters.Add("@ResidentEmployee", SqlDbType.NVarChar, 250).Value = resident.ResidentEmployee; //Tjek her!!
             command.Parameters.Add("@Risk", SqlDbType.NVarChar, 100).Value = resident.Risiko.ToString();
             command.Parameters.Add("@Mood", SqlDbType.NVarChar, 100).Value = resident.Mood.ToString();
