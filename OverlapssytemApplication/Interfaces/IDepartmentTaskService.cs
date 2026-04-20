@@ -4,17 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Enums;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssytemApplication.Interfaces
 {
     public interface IDepartmentTaskService
     {   
-            Task<List<DepartmentTaskModel>> GetAllDepartmentTasksAsync();
-            Task<DepartmentTaskModel> GetDepartmentTaskByIdAsync(int departmentTaskId); 
-            Task<List<DepartmentTaskModel>> GetDepartmentTasksByDepartmentIdAsync(int departmentId);
-            Task SaveNewDepartmentTaskAsync(DepartmentTaskModel departmentTask);
-            Task DeleteDepartmentTaskAsync(int departmentTaskId);
-            Task UpdateDepartmentTaskAsync(DepartmentTaskModel departmentTask);
+            Task<Result<List<DepartmentTaskModel>>> GetAllDepartmentTasksAsync();
+            Task<Result<DepartmentTaskModel>> GetDepartmentTaskByIdAsync(int departmentTaskId); 
+            Task<Result<List<DepartmentTaskModel>>> GetDepartmentTasksByDepartmentIdAsync(int departmentId);
+            Task<Result> SaveNewDepartmentTaskAsync(DepartmentTaskModel departmentTask);
+            Task<Result> DeleteDepartmentTaskAsync(int departmentTaskId);
+            Task<Result> UpdateDepartmentTaskAsync(DepartmentTaskModel departmentTask);
+            Task<Result<ShiftType> > GetTimeOfDayAsync();
 
     }
 }

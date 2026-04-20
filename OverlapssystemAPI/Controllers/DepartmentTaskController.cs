@@ -20,7 +20,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult> GetAllDepartmentTasksAsync()
         {
             var departmentTasks = await _departmentTaskService.GetAllDepartmentTasksAsync();
-            return Ok(departmentTasks);
+            return Ok(departmentTasks.Value);
         }
 
         //Hent departmentTask på id
@@ -28,7 +28,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
             var departmentTasks = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
-            return Ok(departmentTasks);
+            return Ok(departmentTasks.Value);
         }
 
         //Hent departmentTask på departmentID
@@ -36,7 +36,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
         {
             var departmentTasks = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
-            return Ok(departmentTasks);
+            return Ok(departmentTasks.Value);
         }
 
         //Tilføj

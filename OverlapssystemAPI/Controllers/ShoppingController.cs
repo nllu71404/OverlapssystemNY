@@ -21,7 +21,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult> GetShoppingByResidentId(int residentId)
         {
             var shopping = await _shoppingService.GetShoppingByResidentIdAsync(residentId);
-            return Ok(shopping);
+            return Ok(shopping.Value);
         }
 
         //Tilføj
@@ -37,7 +37,7 @@ namespace OverlapssystemAPI.Controllers
             };
             
             var id = await _shoppingService.SaveNewShoppingAsync(shopping);
-            return Ok(id);
+            return Ok(id.Value);
         }
 
         //Update

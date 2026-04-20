@@ -14,14 +14,14 @@ namespace OverlapssystemAPI.Controllers
         {
             _residentServices = residentServices;
         }
-        
+
         //Hent
         [HttpGet("HenterResident")]
         public async Task<ActionResult> GetResidents()
         {
             //Skal kalde LoadResidentAsync og returnerer resultatet
-            var residents = await _residentServices.LoadResidentsAsync();
-            return Ok(residents);
+            var result = await _residentServices.LoadResidentsAsync();
+            return Ok(result.Value);
         }
 
         //Tilføj
@@ -29,8 +29,8 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult<ResidentModel>> CreateResident([FromBody] ResidentModel resident)
         {
             // Placeholder for creating a resident logic
-            await _residentServices.CreateResidentAsync(resident);
-            return Ok(resident);
+            var result = await _residentServices.CreateResidentAsync(resident);
+            return Ok(result.Value);
         }
 
         //Update
@@ -38,30 +38,34 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult<ResidentModel>> UpdateResident(int id, [FromBody] ResidentModel resident)
         {
             // Placeholder for updating a resident logic
-            await _residentServices.UpdateResidentAsync(resident);
-            return Ok(resident);
+            var result = await _residentServices.UpdateResidentAsync(resident);
+            return Ok(result);
         }
 
         //Delete
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteResident(int Id) 
+        public async Task<ActionResult> DeleteResident(int Id)
         {
             // Placeholder for updating a resident logic
-            await _residentServices.DeleteResidentAsync(Id);
-            return Ok(Id);
-
+            var result = await _residentServices.DeleteResidentAsync(Id);
+            return Ok(result);
         }
+
         //Hent på afdeling
         [HttpGet("Department/{id}")]
         public async Task<ActionResult> GetByDepartment(int id)
         {
-            var residents = await _residentServices.LoadResidentsByDepartmentAsync(id);
-            return Ok(residents);
+            var result = await _residentServices.LoadResidentsByDepartmentAsync(id);
+
+            if (!result.Success)
+                return BadRequest(result.Error);
+
+            return Ok(result.Value);
         }
-
-        
-
-
-
     }
+
+
+
+
 }
+

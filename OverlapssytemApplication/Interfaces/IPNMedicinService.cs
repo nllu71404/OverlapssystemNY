@@ -4,14 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssytemApplication.Interfaces
 {
     public interface IPNMedicinService
     {
-        Task<List<PNMedicinModel>> GetPNMedicinByResidentIdAsync(int residentId);
-        Task<int> AddPNMedicinAsync(int residentId, DateTime? pNTime, string reason);
-        Task UpdatePNMedicinAsync(PNMedicinModel pNMedicin);
-        Task DeletePNMedicinAsync(int pNMedicinId);
+        Task<Result<List<PNMedicinModel>>> GetPNMedicinByResidentIdAsync(int residentId);
+
+        Task<Result<int>> AddPNMedicinAsync(int residentId, DateTime? pNTime, string reason);
+
+        Task<Result> UpdatePNMedicinAsync(PNMedicinModel pNMedicin);
+
+        Task<Result> DeletePNMedicinAsync(int pNMedicinId);
     }
 }

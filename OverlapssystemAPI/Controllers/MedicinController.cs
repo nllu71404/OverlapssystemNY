@@ -22,7 +22,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<ActionResult> GetMedicinByResidentId(int residentId)
         {
             var medicin = await _medicinServices.GetMedicinByResidentIdAsync(residentId);
-            return Ok(medicin);
+            return Ok(medicin.Value);
         }
 
         // Tilføjer medicintid 
@@ -37,7 +37,7 @@ namespace OverlapssystemAPI.Controllers
             };
 
             var time = await _medicinServices.AddMedicinTimeAsync(medicinTime);
-            return Ok(time);
+            return Ok(time.Value);
         }
 
         //Delete

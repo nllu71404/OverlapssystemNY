@@ -22,7 +22,11 @@ ResidentName NVARCHAR(100),
 ResidentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
 ResidentStatus NVARCHAR(250),
-Risk NVARCHAR(100) NULL
+Risk NVARCHAR(100) NULL,
+Mood NVARCHAR(100) NULL,
+Activity NVARCHAR(250) NULL,
+FamilyNote NVARCHAR(250) NULL,
+ResidentEmployee NVARCHAR(250) NULL
 
 );
 GO
@@ -70,7 +74,8 @@ CREATE TABLE dbo.DepartmentTask (
 DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
 DepartmentTaskID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 DepartmentTaskTopic NVARCHAR(250) NULL,
-EmployeeName NVARCHAR(100) NULL
+EmployeeName NVARCHAR(100) NULL,
+ShiftType NVARCHAR(100)
 
 );
 GO
@@ -85,6 +90,21 @@ Test BIT NULL
 );
 GO
 
+CREATE TABLE dbo.SpecialEvent (
+SpecialEventID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+SpecialEventNote NVARCHAR(250),
+SpecialEventDateTime DATETIME NULL
+
+CONSTRAINT FK_SpecialEvent_Resident
+        FOREIGN KEY (ResidentID)
+        REFERENCES Resident(ResidentID)
+        ON DELETE CASCADE
+);
+GO
+
+
+
 
 -- Creates Stored Procedures
 -- Creates a Resident to the table of Residents.
@@ -92,7 +112,11 @@ CREATE OR ALTER PROCEDURE dbo.uspCreateResident
 @ResidentName NVARCHAR(100),
 @DepartmentID INT = NULL,
 @ResidentStatus NVARCHAR(100) = NULL,
-@Risk NVARCHAR(100) = NULL
+@Risk NVARCHAR(100) = NULL,
+@Mood NVARCHAR(100) = NULL,
+@Activity NVARCHAR(250) NULL,
+@FamilyNote NVARCHAR(250) NULL,
+@ResidentEmployee NVARCHAR(250) NULL
 AS
 BEGIN
 SET NOCOUNT ON;
@@ -102,14 +126,22 @@ INSERT INTO dbo.Resident
     ResidentName,
     DepartmentID,
     ResidentStatus,
-    Risk
+    Risk,
+    Mood,
+    Activity,
+    FamilyNote,
+    ResidentEmployee
 )
 VALUES
 (
     @ResidentName,
     @DepartmentID,
     @ResidentStatus,
-    @Risk
+    @Risk,
+    @Mood,
+    @Activity,
+    @FamilyNote,
+    @ResidentEmployee
 );
 
 SELECT SCOPE_IDENTITY() AS ResidentID;
@@ -127,6 +159,10 @@ SELECT
     r.ResidentStatus,
     r.DepartmentID,
     r.Risk,
+    r.Mood,
+    r.Activity,
+    r.FamilyNote,
+    r.ResidentEmployee,
 
     m.MedicinTimeID,
     m.MedicinTime,
@@ -159,13 +195,21 @@ CREATE OR ALTER PROCEDURE dbo.uspUpdateResidentById
 @DepartmentID INT = NULL,
 @ResidentStatus NVARCHAR(100) = NULL,
 @Risk NVARCHAR(100) = NULL,
-@ResidentId INT
+@Mood NVARCHAR(100) = NULL,
+@ResidentId INT,
+@Activity NVARCHAR(250) NULL,
+@FamilyNote NVARCHAR(250) NULL,
+@ResidentEmployee NVARCHAR(250) NULL
 AS
 BEGIN
     UPDATE dbo.Resident
     SET ResidentName = @ResidentName, 
     ResidentStatus = @ResidentStatus, 
     Risk = @Risk,
+    Mood = @Mood,
+    Activity = @Activity,
+    FamilyNote = @FamilyNote,
+    ResidentEmployee = @ResidentEmployee,
     DepartmentID = @DepartmentID
     WHERE ResidentID = @ResidentId;
 
@@ -194,6 +238,10 @@ SET NOCOUNT ON;
         r.ResidentStatus,
         r.DepartmentID,
         r.Risk,
+        r.Mood,
+        r.Activity,
+        r.FamilyNote,
+        r.ResidentEmployee,
 
         -- Medicin
         m.MedicinTimeID,
@@ -549,7 +597,8 @@ GO
 CREATE OR ALTER PROCEDURE dbo.uspCreateDepartmentTask
 @DepartmentID INT = NULL,
 @DepartmentTaskTopic NVARCHAR(250) = NULL,
-@EmployeeName NVARCHAR(100) = NULL
+@EmployeeName NVARCHAR(100) = NULL, 
+@ShiftType NVARCHAR(100) = NULL
 AS
 BEGIN
 SET NOCOUNT ON;
@@ -558,20 +607,22 @@ INSERT INTO dbo.DepartmentTask
 (
     DepartmentID,
     DepartmentTaskTopic,
-    EmployeeName
+    EmployeeName,
+    ShiftType
 )
 VALUES
 (
     @DepartmentID,
     @DepartmentTaskTopic,
-    @EmployeeName
+    @EmployeeName,
+    @ShiftType
 );
 
 SELECT SCOPE_IDENTITY() AS DepartmentTaskID;
 END;
 GO
 
--- Gets all Departments from the Department table.
+-- Gets all DepartmentTasks from the DepartmentTask table.
 CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTasks]
 AS
 BEGIN
@@ -589,7 +640,7 @@ SELECT * FROM dbo.DepartmentTask WHERE DepartmentID = @DepartmentID
 END;
 GO
 
--- Gets Employee by EmployeeName
+-- Gets DepartmentTasks by EmployeeName
 CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
 @EmployeeName nvarchar(100)
 AS
@@ -598,17 +649,19 @@ SELECT * FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
 END;
 GO
 
--- Updates a Department by id in the Department table
+-- Updates a DepartmentTask by id in the Department table
 CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentTaskById]
 @DepartmentTaskID INT,
 @DepartmentTaskTopic NVARCHAR(250),
-@EmployeeName NVARCHAR(100)
+@EmployeeName NVARCHAR(100),
+@ShiftType NVARCHAR(100)
 AS
 BEGIN
     UPDATE dbo.DepartmentTask
     SET 
     EmployeeName = @EmployeeName,  
-    DepartmentTaskTopic = @DepartmentTaskTopic
+    DepartmentTaskTopic = @DepartmentTaskTopic,
+    ShiftType = @ShiftType
     WHERE DepartmentTaskID = @DepartmentTaskID;
 
 END;
@@ -623,7 +676,7 @@ DELETE FROM dbo.DepartmentTask WHERE DepartmentTaskTopic = @DepartmentTaskTopic
 END;
 GO
 
--- Delete an Employee entry in the DepartmentTask table
+-- Delete an EmployeeName entry in the DepartmentTask table
 CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentEmployeeName]
 @EmployeeName NVARCHAR(100)
 AS
@@ -727,8 +780,235 @@ DELETE FROM dbo.EmployeePhone WHERE EmployeeName = @EmployeeName
 END;
 GO
 
---Fast data
+-- SpecialEvent stored procedures
+-- Creates a SpecialEvent to the table of SpecialEvents.
+CREATE OR ALTER PROCEDURE [dbo].[uspCreateSpecialEvent]
+@SpecialEventNote NVARCHAR(250),
+@ResidentID INT = NULL,
+@SpecialEventDateTime DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
 
+INSERT INTO dbo.SpecialEvent
+(
+    SpecialEventNote,
+    ResidentID,
+    SpecialEventDateTime
+)
+VALUES
+(
+    @SpecialEventNote,
+    @ResidentID,
+    @SpecialEventDateTime
+);
+
+SELECT SCOPE_IDENTITY() AS SpecialEventID;
+END;
+GO
+
+-- Update
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateSpecialEventById]
+    @SpecialEventID INT,
+    @SpecialEventNote NVARCHAR(250),
+    @SpecialEventDateTime DATETIME = NULL
+AS
+BEGIN
+    UPDATE dbo.SpecialEvent
+    SET 
+    SpecialEventNote = @SpecialEventNote,
+    SpecialEventDateTime = @SpecialEventDateTime
+    WHERE SpecialEventID = @SpecialEventID;
+END;
+GO
+
+-- Delete 
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteSpecialEvent]
+@SpecialEventID INT
+AS
+BEGIN
+DELETE FROM dbo.SpecialEvent WHERE SpecialEventID = @SpecialEventID
+END;
+GO
+ 
+-- Get SpecialEvent by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetSpecialEventByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.SpecialEvent WHERE ResidentID = @ResidentID
+END;
+GO
+ 
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllSpecialEvent]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.SpecialEvent
+END;
+GO
+
+-- Activity stored procedures
+-- Creates a Activity to the table of Activities.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateActivityByResidentId]
+    @ResidentID INT,
+    @Activity NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET Activity = @Activity
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteActivity]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET Activity = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get Activity by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetActivityByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT Activity
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllActivities]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, Activity
+    FROM dbo.Resident
+    WHERE Activity IS NOT NULL;
+END;
+GO
+
+-- Family stored procedures
+-- Creates a Family to the table of Families.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateFamilyById]
+    @ResidentID INT,
+    @FamilyNote NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET FamilyNote = @FamilyNote
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteFamily]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET FamilyNote = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get Family by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetFamilyByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT FamilyNote
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllFamilies]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, FamilyNote
+    FROM dbo.Resident
+    WHERE FamilyNote IS NOT NULL;
+END;
+GO
+
+-- ResidentEmployee stored procedures
+-- Creates a ResidentEmployee to the table of ResidentEmployees.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateResidentEmployee]
+    @ResidentID INT,
+    @ResidentEmployee NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET ResidentEmployee = @ResidentEmployee
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteResidentEmployee]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET ResidentEmployee = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get ResidentEmployee by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetResidentEmployeeByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentEmployee
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllResidentEmployees]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, ResidentEmployee
+    FROM dbo.Resident
+    WHERE ResidentEmployee IS NOT NULL;
+END;
+GO
+
+--Fast data
 --Departments 
 INSERT INTO Department (DepartmentName)
 VALUES ('Skoven');
