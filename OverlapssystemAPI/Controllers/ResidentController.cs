@@ -7,60 +7,55 @@ namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ResidentController : ControllerBase
+    public class ResidentController : ApiControllerBase
     {
         private readonly IResidentServices _residentServices;
+
         public ResidentController(IResidentServices residentServices)
         {
             _residentServices = residentServices;
         }
 
-        //Hent
+        // Hent alle
         [HttpGet("HenterResident")]
-        public async Task<ActionResult> GetResidents()
+        public async Task<IActionResult> GetResidents()
         {
-            //Skal kalde LoadResidentAsync og returnerer resultatet
             var result = await _residentServices.LoadResidentsAsync();
-            return Ok(result.Value);
+            return Handle(result);
         }
 
-        //Tilføj
+        // Tilføj
         [HttpPost("OpretResident")]
-        public async Task<ActionResult<ResidentModel>> CreateResident([FromBody] ResidentModel resident)
+        public async Task<IActionResult> CreateResident([FromBody] ResidentModel resident)
         {
-            // Placeholder for creating a resident logic
             var result = await _residentServices.CreateResidentAsync(resident);
-            return Ok(result.Value);
+            return Handle(result);
         }
 
-        //Update
+        // Update
         [HttpPut("{id}")]
-        public async Task<ActionResult<ResidentModel>> UpdateResident(int id, [FromBody] ResidentModel resident)
+        public async Task<IActionResult> UpdateResident(int id, [FromBody] ResidentModel resident)
         {
-            // Placeholder for updating a resident logic
+            resident.ResidentId = id; // Sørger for at ID'et i URL'en bruges til at identificere hvilken beboer der skal opdateres
+
             var result = await _residentServices.UpdateResidentAsync(resident);
-            return Ok(result);
+            return Handle(result);
         }
 
-        //Delete
+        // Delete
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteResident(int Id)
+        public async Task<IActionResult> DeleteResident(int id)
         {
-            // Placeholder for updating a resident logic
-            var result = await _residentServices.DeleteResidentAsync(Id);
-            return Ok(result);
+            var result = await _residentServices.DeleteResidentAsync(id);
+            return Handle(result);
         }
 
-        //Hent på afdeling
+        // Hent på afdeling
         [HttpGet("Department/{id}")]
-        public async Task<ActionResult> GetByDepartment(int id)
+        public async Task<IActionResult> GetByDepartment(int id)
         {
             var result = await _residentServices.LoadResidentsByDepartmentAsync(id);
-
-            if (!result.Success)
-                return BadRequest(result.Error);
-
-            return Ok(result.Value);
+            return Handle(result);
         }
     }
 

@@ -13,7 +13,7 @@ namespace OverlapssytemApplication.Interfaces
         Task<Result<List<DepartmentModel>>> GetAllDepartmentsAsync();
         Task<Result<DepartmentModel>> GetDepartmentByIdAsync(int departmentId);
         Task<Result<DepartmentModel>> GetDepartmentByNameAsync(string departmentName);
-        Task<Result> SaveNewDepartmentAsync(DepartmentModel department);
+        Task<Result<int>> SaveNewDepartmentAsync(DepartmentModel department);
         Task<Result> DeleteDepartmentAsync(int departmentId);
         Task<Result> UpdateDepartmentAsync(DepartmentModel department);
     }
