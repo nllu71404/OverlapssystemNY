@@ -218,21 +218,6 @@ BEGIN
     ResidentEmployee = @ResidentEmployee,
     DepartmentID = @DepartmentID
     WHERE ResidentID = @ResidentId;
-
-    UPDATE r
-SET r.ResidentName = @ResidentName, 
-    r.ResidentStatus = @ResidentStatus, 
-    r.Risk = @Risk,
-    r.Mood = @Mood,
-    r.Activity = @Activity,
-    r.FamilyNote = @FamilyNote,
-    r.ResidentEmployee = @ResidentEmployee,
-    r.DepartmentID = @DepartmentID
-FROM dbo.Resident r
-LEFT JOIN SpecialEvent se
-    ON r.ResidentID = se.ResidentID
-WHERE r.ResidentID = @ResidentId;
-
 END;
 GO
 
