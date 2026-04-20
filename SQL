@@ -1031,16 +1031,155 @@ VALUES ('Slottet');
 GO
 
 -- MOCK DATA
--- Borgere til Skoven (DepartmentID = 1)
-INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
-VALUES ('Anders Hansen', 1, 'Stabil', 'Green');
+-- =============================================
+-- AFDELING 1 - Beboere (ResidentID 1-6)
+-- =============================================
+INSERT INTO dbo.Resident (ResidentName, DepartmentID, ResidentStatus, Risk, Mood, Activity, FamilyNote, ResidentEmployee)
+VALUES
+('Kirsten Larsen',   1, 'Stabil tilstand',           'Green',  'Happy',   'Går en tur hver morgen',         'Datter besøger om søndagen',         'Anna Sørensen'),
+('Bent Madsen',      1, 'Lettere forvirret om dagen', 'Yellow', 'Neutral', 'Ser TV om eftermiddagen',        'Søn ringer tirsdage',                'Lars Nielsen'),
+('Inger Christensen',1, 'Sengeliggende i perioder',  'Red',    'Sad',     'Ingen fast aktivitet',           'Ingen pårørende registreret',        'Maria Jensen'),
+('Poul Hansen',      1, 'God form',                  'Green',  'Happy',   'Deltager i fællessang',          'Kone besøger dagligt',               'Anna Sørensen'),
+('Grethe Nielsen',   1, 'Urolig om natten',          'Yellow', 'Neutral', 'Håndarbejde om eftermiddagen',   'Familie informeret om nattesituation','Lars Nielsen'),
+('Svend Pedersen',   1, 'Stabil, god appetit',       'Green',  'Happy',   'Læser avisen om morgenen',       'Ingen ønsker om besøg på hverdage',  'Maria Jensen');
 
-INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
-VALUES ('Mette Nielsen', 1, 'Behøver hjælp', 'Yellow');
+-- =============================================
+-- AFDELING 2 - Beboere (ResidentID 7-12)
+-- =============================================
+INSERT INTO dbo.Resident (ResidentName, DepartmentID, ResidentStatus, Risk, Mood, Activity, FamilyNote, ResidentEmployee)
+VALUES
+('Else Thomsen',     2, 'Stabil',                    'Green',  'Happy',   'Maler akvareller',               'Datter besøger om lørdagen',         'Hanne Kristiansen'),
+('Jørgen Olsen',     2, 'Let demens, trives',        'Yellow', 'Neutral', 'Går i haven',                    'Søn kontaktes ved ændringer',        'Peter Rasmussen'),
+('Bodil Jensen',     2, 'Smerter i ben, observeres', 'Red',    'Sad',     'Sidder i dagligstuen',           'Mand besøger dagligt',               'Hanne Kristiansen'),
+('Aage Andersen',    2, 'God form, aktiv',           'Green',  'Happy',   'Spiller kort med medbeboere',    'Ingen faste besøg',                  'Peter Rasmussen'),
+('Ruth Møller',      2, 'Urolig, søger tryghed',     'Yellow', 'Neutral', 'Musik terapi om torsdagen',      'Familie informeret',                 'Hanne Kristiansen'),
+('Harry Knudsen',    2, 'Stabil, god nattesøvn',     'Green',  'Happy',   'Motion med fysioterapeut',       'Kone besøger tirsdage og torsdage',  'Peter Rasmussen');
 
--- Borgere til Slottet (DepartmentID = 2)
-INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
-VALUES ('Ole Pedersen', 2, 'Kritisk', 'Red');
+-- =============================================
+-- MEDICINTIDER (4 beboere pr afdeling)
+-- Afdeling 1: ResidentID 1-4
+-- Afdeling 2: ResidentID 7-10
+-- =============================================
+INSERT INTO dbo.MedicinTime (ResidentID, MedicinTime, IsChecked)
+VALUES
+-- Kirsten Larsen
+(1, '08:00', 0), (1, '12:00', 0), (1, '20:00', 0),
+-- Bent Madsen
+(2, '08:00', 0), (2, '18:00', 0),
+-- Inger Christensen
+(3, '07:30', 0), (3, '12:00', 0), (3, '18:00', 0), (3, '22:00', 0),
+-- Poul Hansen
+(4, '08:00', 0), (4, '20:00', 0),
+-- Else Thomsen
+(7, '08:00', 0), (7, '14:00', 0), (7, '21:00', 0),
+-- Jørgen Olsen
+(8, '07:30', 0), (8, '12:00', 0),
+-- Bodil Jensen
+(9, '08:00', 0), (9, '12:00', 0), (9, '18:00', 0), (9, '22:00', 0),
+-- Aage Andersen
+(10, '08:00', 0), (10, '20:00', 0);
 
-INSERT INTO Resident (ResidentName, DepartmentID, ResidentStatus, Risk)
-VALUES ('Karen Jensen', 2, 'Stabil', 'Green');
+-- =============================================
+-- PN MEDICIN (4 beboere pr afdeling)
+-- =============================================
+INSERT INTO dbo.PNMedicin (ResidentID, PNTime, Reason, PNTimeStamp)
+VALUES
+-- Kirsten Larsen
+(1, '2025-04-19 10:30:00', 'Smerter i ryg',      '2025-04-19 10:35:00'),
+-- Bent Madsen
+(2, '2025-04-19 14:00:00', 'Uro og angst',        '2025-04-19 14:05:00'),
+-- Inger Christensen
+(3, '2025-04-19 03:00:00', 'Smerter, sov ikke',   '2025-04-19 03:10:00'),
+(3, '2025-04-19 09:00:00', 'Morgensmerter',        '2025-04-19 09:05:00'),
+-- Poul Hansen
+(4, '2025-04-18 20:00:00', 'Hovedpine',            '2025-04-18 20:10:00'),
+-- Else Thomsen
+(7, '2025-04-19 11:00:00', 'Lettere smerter i ben','2025-04-19 11:05:00'),
+-- Jørgen Olsen
+(8, '2025-04-19 15:30:00', 'Uro',                  '2025-04-19 15:35:00'),
+-- Bodil Jensen
+(9, '2025-04-19 06:00:00', 'Stærke bensmerter',    '2025-04-19 06:10:00'),
+(9, '2025-04-19 14:00:00', 'Smerter fortsat',       '2025-04-19 14:05:00'),
+-- Aage Andersen
+(10,'2025-04-18 22:00:00', 'Søvnbesvær',            '2025-04-18 22:10:00');
+
+-- =============================================
+-- SHOPPING (3 beboere pr afdeling)
+-- =============================================
+INSERT INTO dbo.Shopping (ResidentID, ShoppingDay, ShoppingTime, PaymentMethod)
+VALUES
+-- Afdeling 1
+(1, 'Mandag',   '10:00', 'Kontant'),
+(2, 'Onsdag',   '11:00', 'Dankort'),
+(3, 'Fredag',   '09:30', 'Kontant'),
+-- Afdeling 2
+(7, 'Tirsdag',  '10:00', 'Dankort'),
+(8, 'Torsdag',  '11:30', 'Kontant'),
+(9, 'Fredag',   '10:00', 'Dankort');
+
+-- =============================================
+-- SPECIAL EVENTS (3 beboere pr afdeling)
+-- =============================================
+INSERT INTO dbo.SpecialEvent (ResidentID, SpecialEventNote, SpecialEventDateTime)
+VALUES
+-- Afdeling 1
+(1, 'Lægebesøg — husk journal',             '2025-04-22 09:00:00'),
+(2, 'Frisør bestilt',                        '2025-04-23 13:00:00'),
+(4, 'Fødselsdag — kage bestilt',             '2025-04-25 14:00:00'),
+-- Afdeling 2
+(7, 'Fysioterapi — ny behandlingsplan',      '2025-04-22 10:00:00'),
+(8, 'Tandlæge — husk transportbestilling',   '2025-04-24 11:00:00'),
+(10,'Familiesamtale med plejepersonale',     '2025-04-26 13:00:00');
+
+-- =============================================
+-- DEPARTMENT TASKS (4 pr vagt pr afdeling)
+-- ShiftType: Dag, Aften, Nat
+-- =============================================
+
+-- Afdeling 1 - Dag
+INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
+VALUES
+(1, 'Morgenmøde med afdelingsleder', '',     'Dag'),
+(1, 'Medicingivning runde',          '',     'Dag'),
+(1, 'Ledsage til aktivitet',         '',     'Dag'),
+(1, 'Dokumentation i omsorgssystem', '',     'Dag');
+
+-- Afdeling 1 - Aften
+INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
+VALUES
+(1, 'Aftensmad og opvask',           '',     'Aften'),
+(1, 'Aftenmedicin runde',            '',     'Aften'),
+(1, 'Sengetid og aftenhygiejne',     '',     'Aften'),
+(1, 'Rapport til nattevagt',         '',     'Aften');
+
+-- Afdeling 1 - Nat
+INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
+VALUES
+(1, 'Nattetilsyn kl. 23 og 02',      '',     'Nat'),
+(1, 'Nattmedicin runde',             '',     'Nat'),
+(1, 'Observation af urolige beboere','',     'Nat'),
+(1, 'Rapport til dagvagt',           '',     'Nat');
+
+-- Afdeling 2 - Dag
+INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
+VALUES
+(2, 'Morgenmøde og briefing',        '',     'Dag'),
+(2, 'Medicingivning runde',          '',     'Dag'),
+(2, 'Ledsage til fysioterapi',       '',     'Dag'),
+(2, 'Dokumentation og journalføring','',     'Dag');
+
+-- Afdeling 2 - Aften
+INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
+VALUES
+(2, 'Aftensmad servering',           '',     'Aften'),
+(2, 'Aftenmedicin runde',            '',     'Aften'),
+(2, 'Aftenhygiejne og sengetid',     '',     'Aften'),
+(2, 'Overlevering til nattevagt',    '',     'Aften');
+
+-- Afdeling 2 - Nat
+INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
+VALUES
+(2, 'Nattetilsyn kl. 23 og 02',      '',     'Nat'),
+(2, 'Nattmedicin runde',             '',     'Nat'),
+(2, 'Observation urolige beboere',   '',     'Nat'),
+(2, 'Morgenrapport klargøring',      '',     'Nat');
