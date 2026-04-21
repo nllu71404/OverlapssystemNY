@@ -7,7 +7,7 @@ namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ShoppingController : ControllerBase
+    public class ShoppingController : ApiControllerBase
     {
         private readonly IShoppingService _shoppingService;
 
@@ -18,15 +18,15 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent
         [HttpGet("Shopping/{residentId}")]
-        public async Task<ActionResult> GetShoppingByResidentId(int residentId)
+        public async Task<IActionResult> GetShoppingByResidentId(int residentId)
         {
             var shopping = await _shoppingService.GetShoppingByResidentIdAsync(residentId);
-            return Ok(shopping.Value);
+            return Handle(shopping);
         }
 
         //Tilføj
         [HttpPost("TilføjShopping")]
-        public async Task<ActionResult> SaveNewShopping([FromBody] AddShoppingDTO addShoppingDTO)
+        public async Task<IActionResult> SaveNewShopping([FromBody] AddShoppingDTO addShoppingDTO)
         {
             var shopping = new ShoppingModel
             {
@@ -36,24 +36,29 @@ namespace OverlapssystemAPI.Controllers
                 PaymentMethod = addShoppingDTO.PaymentMethod
             };
             
+            
             var id = await _shoppingService.SaveNewShoppingAsync(shopping);
-            return Ok(id.Value);
+            if (!id.Success)
+                return Handle(id); //Fejlhåndtering
+
+            //Hvis succes, returneres 201 Created med lokationen for den nye ressource
+            return Created($"/api/shopping/{id.Value}", id.Value);
         }
 
         //Update
         [HttpPut("{shoppingId}")]
-        public async Task<ActionResult> UpdateShopping(int shoppingId, [FromBody] ShoppingModel shoppingModel)
+        public async Task<IActionResult> UpdateShopping(int shoppingId, [FromBody] ShoppingModel shoppingModel)
         {
-            await _shoppingService.UpdateShoppingAsync(shoppingModel);
-            return Ok(shoppingModel);
+            var result = await _shoppingService.UpdateShoppingAsync(shoppingModel);
+            return Handle(result);
         }
 
         //Delete
         [HttpDelete("{shoppingId}")]
-        public async Task<ActionResult> DeleteShopping(int shoppingId)
+        public async Task<IActionResult> DeleteShopping(int shoppingId)
         {
-            await _shoppingService.DeleteShoppingAsync(shoppingId);
-            return Ok(shoppingId);
+            var result = await _shoppingService.DeleteShoppingAsync(shoppingId);
+            return Handle(result);
         }
     }
 }

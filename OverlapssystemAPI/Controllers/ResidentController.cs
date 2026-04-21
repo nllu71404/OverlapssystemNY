@@ -24,12 +24,20 @@ namespace OverlapssystemAPI.Controllers
             return Handle(result);
         }
 
+        
+
         // Tilføj
         [HttpPost("OpretResident")]
         public async Task<IActionResult> CreateResident([FromBody] ResidentModel resident)
         {
             var result = await _residentServices.CreateResidentAsync(resident);
-            return Handle(result);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            return Created($"/api/resident/{result.Value}", result.Value);
         }
 
         // Update

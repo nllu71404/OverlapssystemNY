@@ -8,7 +8,7 @@ namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PNMedicinController : ControllerBase
+    public class PNMedicinController : ApiControllerBase
     {
         private readonly IPNMedicinService _pNMedicinService;
 
@@ -19,37 +19,40 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent
         [HttpGet("PNMedicintider/{residentId}")]
-        public async Task<ActionResult> GetPNMedicinByResidentIdAsync(int residentId)
+        public async Task<IActionResult> GetPNMedicinByResidentIdAsync(int residentId)
         {
             var pnmedicin = await _pNMedicinService.GetPNMedicinByResidentIdAsync(residentId);
-            return Ok(pnmedicin.Value);
+            return Handle(pnmedicin);
         }
 
         //Tilføj
         [HttpPost("TilføjPNMedicin")]
-        public async Task<ActionResult<int>> AddPNMedicinTime([FromBody] AddPNMedicinDTO addPNMedicinDTO)
+        public async Task<IActionResult> AddPNMedicinTime([FromBody] AddPNMedicinDTO addPNMedicinDTO) //Denne ser anderledes ud end de andre Create!
         {
+           
             var id = await _pNMedicinService.AddPNMedicinAsync(addPNMedicinDTO.ResidentID, addPNMedicinDTO.PNTime, addPNMedicinDTO.Reason);
-            return Ok(id.Value);
+
+            if (!id.Success)
+                return Handle(id);
+            
+            return Created($"/api/PNMedicin/{id.Value}", id.Value);
         }
 
         //Update
         [HttpPut("{pNMedicinId}")]
-        public async Task<ActionResult<PNMedicinModel>> UpdatePNMedicinAsync(int pNMedicinId, [FromBody] PNMedicinModel pNMedicin)
+        public async Task<IActionResult> UpdatePNMedicinAsync(int pNMedicinId, [FromBody] PNMedicinModel pNMedicin)
         {
-            await _pNMedicinService.UpdatePNMedicinAsync(pNMedicin);
-            return Ok(pNMedicinId);
+            var result = await _pNMedicinService.UpdatePNMedicinAsync(pNMedicin);
+            return Handle(result);
 
         }
         
         //Delete
         [HttpDelete("{pnMedicinId}")]
-        public async Task<ActionResult> DeletePNMedicinAsync(int pNMedicinId)
+        public async Task<IActionResult> DeletePNMedicinAsync(int pNMedicinId)
         {
-            // Placeholder for updating a resident logic
-            await _pNMedicinService.DeletePNMedicinAsync(pNMedicinId);
-            return Ok(pNMedicinId);
-
+            var result = await _pNMedicinService.DeletePNMedicinAsync(pNMedicinId);
+            return Handle(result);
         }
 
 

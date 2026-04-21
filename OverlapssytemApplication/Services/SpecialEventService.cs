@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Interfaces;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssytemApplication.Services
 {
-    public class SpecialEventService : ISpecialEventService
+    public class SpecialEventService : ISpecialEventService //Mangler validation og error handling
     {
         private readonly ISpecialEventRepository _specialEventRepository;
         public SpecialEventService(ISpecialEventRepository specialEventRepository)
@@ -17,24 +18,28 @@ namespace OverlapssytemApplication.Services
             _specialEventRepository = specialEventRepository;
         }
 
-        public async Task<List<SpecialEventModel>> GetSpecialEventByResidentIdAsync(int residentId)
+        public async Task<Result<List<SpecialEventModel>>> GetSpecialEventByResidentIdAsync(int residentId)
         {
             return await _specialEventRepository.GetSpecialEventByResidentId(residentId);
         }
 
-        public async Task<int> SaveNewSpecialEventAsync(SpecialEventModel specialEvent)
+        public async Task<Result<int>> SaveNewSpecialEventAsync(SpecialEventModel specialEvent)
         {
             return await _specialEventRepository.SaveNewSpecialEvent(specialEvent);
         }
 
-        public async Task UpdateSpecialEventAsync(SpecialEventModel specialEvent)
+        public async Task<Result> UpdateSpecialEventAsync(SpecialEventModel specialEvent)
         {
-            await _specialEventRepository.UpdateSpecialEvent(specialEvent);
-        }
+            
+             await _specialEventRepository.UpdateSpecialEvent(specialEvent);
+            return Result.Ok();
 
-        public async Task DeleteSpecialEventAsync(int specialEventID)
+
+        }
+        public async Task<Result> DeleteSpecialEventAsync(int specialEventID)
         {
             await _specialEventRepository.DeleteSpecialEvent(specialEventID);
+            return Result.Ok(); 
         }
     }
 }

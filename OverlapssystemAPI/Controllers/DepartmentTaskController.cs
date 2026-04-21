@@ -7,7 +7,7 @@ namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DepartmentTaskController : ControllerBase
+    public class DepartmentTaskController : ApiControllerBase
     {
         private readonly IDepartmentTaskService _departmentTaskService;
         public DepartmentTaskController(IDepartmentTaskService departmentTaskService)
@@ -17,50 +17,54 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent alle
         [HttpGet("HentDepartmentTasks")]
-        public async Task<ActionResult> GetAllDepartmentTasksAsync()
+        public async Task<IActionResult> GetAllDepartmentTasksAsync()
         {
             var departmentTasks = await _departmentTaskService.GetAllDepartmentTasksAsync();
-            return Ok(departmentTasks.Value);
+            return Handle(departmentTasks);
         }
 
         //Hent departmentTask på id
         [HttpGet("HentDepartmentTasksID/{departmentTaskId}")]
-        public async Task<ActionResult> GetDepartmentTaskByIdAsync(int departmentTaskId)
+        public async Task<IActionResult> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
             var departmentTasks = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
-            return Ok(departmentTasks.Value);
+            return Handle(departmentTasks);
         }
 
         //Hent departmentTask på departmentID
         [HttpGet("HentDepartmentTaskByDepartmentId/{departmentId}")]
-        public async Task<ActionResult> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
+        public async Task<IActionResult> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
         {
             var departmentTasks = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
-            return Ok(departmentTasks.Value);
+            return Handle(departmentTasks);
         }
 
         //Tilføj
         [HttpPut("TilføjDepartmentTask")]
-        public async Task<ActionResult<DepartmentTaskModel>> SaveNewDepartmentTaskAsync([FromBody] DepartmentTaskModel departmentTaskModel)
+        public async Task<IActionResult> SaveNewDepartmentTaskAsync([FromBody] DepartmentTaskModel departmentTaskModel)
         {
-            await _departmentTaskService.SaveNewDepartmentTaskAsync(departmentTaskModel);
-            return Ok(departmentTaskModel);
+            var result = await _departmentTaskService.SaveNewDepartmentTaskAsync(departmentTaskModel);
+
+            if (!result.Success)
+                return Handle(result);
+
+            return Created($"/api/DepartmentTask/{result.Value}", result.Value);
         }
 
         //Update
         [HttpPut("{id}")]
-        public async Task<ActionResult<DepartmentTaskModel>> UpdateDepartmentTaskAsync(int id,[FromBody] DepartmentTaskModel departmentTaskModel)
+        public async Task<IActionResult> UpdateDepartmentTaskAsync(int id,[FromBody] DepartmentTaskModel departmentTaskModel)
         {
-            await _departmentTaskService.UpdateDepartmentTaskAsync(departmentTaskModel);
-            return Ok(departmentTaskModel);
+            var result = await _departmentTaskService.UpdateDepartmentTaskAsync(departmentTaskModel);
+            return Handle(result);
         }
 
         //Delete
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteDepartmentTaskAsync(int id)
+        public async Task<IActionResult> DeleteDepartmentTaskAsync(int id)
         {
-            await _departmentTaskService.DeleteDepartmentTaskAsync(id);
-            return Ok(id);
+            var result = await _departmentTaskService.DeleteDepartmentTaskAsync(id);
+            return Handle(result);
         }
     }
 }
