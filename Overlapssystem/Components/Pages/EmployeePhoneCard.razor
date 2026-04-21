@@ -1,0 +1,22 @@
+﻿@using OverlapssystemDomain.Entities
+@using Overlapssystem.Services
+@inject EmployeePhoneApiService employeePhoneApiService
+@inject IJSRuntime JS
+
+
+<h3>EmployeePhoneCard</h3>
+
+@code {
+	[Parameter]
+	public int DepartmentId { get; set; }
+	[Parameter]
+	public bool IsReadOnly { get; set; } = false;
+
+	[Parameter]
+	public EventCallback<int> OnAdd { get; set; }
+
+	public List<EmployeePhoneModel> EmployeePhones { get; set; } = new();
+
+
+
+}
