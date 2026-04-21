@@ -94,7 +94,7 @@ else
     private async Task DeleteResidentAsync(ResidentModel resident)
     {
         await api.DeleteResident(resident.ResidentId);
-        residents = await api.GetByDepartment(departmentId);
+        residents.Remove(resident);
     }
 
     // Parent creates the task and then asks the child to refresh.
