@@ -1,22 +1,26 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Interfaces;
+using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Common.Errors;
+using OverlapssytemApplication.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OverlapssystemDomain.Entities;
-using OverlapssytemApplication.Common;
-using OverlapssytemApplication.Interfaces;
-using OverlapssystemDomain.Interfaces;
 
 namespace OverlapssytemApplication.Services
 {
     public class EmployeePhoneService : IEmployeePhoneService
     {
         private readonly IEmployeePhoneRepository _employeePhoneRepository;
+        private readonly ILogger<EmployeePhoneService> _logger;
 
-        public EmployeePhoneService(IEmployeePhoneRepository employeePhoneRepository)
+        public EmployeePhoneService(IEmployeePhoneRepository employeePhoneRepository, ILogger<EmployeePhoneService> logger)
         {
             _employeePhoneRepository = employeePhoneRepository;
+            _logger = logger;
         }
 
         public List<EmployeePhoneModel> EmployeePhones { get; private set; } = new();
@@ -29,9 +33,10 @@ namespace OverlapssytemApplication.Services
                 await _employeePhoneRepository.DeleteEmployeePhoneAsync(employeePhoneId);
                 return Result.Ok();
             }
-                        catch (Exception ex)
+                        catch (Exception)
             {
-                return Result.Fail($"Fejl ved sletning af medarbejder telefon: {ex.Message}");
+                
+                return Error.Technical("Fejl ved sletning af medarbejder telefon!");
             }
         }
         
@@ -42,7 +47,7 @@ namespace OverlapssytemApplication.Services
             
             EmployeePhones = result ?? new List<EmployeePhoneModel>();
             
-            return Result<List<EmployeePhoneModel>>.Ok(EmployeePhones);
+            return EmployeePhones;
 
         }
         
@@ -52,9 +57,9 @@ namespace OverlapssytemApplication.Services
             var result = await _employeePhoneRepository.GetEmployeePhoneByIdAsync(employeePhoneId);
             
             if (result == null)
-                return Result<EmployeePhoneModel>.Fail("Medarbejder telefon blev ikke fundet");
+                return Error.Validation("Medarbejder telefon blev ikke fundet");
             
-            return Result<EmployeePhoneModel>.Ok(result);
+            return result;
 
         }
 
@@ -64,11 +69,12 @@ namespace OverlapssytemApplication.Services
             try
             {
                 var id = await _employeePhoneRepository.SaveNewEmployeePhoneAsync(employeePhone);
-                return Result<int>.Ok(id);
+                return id;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Result<int>.Fail($"Fejl ved oprettelse af medarbejder telefon: {ex.Message}");
+
+                return Error.Technical("Fejl ved oprettelse af medarbejder telefon!");
             }
         }
         
@@ -80,9 +86,9 @@ namespace OverlapssytemApplication.Services
                 await _employeePhoneRepository.UpdateEmployeePhoneAsync(employeePhone);
                 return Result.Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Result.Fail($"Fejl ved opdatering af medarbejder telefon: {ex.Message}");
+                return Error.Technical("Fejl ved opdatering af medarbejder telefon");
             }
         }
     }
