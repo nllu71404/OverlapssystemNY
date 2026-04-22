@@ -103,7 +103,20 @@ CONSTRAINT FK_SpecialEvent_Resident
 );
 GO
 
-
+-- Audit Trail
+-- Audit Table: Creates dbo.AuditLog
+CREATE TABLE dbo.AuditLog
+(
+AuditLogId       int IDENTITY(1,1) PRIMARY KEY,
+TableName        sysname,
+Operation        varchar(10),
+PrimaryKeyValue  nvarchar(200),
+BeforeData       nvarchar(max),
+AfterData        nvarchar(max),
+ChangedBy        nvarchar(200),
+ChangeDate       datetime2(7)
+);
+GO
 
 
 -- Creates Stored Procedures
@@ -1019,6 +1032,413 @@ BEGIN
     WHERE ResidentEmployee IS NOT NULL;
 END;
 GO
+
+-- Audit Trail Triggers
+-- Audit Trigger for Resident table
+CREATE TRIGGER trg_Audit_Resident
+ON dbo.Resident
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'Resident',
+    'INSERT',
+    CAST(i.ResidentId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.ResidentId = i.ResidentId
+WHERE d.ResidentId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'Resident',
+    'DELETE',
+    CAST(d.ResidentId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.ResidentId = d.ResidentId
+WHERE i.ResidentId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'Resident',
+    'UPDATE',
+    CAST(i.ResidentId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.ResidentId = i.ResidentId;
+END;
+GO
+
+-- Audit Trigger for MedicinTime table
+CREATE TRIGGER trg_Audit_MedicinTime
+ON dbo.MedicinTime
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'MedicinTime',
+    'INSERT',
+    CAST(i.MedicinTimeId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.MedicinTimeId = i.MedicinTimeId
+WHERE d.MedicinTimeId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'MedicinTime',
+    'DELETE',
+    CAST(d.MedicinTimeId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.MedicinTimeId = d.MedicinTimeId
+WHERE i.MedicinTimeId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'MedicinTime',
+    'UPDATE',
+    CAST(i.MedicinTimeId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.MedicinTimeId = i.MedicinTimeId;
+END;
+GO
+
+-- Audit Trigger for PNMedicin table
+CREATE TRIGGER trg_Audit_PNMedicin
+ON dbo.PNMedicin
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'PNMedicin',
+    'INSERT',
+    CAST(i.PNId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.PNId = i.PNId
+WHERE d.PNId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'PNId',
+    'DELETE',
+    CAST(d.PNId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.PNId = d.PNId
+WHERE i.PNId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'PNId',
+    'UPDATE',
+    CAST(i.PNId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.PNId = i.PNId;
+END;
+GO
+
+-- Audit Trigger for Shopping table
+CREATE TRIGGER trg_Audit_Shopping
+ON dbo.Shopping
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'ShoppingId',
+    'INSERT',
+    CAST(i.ShoppingId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.ShoppingId = i.ShoppingId
+WHERE d.ShoppingId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'ShoppingId',
+    'DELETE',
+    CAST(d.ShoppingId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.ShoppingId = d.ShoppingId
+WHERE i.ShoppingId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'ShoppingId',
+    'UPDATE',
+    CAST(i.ShoppingId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.ShoppingId = i.ShoppingId;
+END;
+GO
+
+-- Audit Trigger for SpecialEvent table
+CREATE TRIGGER trg_Audit_SpecialEvent
+ON dbo.SpecialEvent
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'SpecialEventId',
+    'INSERT',
+    CAST(i.SpecialEventId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.SpecialEventId = i.SpecialEventId
+WHERE d.SpecialEventId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'SpecialEventId',
+    'DELETE',
+    CAST(d.SpecialEventId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.SpecialEventId = d.SpecialEventId
+WHERE i.SpecialEventId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLog
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'SpecialEventId',
+    'UPDATE',
+    CAST(i.SpecialEventId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.SpecialEventId = i.SpecialEventId;
+END;
+GO
+
 
 --Fast data
 --Departments 
