@@ -23,6 +23,11 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<EmployeePhoneModel>($"api/EmployeePhone/HentEmployeePhoneById/{employeePhoneId}");
         }
 
+        public async Task<List<EmployeePhoneModel>> GetEmployeePhonesByDepartmentId(int departmentId)
+        {
+            return await _http.GetFromJsonAsync<List<EmployeePhoneModel>>($"api/EmployeePhone/HentEmployeePhonesByDepartmentId/{departmentId}");
+        }
+
         //Tilføj
         public async Task SaveNewEmployeePhone(EmployeePhoneModel employeePhoneModel)
         {

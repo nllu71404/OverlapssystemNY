@@ -77,6 +77,30 @@ namespace OverlapssystemInfrastructure.Repositories
             return phone!;
         }
 
+        public async Task<List<EmployeePhoneModel>> GetEmployeePhonesByDepartmentIdAsync(int departmentId)
+        {
+            List<EmployeePhoneModel> employeePhones = new();
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspGetEmployeePhoneNumberByDepartmentID", connection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentId;
+            await connection.OpenAsync();
+            using SqlDataReader reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                EmployeePhoneModel phone = new EmployeePhoneModel
+                {
+                    EmployeePhoneID = Convert.ToInt32(reader["EmployeePhoneID"]),
+                    DepartmentID = reader["DepartmentID"] == DBNull.Value ? null : Convert.ToInt32(reader["DepartmentID"]),
+                    PhoneNumber = reader["PhoneNumber"]?.ToString() ?? "",
+                    EmployeeName = reader["EmployeeName"]?.ToString() ?? "",
+                    Test = reader["Test"] != DBNull.Value && Convert.ToBoolean(reader["Test"])
+                };
+                employeePhones.Add(phone);
+            }
+            return employeePhones;
+        }
+
         public async Task<int> SaveNewEmployeePhoneAsync(EmployeePhoneModel employeePhone)
         {
             using SqlConnection connection = new SqlConnection(_connectionString);

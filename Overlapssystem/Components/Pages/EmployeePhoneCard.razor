@@ -3,8 +3,65 @@
 @inject EmployeePhoneApiService employeePhoneApiService
 @inject IJSRuntime JS
 
+<div name="employee-phone-card">
 
-<h3>EmployeePhoneCard</h3>
+    <div class="employee-phone-card-header">
+        <h2>Telefonliste</h2>
+
+        @if (!IsReadOnly)
+        {
+            <button class="btn-plus"
+                    @onclick="() => OnAdd.InvokeAsync(DepartmentId)">
+                +
+            </button>
+        }
+    </div>
+    <table class="phone-table">
+        <thead>
+            <tr>
+                <th>Telefonnummer</th>
+                <th>Navn</th>
+                <th>Test</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var phone in EmployeePhones)
+            {
+                <tr>
+                    <td>
+                        @if (IsReadOnly)
+                        {
+                            <span>@phone.PhoneNumber</span>
+                        }
+                        else
+                        {
+                            <input value="@phone.PhoneNumber"
+                                   @onchange="async e => {
+                                       phone.PhoneNumber = e.Value?.ToString();
+                                       await UpdateEmployeePhone(phone);
+                                   }" />
+						}
+                    </td>
+					<td>
+                        <input value="@phone.EmployeeName"
+                               @onchange="async e => {
+                                   phone.EmployeeName = e.Value?.ToString();
+                                   await UpdateEmployeePhone(phone);
+                                                                  }"
+							   placeholder="Navn" />
+					</td>
+
+                    <td>
+                        @phone.Test
+                    </td>
+                  
+                </tr>
+                        }
+        </tbody>
+    </table>
+</div>
+
 
 @code {
 	[Parameter]
@@ -14,8 +71,28 @@
 
 	[Parameter]
 	public EventCallback<int> OnAdd { get; set; }
+	[Parameter]
+	public EventCallback<EmployeePhoneModel> OnDelete { get; set; }
 
+	
 	public List<EmployeePhoneModel> EmployeePhones { get; set; } = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+	}
+
+    public async Task RefreshAsync()
+    {
+        EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+        StateHasChanged();
+	}
+
+    public async Task UpdateEmployeePhone(EmployeePhoneModel phone)
+    {
+        await employeePhoneApiService.UpdateEmployeePhone(phone.EmployeePhoneID, phone);
+	}
+
 
 
 

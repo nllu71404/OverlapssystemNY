@@ -37,6 +37,14 @@ namespace OverlapssystemAPI.Controllers
             return Ok(employeePhone.Value);
         }
 
+        //Hent medarbejdertelefoner på departmentId
+        [HttpGet("HentEmployeePhonesByDepartmentId/{departmentId}")]
+        public async Task<ActionResult> GetEmployeePhonesByDepartmentIdAsync(int departmentId)
+        {
+            var employeePhones = await _employeePhoneService.GetEmployeePhonesByDepartmentIdAsync(departmentId);
+            return Ok(employeePhones.Value);
+        }
+
         //Tilføj/Gem et medarbejdertelefonnummer
         [HttpPost("TilføjEmployeePhone")]
         public async Task<ActionResult> SaveNewEmployeePhoneAsync([FromBody] EmployeePhoneModel employeePhoneModel)
