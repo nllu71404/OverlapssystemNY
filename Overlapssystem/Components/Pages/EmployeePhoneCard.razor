@@ -29,6 +29,8 @@
             @foreach (var phone in EmployeePhones)
             {
                 <tr>
+
+                    <!-- Telefonnummer -->
                     <td>
                         @if (IsReadOnly)
                         {
@@ -37,27 +39,56 @@
                         else
                         {
                             <input value="@phone.PhoneNumber"
-                                   @onchange="async e => {
+                                   @onchange="async e =>
+                                   {
                                        phone.PhoneNumber = e.Value?.ToString();
                                        await UpdateEmployeePhone(phone);
                                    }" />
-						}
-                    </td>
-					<td>
-                        <input value="@phone.EmployeeName"
-                               @onchange="async e => {
-                                   phone.EmployeeName = e.Value?.ToString();
-                                   await UpdateEmployeePhone(phone);
-                                                                  }"
-							   placeholder="Navn" />
-					</td>
-
-                    <td>
-                        @phone.Test
-                    </td>
-                  
-                </tr>
                         }
+                    </td>
+
+                    <!-- Medarbejder navn -->
+                    <td>
+                        @if (IsReadOnly)
+                        {
+                            <span>@phone.EmployeeName</span>
+                        }
+                        else
+                        {
+                            <input value="@phone.EmployeeName"
+                                   @onchange="async e =>
+                                   {
+                                       phone.EmployeeName = e.Value?.ToString();
+                                       await UpdateEmployeePhone(phone);
+                                   }"
+                                     placeholder="Navn" />
+                        }
+                    </td>
+
+                    <!-- Test -->
+                    <td>
+                        <input type="checkbox"
+                               checked="@phone.Test"
+                               @onchange="async e =>
+                               {
+                                   phone.Test = (bool)e.Value;
+                                   await UpdateEmployeePhone(phone);
+                               }" />
+                      </td>
+
+                    <!-- Slet knap kun Admin -->
+                    @if (!IsReadOnly)
+                    {
+                        <td>
+                            <button class="btn-delete"
+                                    @onclick="() => OnDelete.InvokeAsync(phone)">
+                                Slet
+                            </button>
+                        </td>
+                    }
+
+                </tr>
+            }
         </tbody>
     </table>
 </div>
@@ -77,7 +108,7 @@
 	
 	public List<EmployeePhoneModel> EmployeePhones { get; set; } = new();
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnParametersSetAsync()
 	{
 		EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
 	}
@@ -91,6 +122,7 @@
     public async Task UpdateEmployeePhone(EmployeePhoneModel phone)
     {
         await employeePhoneApiService.UpdateEmployeePhone(phone.EmployeePhoneID, phone);
+      
 	}
 
 
