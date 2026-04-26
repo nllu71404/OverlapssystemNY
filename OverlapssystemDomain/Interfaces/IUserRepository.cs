@@ -8,10 +8,10 @@ namespace OverlapssystemDomain.Interfaces
 {
     public interface IUserRepository
     {
-            public bool CreateUser(string userName, string userPassword, Enums.UserRole userRole);
-            public List<Entities.UserModel> GetAllUsers();
-            public Entities.UserModel GetUserByID(int userID);
-            public bool UpdateUser(int userID, string userName, string userPassword, Enums.UserRole userRole);
-            public bool DeleteUser(int userID);
+            Task CreateUser(string userName, string userPassword, Enums.UserRole userRole);
+            Task<List<Entities.UserModel>> GetAllUsers();
+            Task<Entities.UserModel> GetUserByID(int userID);
+            Task UpdateUser(int userID, string userName, string userPassword, Enums.UserRole userRole);
+            Task DeleteUser(int userID);
     }
 }

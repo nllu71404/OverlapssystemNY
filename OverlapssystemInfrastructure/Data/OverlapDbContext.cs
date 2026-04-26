@@ -33,7 +33,7 @@ namespace OverlapssystemInfrastructure.Data
             // Konfigurér DepartmentModel
             modelBuilder.Entity<DepartmentModel>(entity =>
             {
-                entity.ToTable("Department"); //Finder den eksisterende DepartmentModel og navngiver den "Departments" i databasen
+                entity.ToTable("Department", t => t.ExcludeFromMigrations()); //Finder den eksisterende DepartmentModel og navngiver den "Departments" i databasen
                 entity.HasKey(e => e.DepartmentID);
                 entity.Property(e => e.Name).IsRequired();
             });
