@@ -1,6 +1,7 @@
 ﻿using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Common.Errors;
 using OverlapssytemApplication.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -19,65 +20,98 @@ namespace OverlapssytemApplication.Services
             _medicinRepository = medicinRepository;
         }
 
-        //Hent medicin
+        // Hent medicin
         public async Task<Result<List<MedicinModel>>> GetMedicinByResidentIdAsync(int residentId)
         {
-            var result = await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
+            if (residentId <= 0)
+                return Error.Validation("Ugyldigt resident ID");
 
-            return Result<List<MedicinModel>>.Ok(result ?? new List<MedicinModel>());
+            try
+            {
+                var result = await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
+
+                return result ?? new List<MedicinModel>(); // implicit success
+            }
+            catch (Exception)
+            {
+                return Error.Technical("Kunne ikke hente medicin");
+            }
         }
 
-        //Tilføj medicin
+        // Tilføj medicin
         public async Task<Result<int>> AddMedicinTimeAsync(MedicinModel medicinModel)
         {
+            if (medicinModel == null)
+                return Error.Validation("Medicin må ikke være null");
+
             try
             {
                 var id = await _medicinRepository.SaveNewMedicinAsync(medicinModel);
-                return Result<int>.Ok(id);
+
+                return id; // implicit success
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Result<int>.Fail(ex.Message);
+                return Error.Technical("Kunne ikke oprette medicin");
             }
         }
 
-        //Slet medicin
+        // Slet medicin
         public async Task<Result> DeleteMedicinAsync(int medicinId)
         {
+            if (medicinId <= 0)
+                return Error.Validation("Ugyldigt medicin ID");
+
             try
             {
                 await _medicinRepository.DeleteMedicinAsync(medicinId);
+
                 return Result.Ok();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException)
             {
-                return Result.Fail(ex.Message);
+                return Error.NotFound("Medicin blev ikke fundet");
+            }
+            catch (Exception)
+            {
+                return Error.Technical("Kunne ikke slette medicin");
             }
         }
 
-        //Opdater medicin
+        // Opdater medicin
         public async Task<Result> UpdateMedicinAsync(MedicinModel medicinModel)
         {
+            if (medicinModel == null)
+                return Error.Validation("Medicin må ikke være null");
+
             try
             {
                 await _medicinRepository.UpdateMedicinAsync(medicinModel);
+
                 return Result.Ok();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException)
             {
-                return Result.Fail(ex.Message);
+                return Error.NotFound("Medicin blev ikke fundet");
+            }
+            catch (Exception)
+            {
+                return Error.Technical("Kunne ikke opdatere medicin");
             }
         }
 
-        //Marker medicin som taget/ikke taget
+        // Marker medicin som taget/ikke taget
         public async Task<Result> SetMedicinCheckedAsync(int medicinTimeId, bool isChecked)
         {
+            if (medicinTimeId <= 0)
+                return Error.Validation("Ugyldigt medicin ID");
+
             try
             {
                 var medicin = await _medicinRepository.GetMedicinByIdAsync(medicinTimeId);
 
                 if (medicin == null)
-                    return Result.Fail("Medicin blev ikke fundet");
+                    return Error.NotFound("Medicin blev ikke fundet");
 
                 medicin.IsChecked = isChecked;
                 medicin.MedicinCheckTimeStamp = isChecked ? DateTime.UtcNow : null;
@@ -86,9 +120,9 @@ namespace OverlapssytemApplication.Services
 
                 return Result.Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Result.Fail(ex.Message);
+                return Error.Technical("Kunne ikke opdatere medicin status");
             }
         }
     }

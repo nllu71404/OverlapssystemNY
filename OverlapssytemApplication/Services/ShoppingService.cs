@@ -2,6 +2,7 @@
 using OverlapssystemDomain.Enums;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Common.Errors;
 using OverlapssytemApplication.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -20,55 +21,84 @@ namespace OverlapssytemApplication.Services
             _shoppingrepository = shoppingrepository;
         }
 
-        //Hent shopping
+        // Hent shopping
         public async Task<Result<List<ShoppingModel>>> GetShoppingByResidentIdAsync(int residentId)
         {
-            var result = await _shoppingrepository.GetShoppingByResidentIdAsync(residentId);
+            if (residentId <= 0)
+                return Error.Validation("Ugyldigt resident ID");
 
-            return Result<List<ShoppingModel>>.Ok(result ?? new List<ShoppingModel>());
+            try
+            {
+                var result = await _shoppingrepository.GetShoppingByResidentIdAsync(residentId);
+
+                return result ?? new List<ShoppingModel>(); // implicit success
+            }
+            catch (Exception)
+            {
+                return Error.Technical("Kunne ikke hente shopping");
+            }
         }
 
-        //Slet shopping
+        // Slet shopping
         public async Task<Result> DeleteShoppingAsync(int shoppingId)
         {
+            if (shoppingId <= 0)
+                return Error.Validation("Ugyldigt shopping ID");
+
             try
             {
                 await _shoppingrepository.DeleteShoppingAsync(shoppingId);
+
                 return Result.Ok();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException)
             {
-                return Result.Fail(ex.Message);
+                return Error.NotFound("Shopping findes ikke");
+            }
+            catch (Exception)
+            {
+                return Error.Technical("Kunne ikke slette shopping");
             }
         }
 
-        //Opret shopping
+        // Opret shopping
         public async Task<Result<int>> SaveNewShoppingAsync(ShoppingModel shoppingModel)
         {
+            if (shoppingModel == null)
+                return Error.Validation("Shopping må ikke være null");
+
             try
             {
                 var id = await _shoppingrepository.SaveNewShoppingAsync(shoppingModel);
-                return Result<int>.Ok(id);
+
+                return id; // implicit success
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Result<int>.Fail(ex.Message);
+                return Error.Technical("Kunne ikke oprette shopping");
             }
         }
 
-        //Update shopping
+        // Update shopping
         public async Task<Result> UpdateShoppingAsync(ShoppingModel shopping)
         {
+            if (shopping == null)
+                return Error.Validation("Shopping må ikke være null");
+
             try
             {
                 await _shoppingrepository.UpdateShoppingAsync(shopping);
+
                 return Result.Ok();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException)
             {
-                return Result.Fail(ex.Message);
+                return Error.NotFound("Shopping findes ikke");
+            }
+            catch (Exception)
+            {
+                return Error.Technical("Kunne ikke opdatere shopping");
             }
         }
-
     }
 }

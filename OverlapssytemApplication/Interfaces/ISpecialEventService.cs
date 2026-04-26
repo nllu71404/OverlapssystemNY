@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Interfaces;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssytemApplication.Interfaces
 {
     public interface ISpecialEventService
     {
-        Task<List<SpecialEventModel>> GetSpecialEventByResidentIdAsync(int residentId);
-        Task<int> SaveNewSpecialEventAsync(SpecialEventModel specialEvent);
-        Task UpdateSpecialEventAsync(SpecialEventModel specialEvent);
-        Task DeleteSpecialEventAsync(int specialEventID);
+        Task<Result<List<SpecialEventModel>>> GetSpecialEventByResidentIdAsync(int residentId);
+        Task<Result<int>> SaveNewSpecialEventAsync(SpecialEventModel specialEvent);
+        Task<Result> UpdateSpecialEventAsync(SpecialEventModel specialEvent);
+        Task<Result> DeleteSpecialEventAsync(int specialEventID);
 
 
     }

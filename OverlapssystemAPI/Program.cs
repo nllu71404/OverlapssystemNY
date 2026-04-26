@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+using OverlapssystemAPI.Middleware;
 using OverlapssystemDomain.Interfaces;
 using OverlapssystemInfrastructure.Repositories;
 using OverlapssytemApplication.Interfaces;
@@ -42,10 +42,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+//Global error handling (tidlig)
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+//Secuity/ transport
 app.UseHttpsRedirection();
 
+//Auth
+app.UseAuthentication();
 app.UseAuthorization();
 
+//Endpoints
 app.MapControllers();
 
 app.Run();
