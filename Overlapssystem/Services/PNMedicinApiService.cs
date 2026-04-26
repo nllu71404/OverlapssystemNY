@@ -25,9 +25,9 @@ namespace Overlapssystem.Services
         }
 
         //Update
-        public async Task UpdatePNMedicin(int pNMedicinId, PNMedicinModel pNMedicin)
+        public async Task UpdatePNMedicin(int pNMedicinId, UpdatePNMedicinDTO pNMedicinDto)
         {
-            await _http.PutAsJsonAsync($"api/PNMedicin/{pNMedicinId}", pNMedicin);
+            await _http.PutAsJsonAsync($"api/PNMedicin/{pNMedicinId}", pNMedicinDto);
         }
 
         //Delete

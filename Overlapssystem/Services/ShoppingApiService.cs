@@ -18,16 +18,16 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<ShoppingModel>>($"api/Shopping/Shopping/{residentId}");
         }
         //Tilføj
-        public async Task<int> SaveNewShopping(AddShoppingDTO addShoppingDTO)
+        public async Task<int> AddShopping(AddShoppingDTO addShoppingDTO)
         {
             var response = await _http.PostAsJsonAsync("api/Shopping/TilføjShopping", addShoppingDTO);
             return await response.Content.ReadFromJsonAsync<int>();
         }
 
         //Update
-        public async Task UpdateShopping(int shoppingId, ShoppingModel shoppingModel)
+        public async Task UpdateShopping(int shoppingId, UpdateShoppingDTO shoppingDto)
         {
-            await _http.PutAsJsonAsync($"api/Shopping/{shoppingId}", shoppingModel);
+            await _http.PutAsJsonAsync($"api/Shopping/{shoppingId}", shoppingDto);
         }
 
         //Delete

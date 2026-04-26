@@ -5,8 +5,11 @@
 @using OverlapssystemDomain.Interfaces
 @using Overlapssystem.Services
 @using OverlapssystemShared
+@using Overlapssystem.ViewModels
+@using Overlapssystem.Interfaces
 
-@inject ResidentApiService api
+@inject ResidentViewModel residentViewModel
+@inject IResidentFacade residentFacade
 @inject NavigationManager Navigation
 
 
@@ -48,7 +51,7 @@ else
     {
         try
         {
-            residents = await api.GetByDepartment(departmentId);
+            residents = await residentFacade.GetResidentByDepartment(departmentId);
         }
         catch (Exception ex)
         {
@@ -57,21 +60,21 @@ else
         }
     }
 
-    private async Task SaveResidentAsync(ResidentModel resident)
+    private async Task SaveResidentAsync(ResidentViewModel vm)
     {
-        await api.UpdateResident(resident.ResidentId, resident);
-        residents = await api.GetByDepartment(departmentId);
+        await residentFacade.UpdateResident(vm);
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
 
-    private async Task DeleteResidentAsync(ResidentModel resident)
+    private async Task DeleteResidentAsync(ResidentViewModel vm)
     {
-        await api.DeleteResident(resident.ResidentId);
-        residents = await api.GetByDepartment(departmentId);
+        await residentFacade.DeleteResident(vm.Id);
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
     private void LogOut()
     {
         Navigation.NavigateTo("/");
     }
 
-    List<ResidentModel> residents = new();
+    List<ResidentViewModel> residents = new();
 }

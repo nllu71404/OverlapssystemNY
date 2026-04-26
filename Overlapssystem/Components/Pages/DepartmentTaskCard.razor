@@ -1,7 +1,11 @@
 ﻿@using OverlapssystemDomain.Entities
 @using Overlapssystem.Services
 @using OverlapssystemDomain.Enums;
-@inject DepartmentTaskApiService departmentTaskApiService
+@using Overlapssystem.Facades;
+@using Overlapssystem.ViewModels;
+@using Overlapssystem.Interfaces;
+
+@inject IDepartmentTaskFacade departmentTaskFacade
 @inject IJSRuntime JS
 
 <div class="department-task-card">
@@ -67,24 +71,24 @@
     public EventCallback<int> OnAdd { get; set; }
 
     [Parameter]
-    public EventCallback<DepartmentTaskModel> OnDelete { get; set; }
+    public EventCallback<DepartmentTaskViewModel> OnDelete { get; set; }
 
-    public List<DepartmentTaskModel> Tasks { get; set; } = new();
+    public List<DepartmentTaskViewModel> Tasks { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        Tasks = await departmentTaskApiService.GetDepartmentTasksByDepartmentId(DepartmentId);
+        Tasks = await departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId);
     }
 
     // Allow parent to ask this component to refresh its list after parent creates/updates.
     public async Task RefreshAsync()
     {
-        Tasks = await departmentTaskApiService.GetDepartmentTasksByDepartmentId(DepartmentId);
+        Tasks = await departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId);
         StateHasChanged();
     }
 
-    private async Task UpdateDepartmentTask(DepartmentTaskModel task)
+    private async Task UpdateDepartmentTask(DepartmentTaskViewModel task)
     {
-        await departmentTaskApiService.UpdateDepartmentTask(task.DepartmentTaskID, task);
+        await departmentTaskFacade.UpdateDepartmentTask(task);
     }
 }

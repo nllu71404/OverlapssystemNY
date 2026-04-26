@@ -4,6 +4,9 @@ using OverlapssystemDomain.Interfaces;
 using OverlapssystemInfrastructure.Repositories;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
+using Overlapssystem.Facades;
+using Overlapssystem.Interfaces;
+using Overlapssystem.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +27,15 @@ builder.Services.AddScoped<PNMedicinApiService>();
 builder.Services.AddScoped<ShoppingApiService>();
 builder.Services.AddScoped<DepartmentTaskApiService>();
 builder.Services.AddScoped<SpecialEventApiService>();
+builder.Services.AddScoped<IResidentFacade, ResidentFacade>();
+builder.Services.AddScoped<IDepartmentTaskFacade, DepartmentTaskFacade>();
+builder.Services.AddScoped<ResidentViewModel>();
+builder.Services.AddScoped<DepartmentTaskViewModel>();
+builder.Services.AddScoped<MedicinViewModel>();
+builder.Services.AddScoped<PNMedicinViewModel>();
+builder.Services.AddScoped<ShoppingViewModel>();
+builder.Services.AddScoped<SpecialEventViewModel>();
+builder.Services.AddScoped<DepartmentViewModel>();
 
 
 var app = builder.Build();

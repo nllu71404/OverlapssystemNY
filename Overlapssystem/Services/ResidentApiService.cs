@@ -16,18 +16,18 @@ namespace Overlapssystem.Services
             _http = http;
         }
 
-        public async Task<List<ResidentModel>> GetAllResidents()
+        public async Task<List<ResidentDTO>> GetAllResidents()
         {
-            return await _http.GetFromJsonAsync<List<ResidentModel>>("api/Resident/HenterResident");
+            return await _http.GetFromJsonAsync<List<ResidentDTO>>("api/Resident/HenterResident");
         }
 
-        public async Task<int> CreateResident(ResidentModel resident)
+        public async Task<int> AddResident(AddResidentDTO resident)
         {
             var response = await _http.PostAsJsonAsync("api/Resident/OpretResident", resident);
             return await response.Content.ReadFromJsonAsync<int>();
         }
 
-        public async Task UpdateResident(int id, ResidentModel resident)
+        public async Task UpdateResident(int id, ResidentDTO resident)
         {
             await _http.PutAsJsonAsync($"api/Resident/{id}", resident);
         }
@@ -37,9 +37,9 @@ namespace Overlapssystem.Services
             await _http.DeleteAsync($"api/Resident/{id}");
         }
 
-        public async Task<List<ResidentModel>> GetByDepartment(int? id)
+        public async Task<List<ResidentDTO>> GetByDepartment(int? id)
         {
-            return await _http.GetFromJsonAsync<List<ResidentModel>>($"api/Resident/Department/{id}");
+            return await _http.GetFromJsonAsync<List<ResidentDTO>>($"api/Resident/Department/{id}");
         }
 
         

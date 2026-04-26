@@ -25,9 +25,9 @@ namespace Overlapssystem.Services
         }
 
         //Update
-        public async Task UpdateSpecialEvent(int specialEventID, SpecialEventModel specialEventModel)
+        public async Task UpdateSpecialEvent(int specialEventID, UpdateSpecialEventDTO specialEventDto)
         {
-            await _http.PutAsJsonAsync($"api/SpecialEvent/{specialEventID}", specialEventModel);
+            await _http.PutAsJsonAsync($"api/SpecialEvent/{specialEventID}", specialEventDto);
         }
 
         //Delete
