@@ -19,16 +19,11 @@ namespace OverlapssystemInfrastructure.Repositories
         {
             _context = context;
         }
-        public async Task CreateUser(string userName, string userPassword, UserRole userRole)
+        public async Task<int> CreateUser( UserModel usermodel)
         {
-            var user = new UserModel
-            {
-                UserName = userName,
-                UserPassword = userPassword,
-                UserRole = userRole
-            };
-            _context.Users.Add(user);
+            await _context.Users.AddAsync(usermodel);
             await _context.SaveChangesAsync();
+            return usermodel.UserID;
         }
 
         public async Task DeleteUser(int userID)
@@ -48,14 +43,14 @@ namespace OverlapssystemInfrastructure.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.UserID == userID);
         }
 
-        public Task UpdateUser(int userID, string userName, string userPassword, UserRole userRole)
+        public async Task UpdateUser(int userID, UserModel usermodel)
         {
-            var user = new UserModel
-            {
-                UserName = userName,
-                UserPassword = userPassword,
-                UserRole = userRole
-            };
+            var user =await GetUserByID(userID);
+
+            user.UserName = usermodel.UserName;
+            user.UserPassword = usermodel.UserPassword;
+            user.UserRole = usermodel.UserRole;
+
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
