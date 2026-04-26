@@ -25,8 +25,13 @@ builder.Services.AddScoped<IDepartmentTaskRepository, DepartmentTaskRepository>(
 builder.Services.AddScoped<IDepartmentTaskService, DepartmentTaskService>();
 builder.Services.AddScoped<ISpecialEventRepository,  SpecialEventRepository>();
 builder.Services.AddScoped<ISpecialEventService, SpecialEventService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+
 builder.Services.AddDbContext<OverlapssystemInfrastructure.Data.OverlapDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ProjektDB"))); //Tilføjer DbContext og konfigurerer den til at bruge SQL Server med en forbindelse streng fra appsettings.json
+
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

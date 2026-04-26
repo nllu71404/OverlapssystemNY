@@ -1,0 +1,38 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@using OverlapssystemDomain.Entities
+@using OverlapssystemDomain.Enums
+@using OverlapssystemDomain.Interfaces
+@using Overlapssystem.Services
+@using OverlapssystemShared
+
+@inject UserApiService apiService
+@inject NavigationManager navigation
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Log ind</h2>
+
+        <div class="input-group">
+            <input type="text" placeholder="Indtast brugernavn" @bind="userName" />
+        </div>
+
+        <div class="input-group">
+            <input type="password" placeholder="Indtast password" @bind="password" />
+        </div>
+
+        <button class="login-btn" @onclick="HandleLogin">Login</button>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="error-msg">@errorMessage</p>
+        }
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public UserModel User { get; set; } = new();
+
+    private async Task  
+}

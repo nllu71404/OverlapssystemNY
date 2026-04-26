@@ -10,10 +10,12 @@ namespace OverlapssystemDomain.Interfaces
     public interface IUserRepository
     {
             
-            Task<List<UserModel>> GetAllUsers();
-            Task<UserModel> GetUserByID(int userID);
-            Task<int> CreateUser(UserModel usermodel);
-            Task UpdateUser(int userID, UserModel usermodel);
-            Task DeleteUser(int userID);
+        Task<List<UserModel>> GetAllUsers();
+        Task<UserModel> GetUserByID(int userID);
+        Task<UserModel> GetUserByUserName(string userName);
+        Task<int> CreateUser(UserModel usermodel);
+        Task UpdateUser(int userID, UserModel usermodel);
+        Task DeleteUser(int userID);
+            
     }
 }

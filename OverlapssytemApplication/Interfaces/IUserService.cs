@@ -13,8 +13,10 @@ namespace OverlapssytemApplication.Interfaces
     {
         Task<Result<List<UserModel>>> GetAllUsersAsync();
         Task<Result<UserModel>> GetUserByIdAsync(int userID);
+        Task<Result<UserModel>> GetUserByUserName(string userName);
         Task<Result<int>> CreateNewUserAsync(UserModel usermodel);
         Task<Result> DeleteUserAsync(int id);
         Task<Result> UpdateUserAsync(UserModel usermodel);
+        Task<Result> ValidateUserAsync(string userName, string password);
     }
 }
