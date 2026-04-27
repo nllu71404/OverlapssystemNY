@@ -761,12 +761,13 @@ END;
 GO
 
 -- Get EmployeePhoneNumber by DepartmentID
-CREATE OR ALTER   PROCEDURE [dbo].[uspGetEmployeePhoneNumberByDepartmentID]
+CREATE OR ALTER PROCEDURE [dbo].[uspGetEmployeePhoneNumberByDepartmentID]
 @DepartmentID INT
 AS
 BEGIN
 SELECT * FROM dbo.EmployeePhone WHERE DepartmentID = @DepartmentID
 END;
+GO
 
 -- Gets Employee by EmployeeName
 CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
@@ -778,7 +779,7 @@ END;
 GO
 
 -- Updates a EmployeePhone by id in the EmployeePhone table
-ALTER PROCEDURE [dbo].[uspUpdateEmployeePhoneById]
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateEmployeePhoneById]
 
 @EmployeePhoneID INT,
 @DepartmentID INT,
@@ -796,6 +797,7 @@ BEGIN
         Test = @Test
     WHERE EmployeePhoneID = @EmployeePhoneID;
 END
+GO 
 
 -- Delete an EmployeePhone entry in the EmployeePhone table
 CREATE OR ALTER PROCEDURE [dbo].[uspDeleteEmployeePhone]
