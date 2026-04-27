@@ -31,6 +31,14 @@ namespace OverlapssystemAPI.Controllers
             return Handle(restult);
         }
 
+        //Hent på brugernavn
+        [HttpGet("HenterBrugere/Brugernavn/{username}")]
+        public async Task<IActionResult> GetUsersByUsername(string username)
+        {
+            var restult = await _userService.GetUserByUserNameAsync(username);
+            return Handle(restult);
+        }
+
         //Tilføj
         [HttpPost("OpretBruger")]
         public async Task<IActionResult> CreateUser([FromBody] AddUserDTO userDTO)
@@ -43,7 +51,7 @@ namespace OverlapssystemAPI.Controllers
 
             var newuser = await _userService.CreateNewUserAsync(usermodel);
 
-            if(!newuser.Success) return Handle(newuser);
+            if (!newuser.Success) return Handle(newuser);
 
             return Created($"/api/Medicin/{newuser.Value}", newuser.Value);
 
@@ -63,6 +71,17 @@ namespace OverlapssystemAPI.Controllers
         {
             await _userService.UpdateUserAsync(usermodel);
             return Ok(userID);
+        }
+        //Validering
+        public async Task<IActionResult> ValidateUser([FromBody] AddUserDTO userDTO)
+        {
+            var result = await _userService.ValidateUserAsync(userDTO.UserName, userDTO.Password);
+            if (!result.Success)
+            {
+                return Unauthorized(new { message = result.Error.Message ?? "Ingen adgang" });
+            }
+
+            return Ok(true);
         }
     }
 }

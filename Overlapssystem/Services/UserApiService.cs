@@ -22,6 +22,12 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<UserModel>($"api/Brugere/HenterBrugere/{userID}");
         }
 
+        //Hent på brugernavn
+        public async Task<UserModel> GetUserByUsername(string username)
+        {
+            return await _http.GetFromJsonAsync<UserModel>($"api/Brugere/HenterBrugere/Brugernavn/{username}");
+        }
+
         //Tilføj
         public async Task<int> CreateUser(AddUserDTO userDTO)
         {
@@ -37,6 +43,25 @@ namespace Overlapssystem.Services
         public async Task UpdateUser(int userID, AddUserDTO userDTO)
         {
             await _http.PutAsJsonAsync($"api/Brugere/{userID}", userDTO);
+        }
+        //Validering
+        public async Task<bool> ValidateUser(string username, string password)
+        {
+            var dto = new { UserName = username, Password = password };
+            var response = await _http.PostAsJsonAsync($"api/Brugere/ValiderBruger", dto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var success = await response.Content.ReadFromJsonAsync<bool>();
+                return success;
+            }
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return false;
+            }
+            response.EnsureSuccessStatusCode();
+            return false;
+
         }
     }
 }

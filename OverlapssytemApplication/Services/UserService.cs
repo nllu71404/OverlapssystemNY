@@ -94,6 +94,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
+
         public async Task<Result<int>> CreateNewUserAsync(UserModel usermodel)
         {
             if (usermodel == null) return Error.Validation("Brugermodellen er påkrævet");
@@ -178,6 +179,8 @@ namespace OverlapssytemApplication.Services
                 return Error.Technical("Fejl ved validering af bruger");
             }
         }
+
+        
     }
 }
         

@@ -34,5 +34,43 @@
     [Parameter]
     public UserModel User { get; set; } = new();
 
-    private async Task  
+    private string userName = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = string.Empty;
+
+        if(string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Brugernavn og password må ikke være tomme.";
+            return;
+        }
+        try
+        {
+            isLoading = true;
+
+            //Venter på ApiService til at returnerer en book
+            var validUser = await apiService.ValidateUser(userName, password);
+
+            if (validUser)
+            {
+                navigation.NavigateTo("/HandoverScheme");
+            }
+            else
+            {
+				errorMessage = "Ugyldigt brugernavn eller password.";
+            }
+        } catch (Exception ex)
+        {
+            errorMessage = $"Der opstod en fejl: {ex.Message}";
+        }
+        finally
+        {
+			isLoading = false;
+        }
+
+	}
 }
