@@ -24,13 +24,14 @@ namespace OverlapssystemAPI.Controllers
             return Handle(result);
         }
 
-        
+
 
         // Tilføj
         [HttpPost("OpretResident")]
-        public async Task<IActionResult> CreateResident([FromBody] ResidentModel resident)
+        public async Task<IActionResult> CreateResident([FromBody] AddResidentDTO resident)
         {
-            var result = await _residentServices.CreateResidentAsync(resident);
+            var residentModel = MapToResidentModel(resident);
+            var result = await _residentServices.CreateResidentAsync(residentModel);
 
             if (!result.Success)
             {
@@ -42,11 +43,10 @@ namespace OverlapssystemAPI.Controllers
 
         // Update
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateResident(int id, [FromBody] ResidentModel resident)
+        public async Task<IActionResult> UpdateResident(int id, [FromBody] UpdateResidentDTO resident)
         {
-            resident.ResidentId = id; // Sørger for at ID'et i URL'en bruges til at identificere hvilken beboer der skal opdateres
-
-            var result = await _residentServices.UpdateResidentAsync(resident);
+            var residentModel = MapToUpdateResidentModel(resident, id);
+            var result = await _residentServices.UpdateResidentAsync(residentModel);
             return Handle(result);
         }
 
@@ -65,10 +65,41 @@ namespace OverlapssystemAPI.Controllers
             var result = await _residentServices.LoadResidentsByDepartmentAsync(id);
             return Handle(result);
         }
+    
+
+    // ---- Mapping helpers -----
+
+     private ResidentModel MapToResidentModel(AddResidentDTO dto)
+        {
+            return new ResidentModel
+            {
+                Name = dto.Name,
+                DepartmentId = dto.DepartmentId,
+                Status = dto.Status,
+                Activity = dto.Activity,
+                Family = dto.Family,
+                ResidentEmployee = dto.ResidentEmployee,
+                Risiko = dto.Risiko,
+                Mood = dto.Mood
+            };
+        }
+
+        private ResidentModel MapToUpdateResidentModel(UpdateResidentDTO dto, int id)
+        {
+            return new ResidentModel
+            {
+                ResidentId = id,
+                Name = dto.Name,
+                DepartmentId = dto.DepartmentId,
+                Status = dto.Status,
+                Activity = dto.Activity,
+                Family = dto.Family,
+                ResidentEmployee = dto.ResidentEmployee,
+                Risiko = dto.Risiko,
+                Mood = dto.Mood
+            };
+        }
+
     }
-
-
-
-
 }
 

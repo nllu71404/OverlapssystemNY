@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OverlapssystemShared
 {
-    public class ResidentDTO //Bruges til Get-funktioner
+    public class UpdateResidentDTO
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
@@ -19,10 +19,5 @@ namespace OverlapssystemShared
 
         public Risiko Risiko { get; set; }
         public Mood Mood { get; set; }
-
-        public List<MedicinTimeDTO> MedicinTimes { get; set; } = new();
-        public List<PNMedicinDTO> PNMedicin { get; set; } = new();
-        public List<UpdateShoppingDTO> Shopping { get; set; } = new();
-        public List<UpdateSpecialEventDTO> SpecialEvents { get; set; } = new();
     }
 }

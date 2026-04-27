@@ -31,7 +31,7 @@ namespace Overlapssystem.Facades
             await _residentApi.UpdateResident(vm.Id, dto);
         }
 
-        public async Task DeleteResident(int residentId) 
+        public async Task DeleteResident(int residentId)
         {
             await _residentApi.DeleteResident(residentId);
         }
@@ -45,7 +45,7 @@ namespace Overlapssystem.Facades
 
         public async Task<List<ResidentViewModel>> GetAllResidents()
         {
-           var dtos = await _residentApi.GetAllResidents();
+            var dtos = await _residentApi.GetAllResidents();
             var residents = dtos.Select(dto => MapResident(dto)).ToList();
             return residents;
         }
@@ -146,9 +146,9 @@ namespace Overlapssystem.Facades
 
 
         // Resident
-        private ResidentDTO MapUpdateResident(ResidentViewModel vm)
+        private UpdateResidentDTO MapUpdateResident(ResidentViewModel vm)
         {
-            return new ResidentDTO
+            return new UpdateResidentDTO
             {
                 Id = vm.Id,
                 DepartmentId = vm.DepartmentId,
@@ -189,7 +189,23 @@ namespace Overlapssystem.Facades
                 Family = dto.Family,
                 ResidentEmployee = dto.ResidentEmployee,
                 Risiko = dto.Risiko,
-                Mood = dto.Mood
+                Mood = dto.Mood,
+
+                 MedicinTimes = dto.MedicinTimes?
+            .Select(MapMedicin)
+            .ToList() ?? new List<MedicinViewModel>(),
+
+                PNMedicin = dto.PNMedicin?
+            .Select(MapPNMedicin)
+            .ToList() ?? new List<PNMedicinViewModel>(),
+
+                Shopping = dto.Shopping?
+            .Select(MapShopping)
+            .ToList() ?? new List<ShoppingViewModel>(),
+
+                SpecialEvents = dto.SpecialEvents?
+            .Select(MapSpecialEvent)
+            .ToList() ?? new List<SpecialEventViewModel>()
             };
         }
 
@@ -214,13 +230,24 @@ namespace Overlapssystem.Facades
             };
         }
 
+        private MedicinViewModel MapMedicin(MedicinTimeDTO dto) //Child mapping - bruges i MapResident
+        {
+            return new MedicinViewModel
+            {
+                MedicinTimeID = dto.MedicinTimeID,
+                ResidentID = dto.ResidentID,
+                MedicinTimeText = dto.MedicinTime?.ToString(@"hh\:mm") ?? string.Empty,
+                IsChecked = dto.IsChecked,
+                MedicinCheckTimeStampText = dto.MedicinCheckTimeStamp?.ToString("HH:mm") ?? string.Empty
+            };
+        }
+
         // PNMedicin
         private UpdatePNMedicinDTO MapUpdatePNMedicin(PNMedicinViewModel vm)
         {
             return new UpdatePNMedicinDTO
             {
                 PNMedicinID = vm.PNMedicinID,
-                ResidentID = vm.ResidentID,
                 PNTime = vm.PNTime,
                 Reason = vm.Reason
             };
@@ -235,6 +262,17 @@ namespace Overlapssystem.Facades
                 ResidentID = vm.ResidentID,
                 PNTime = vm.PNTime,
                 Reason = vm.Reason
+            };
+        }
+
+        private PNMedicinViewModel MapPNMedicin(PNMedicinDTO dto) //Child mapping - bruges i MapResident
+        {
+            return new PNMedicinViewModel
+            {
+                PNMedicinID = dto.PNMedicinID,
+                ResidentID = dto.ResidentID,
+                PNTime = dto.PNTime,
+                Reason = dto.Reason
             };
         }
 
@@ -262,6 +300,18 @@ namespace Overlapssystem.Facades
             };
         }
 
+        private ShoppingViewModel MapShopping(UpdateShoppingDTO dto) // Child mapping - bruges i MapResident
+        {
+            return new ShoppingViewModel
+            {
+                ShoppingID = dto.ShoppingID,
+                ResidentID = dto.ResidentID,
+                Day = dto.Day,
+                TimeText = dto.Time?.ToString(@"hh\:mm") ?? string.Empty,
+                PaymentMethod = dto.PaymentMethod
+            };
+        }
+
         // SpecialEvent
 
         private UpdateSpecialEventDTO MapUpdateSpecialEvent(SpecialEventViewModel vm)
@@ -282,6 +332,17 @@ namespace Overlapssystem.Facades
                 ResidentID = vm.ResidentID,
                 SpecialEventNote = vm.SpecialEventNote,
                 SpecialEventDateTime = DateTime.TryParse(vm.SpecialEventDateTimeText, out var dt) ? dt : (DateTime?)null
+            };
+        }
+
+        private SpecialEventViewModel MapSpecialEvent(UpdateSpecialEventDTO dto) // Child mapping - bruges i MapResident
+        {
+            return new SpecialEventViewModel
+            {
+                SpecialEventID = dto.SpecialEventID,
+                ResidentID = dto.ResidentID,
+                SpecialEventNote = dto.SpecialEventNote,
+                SpecialEventDateTimeText = dto.SpecialEventDateTime?.ToString("yyyy-MM-dd HH:mm") ?? string.Empty
             };
         }
     }

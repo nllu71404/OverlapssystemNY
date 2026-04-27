@@ -27,7 +27,7 @@ namespace Overlapssystem.Services
             return await response.Content.ReadFromJsonAsync<int>();
         }
 
-        public async Task UpdateResident(int id, ResidentDTO resident)
+        public async Task UpdateResident(int id, UpdateResidentDTO resident)
         {
             await _http.PutAsJsonAsync($"api/Resident/{id}", resident);
         }

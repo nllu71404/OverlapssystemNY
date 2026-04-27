@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace OverlapssystemShared
 {
-    internal class PNMedicinDTO
+    public class PNMedicinDTO
     {
+        public int PNMedicinID { get; set; }
+        public int ResidentID { get; set; }
+        public DateTime? PNTime { get; set; }
+        public string Reason { get; set; } = "";
     }
 }

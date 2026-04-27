@@ -7,10 +7,7 @@
 
 @inject IJSRuntime JS
 @inject IResidentFacade residentFacade
-@inject MedicinViewModel medicinViewModel
-@inject PNMedicinViewModel pnMedicinViewModel
-@inject SpecialEventViewModel specialEventViewModel
-@inject ShoppingViewModel shoppingViewModel
+
 
 
 <div class="resident-card @GetRiskClass()">
@@ -70,7 +67,7 @@
     <div class="section">
         <div class="section-header">
             <strong>MEDICIN TIDER</strong>
-            <button class="btn-plus" @onclick="() => AddMedicinTimeAsync(medicinViewModel)">+</button>
+            <button class="btn-plus" @onclick="AddMedicinTimeAsync">+</button>
         </div>
 
         <ul>
@@ -87,7 +84,7 @@
                 <input type="checkbox"
                        checked="@med.IsChecked"
                        @onchange="async e => {
-                       await residentFacade.SetMedicinChecked(medicinViewModel, (bool)e.Value!);
+                       await SetMedicinChecked(med, (bool)e.Value!);
                        med.IsChecked = (bool)e.Value!;
                                   }" />
 
@@ -113,7 +110,7 @@
         <div class="section-header">
             <strong>PN MEDICIN</strong>
             <button class="btn-plus"
-                    @onclick="() => AddPNMedicinAsync(pnMedicinViewModel)">+</button>
+                    @onclick="AddPNMedicinAsync">+</button>
         </div>
 
         <ul>
@@ -141,7 +138,7 @@
     <div class="section">
         <div class="section-header">
             <strong>HANDLEDAG</strong>
-            <button class="btn-plus" @onclick="() => residentFacade.AddShopping(shoppingViewModel)">+</button>
+            <button class="btn-plus" @onclick="AddShopping">+</button>
         </div>
 
         <ul>
@@ -180,7 +177,7 @@
     <div class="section">
         <div class="section-header">
             <strong>SÆRLIG HÆNDELSE</strong>
-            <button class="btn-plus" @onclick="() => residentFacade.AddSpecialEvent(specialEventViewModel)">+</button>
+            <button class="btn-plus" @onclick="AddSpecialEvent">+</button>
             </div>
 
             <ul>
@@ -255,12 +252,19 @@
     // Medicin
     private async Task UpdateMedicinTimeAsync(MedicinViewModel vm)
     {
+      
         await residentFacade.UpdateMedicin(vm);
     }
 
-    private async Task AddMedicinTimeAsync(MedicinViewModel vm)
+    private async Task AddMedicinTimeAsync()
     {
-        await residentFacade.AddMedicinTime(vm);
+        var vm = new MedicinViewModel
+            {
+                ResidentID = Resident.Id,
+            };
+
+        var id = await residentFacade.AddMedicinTime(vm);
+        vm.MedicinTimeID = id;
 
         Resident.MedicinTimes.Add(vm);
     }
@@ -272,17 +276,39 @@
 
         if (!ok) return;
 
+
         await residentFacade.DeleteMedicinTime(vm);
 
         Resident.MedicinTimes.Remove(vm);
     }
 
+    private async Task SetMedicinChecked(MedicinViewModel vm, bool isChecked)
+    {
+        
+        await residentFacade.SetMedicinChecked(vm, isChecked);
+        vm.IsChecked = isChecked;
+        if (isChecked)
+        {
+            vm.MedicinCheckTimeStampText = DateTime.Now.ToString();
+        }
+        else
+        {
+            vm.MedicinCheckTimeStampText = null;
+        }
+    }
+
 
     // PN Medicin
 
-    private async Task AddPNMedicinAsync(PNMedicinViewModel vm)
+    private async Task AddPNMedicinAsync()
     {
-        await residentFacade.AddPNMedicinTime(vm);
+        var vm = new PNMedicinViewModel
+        {
+            ResidentID = Resident.Id,
+        };
+       
+        var id = await residentFacade.AddPNMedicinTime(vm);
+        vm.PNMedicinID = id;
 
         Resident.PNMedicin.Add(vm);
 
@@ -294,21 +320,29 @@
 
         if (!ok) return;
 
+     
+
         await residentFacade.DeletePNMedicinTime(vm);
         Resident.PNMedicin.Remove(vm);
     }
 
     private async Task UpdatePNMedicinTimeAsync(PNMedicinViewModel vm)
     {
+       
         await residentFacade.UpdatePNMedicin(vm);
     }
 
     // Shopping 
 
-    private async Task AddShopping(ShoppingViewModel vm)
+    private async Task AddShopping()
     {
-
-       await residentFacade.AddShopping(vm);
+        var vm = new ShoppingViewModel
+        {
+            ResidentID = Resident.Id,
+        };
+       
+        var id = await residentFacade.AddShopping(vm);
+        vm.ShoppingID = id;
 
         Resident.Shopping.Add(vm);
         
@@ -318,6 +352,7 @@
     {
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne handledag?");
         if (!ok) return;
+        
 
         await residentFacade.DeleteShopping(vm);
         
@@ -326,19 +361,27 @@
 
     private async Task UpdateShopping(ShoppingViewModel vm)
     {
+       
         await residentFacade.UpdateShopping(vm);
     }
 
     // Special Event
 
-    private async Task AddSpecialEvent(SpecialEventViewModel vm)
+    private async Task AddSpecialEvent()
     {
-        await residentFacade.AddSpecialEvent(vm);
+       var vm = new SpecialEventViewModel
+        {
+            ResidentID = Resident.Id,
+        };
+       
+        var id = await residentFacade.AddSpecialEvent(vm);
+        vm.SpecialEventID = id;
 
         Resident.SpecialEvents.Add(vm);
     }
     private async Task UpdateSpecialEvent(SpecialEventViewModel vm)
     {
+       
         await residentFacade.UpdateSpecialEvent(vm);
     }
 
@@ -346,6 +389,7 @@
     {
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne særlige hændelse?");
         if (!ok) return;
+
         await residentFacade.DeleteSpecialEvent(vm);
         Resident.SpecialEvents.Remove(vm);
     }

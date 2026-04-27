@@ -6,8 +6,17 @@ using System.Threading.Tasks;
 
 namespace OverlapssystemShared
 {
-    internal class MedicinTimeDTO
+    public class MedicinTimeDTO
     {
+        public int MedicinTimeID { get; set; }
+
+        public int ResidentID { get; set; }
+
+        public TimeSpan? MedicinTime { get; set; }
+
+        public bool IsChecked { get; set; }
+
+        public DateTime? MedicinCheckTimeStamp { get; set; }
 
     }
 }

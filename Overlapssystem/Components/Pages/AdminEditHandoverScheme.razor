@@ -12,7 +12,8 @@
 <h3>AdminEditHandoverScheme</h3>
 
 
-@inject DepartmentTaskApiService departmentTaskApi
+@inject DepartmentTaskApiService departmentTaskApi //Kig på denne
+@inject EmployeePhoneApiService employeePhoneApi// Kig på denne 
 @inject IResidentFacade residentFacade
 @inject IDepartmentTaskFacade departmentTaskFacade
 @inject ResidentViewModel residentViewModel
@@ -55,6 +56,11 @@ else
                     OnAdd="AddDepartmentTask"
                     OnDelete="DeleteDepartmentTask" />
 
+<EmployeePhoneCard @ref="employeePhoneCardRef"
+                   DepartmentId="departmentId"
+                   IsReadOnly="false"
+                   OnAdd="AddEmployeePhoneNumber"
+                   OnDelete="DeleteEmployeePhoneNumber" />
 
 
 
@@ -64,6 +70,8 @@ else
     public int departmentId { get; set; }
 
     private DepartmentTaskCard? departmentTaskCardRef;
+
+    private EmployeePhoneCard? employeePhoneCardRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -126,6 +134,34 @@ else
         if (departmentTaskCardRef is not null)
         {
             await departmentTaskCardRef.RefreshAsync();
+        }
+    }
+
+    private async Task AddEmployeePhoneNumber(int deptId)
+    {
+        var newPhone = new EmployeePhoneModel
+        {
+            DepartmentID = deptId,
+            PhoneNumber = string.Empty,
+            EmployeeName = string.Empty
+        };
+        await employeePhoneApi.SaveNewEmployeePhone(newPhone);
+        // Ask the child component to refresh its list
+        if (employeePhoneCardRef is not null)
+        {
+            await employeePhoneCardRef.RefreshAsync();
+        }
+    }
+
+    private async Task DeleteEmployeePhoneNumber(EmployeePhoneModel phone)
+    {
+        var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette dette telefonnummer?");
+        if (!ok) return;
+        await employeePhoneApi.DeleteEmployeePhone(phone.EmployeePhoneID);
+
+        if (employeePhoneCardRef is not null)
+        {
+            await employeePhoneCardRef.RefreshAsync();
         }
     }
 
