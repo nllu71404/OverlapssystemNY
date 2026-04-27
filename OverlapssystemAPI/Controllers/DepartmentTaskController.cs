@@ -2,6 +2,7 @@
 using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
+using OverlapssystemShared;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -41,21 +42,21 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj
         [HttpPut("TilføjDepartmentTask")]
-        public async Task<IActionResult> SaveNewDepartmentTaskAsync([FromBody] DepartmentTaskModel departmentTaskModel)
+        public async Task<IActionResult> SaveNewDepartmentTaskAsync([FromBody] AddDepartmentTaskDTO departmentTaskDTO)
         {
-            var result = await _departmentTaskService.SaveNewDepartmentTaskAsync(departmentTaskModel);
+            var mappedModel = MapToAddDepartmentTaskModel(departmentTaskDTO);
+            var result = await _departmentTaskService.SaveNewDepartmentTaskAsync(mappedModel);
+            return Handle(result);
 
-            if (!result.Success)
-                return Handle(result);
 
-            return Created($"/api/DepartmentTask/{result.Value}", result.Value);
         }
 
         //Update
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDepartmentTaskAsync(int id,[FromBody] DepartmentTaskModel departmentTaskModel)
+        public async Task<IActionResult> UpdateDepartmentTaskAsync(int id, [FromBody] UpdateDepartmentTaskDTO departmentTaskDTO)
         {
-            var result = await _departmentTaskService.UpdateDepartmentTaskAsync(departmentTaskModel);
+            var mappedModel = MapToUpdateDepartmentTaskModel(departmentTaskDTO);
+            var result = await _departmentTaskService.UpdateDepartmentTaskAsync(mappedModel);
             return Handle(result);
         }
 
@@ -65,6 +66,31 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentTaskService.DeleteDepartmentTaskAsync(id);
             return Handle(result);
+        }
+
+
+        // ----- Mapping -------
+
+        private DepartmentTaskModel MapToAddDepartmentTaskModel(AddDepartmentTaskDTO dto)
+        {
+            return new DepartmentTaskModel
+            {
+                DepartmentID = dto.DepartmentID,
+                DepartmentTaskTopic = dto.DepartmentTaskTopic,
+                EmployeeName = dto.EmployeeName,
+                ShiftType = dto.ShiftType
+            };
+        }
+
+        private DepartmentTaskModel MapToUpdateDepartmentTaskModel(UpdateDepartmentTaskDTO dto)
+        {
+            return new DepartmentTaskModel
+            {
+                DepartmentTaskID = dto.DepartmentTaskID,
+                DepartmentTaskTopic = dto.DepartmentTaskTopic,
+                EmployeeName = dto.EmployeeName,
+                ShiftType = dto.ShiftType
+            };
         }
     }
 }

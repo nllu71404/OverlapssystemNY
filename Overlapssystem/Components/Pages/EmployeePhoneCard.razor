@@ -1,5 +1,6 @@
 ﻿@using OverlapssystemDomain.Entities
 @using Overlapssystem.Services
+@using Overlapssystem.ViewModels
 @inject EmployeePhoneApiService employeePhoneApiService
 @inject IJSRuntime JS
 
@@ -103,23 +104,23 @@
 	[Parameter]
 	public EventCallback<int> OnAdd { get; set; }
 	[Parameter]
-	public EventCallback<EmployeePhoneModel> OnDelete { get; set; }
+	public EventCallback<EmployeePhoneViewModel> OnDelete { get; set; }
 
 	
-	public List<EmployeePhoneModel> EmployeePhones { get; set; } = new();
+	public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
 
-	protected override async Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync() // Denne skal bruge en facade, så den ikke har direkte adgang til API'et
 	{
 		EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
 	}
 
-    public async Task RefreshAsync()
+    public async Task RefreshAsync() // Denne skal bruge en facade, så den ikke har direkte adgang til API'et
     {
         EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
         StateHasChanged();
 	}
 
-    public async Task UpdateEmployeePhone(EmployeePhoneModel phone)
+    public async Task UpdateEmployeePhone(EmployeePhoneViewModel phone) // Denne skal bruge en facade, så den ikke har direkte adgang til API'et
     {
         await employeePhoneApiService.UpdateEmployeePhone(phone.EmployeePhoneID, phone);
       
