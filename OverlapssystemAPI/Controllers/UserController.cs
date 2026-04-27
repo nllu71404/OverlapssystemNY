@@ -10,9 +10,12 @@ namespace OverlapssystemAPI.Controllers
     public class UserController : ApiControllerBase
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly IAuthService _authService;
+
+        public UserController(IUserService userService, IAuthService authService)
         {
             _userService = userService;
+            _authService = authService;
         }
 
         //Hent alle
@@ -24,10 +27,10 @@ namespace OverlapssystemAPI.Controllers
         }
 
         //Hent på ID
-        [HttpGet("HenterBrugere/{userID}")]
-        public async Task<IActionResult> GetUsersById(int userID)
+        [HttpGet("HenterBrugere/{userId}")]
+        public async Task<IActionResult> GetUsersById(string userId)
         {
-            var restult = await _userService.GetUserByIdAsync(userID);
+            var restult = await _userService.GetUserByIdAsync(userId);
             return Handle(restult);
         }
 
@@ -43,39 +46,34 @@ namespace OverlapssystemAPI.Controllers
         [HttpPost("OpretBruger")]
         public async Task<IActionResult> CreateUser([FromBody] AddUserDTO userDTO)
         {
-            var usermodel = new UserModel
+            var userModel = new UserModel
             {
                 UserName = userDTO.UserName,
-                UserPassword = userDTO.Password,
             };
-
-            var newuser = await _userService.CreateNewUserAsync(usermodel);
-
-            if (!newuser.Success) return Handle(newuser);
-
-            return Created($"/api/Medicin/{newuser.Value}", newuser.Value);
-
+            var result = await _userService.CreateNewUserAsync(userModel, userDTO.Password);
+            return Handle(result);
         }
 
         //Slet
-        [HttpDelete("{userID")]
-        public async Task<IActionResult> DeleteUser(int userID)
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId)
         {
-            await _userService.DeleteUserAsync(userID);
-            return Ok(userID);
+            await _userService.DeleteUserAsync(userId);
+            return Ok(userId);
         }
 
         //Update
-        [HttpPut("{userID")]
-        public async Task<IActionResult> UpdateUser(int userID, [FromBody] UserModel usermodel)
+        [HttpPut("{userId}")]
+        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserModel usermodel)
         {
-            await _userService.UpdateUserAsync(usermodel);
-            return Ok(userID);
+            await _userService.UpdateUserAsync(userId, usermodel);
+            return Ok(userId);
         }
         //Validering
+        [HttpPost("ValiderBruger")]
         public async Task<IActionResult> ValidateUser([FromBody] AddUserDTO userDTO)
         {
-            var result = await _userService.ValidateUserAsync(userDTO.UserName, userDTO.Password);
+            var result = await _authService.LoginAsync(userDTO.UserName, userDTO.Password);
             if (!result.Success)
             {
                 return Unauthorized(new { message = result.Error.Message ?? "Ingen adgang" });

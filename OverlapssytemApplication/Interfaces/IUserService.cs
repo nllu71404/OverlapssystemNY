@@ -12,11 +12,10 @@ namespace OverlapssytemApplication.Interfaces
     public interface IUserService
     {
         Task<Result<List<UserModel>>> GetAllUsersAsync();
-        Task<Result<UserModel>> GetUserByIdAsync(int userID);
+        Task<Result<UserModel>> GetUserByIdAsync(string userId);
         Task<Result<UserModel>> GetUserByUserNameAsync(string userName);
-        Task<Result<int>> CreateNewUserAsync(UserModel usermodel);
-        Task<Result> DeleteUserAsync(int id);
-        Task<Result> UpdateUserAsync(UserModel usermodel);
-        Task<Result> ValidateUserAsync(string userName, string password);
+        Task<Result> CreateNewUserAsync(UserModel usermodel, string password);
+        Task<Result> DeleteUserAsync(string userId);
+        Task<Result> UpdateUserAsync(string userId, UserModel userModel);
     }
 }

@@ -9,58 +9,62 @@ using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Enums;
 using OverlapssystemDomain.Interfaces;
 using OverlapssystemInfrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace OverlapssystemInfrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly OverlapDbContext _context;
-        public UserRepository(OverlapDbContext context)
+        //Bruger UserManager fra ASP.NET Identity (indbygget klasse) til at håndtere brugere
+        private readonly UserManager<UserModel> _userManager;
+
+        public UserRepository(UserManager<UserModel> userManager)
         {
-            _context = context;
-        }
-        public async Task<int> CreateUser(UserModel usermodel)
-        {
-            await _context.Users.AddAsync(usermodel);
-            await _context.SaveChangesAsync();
-            return usermodel.UserID;
+            _userManager = userManager;
         }
 
-        public async Task DeleteUser(int userID)
+        // CreateAsync opretter brugeren i databasen og hasher passwordet automatisk
+        // Vi sender password som separat parameter da Identity aldrig gemmer det i plaintext
+        public async Task<IdentityResult> CreateUser(UserModel userModel, string password)
         {
-            var user = await GetUserByID(userID);
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            return await _userManager.CreateAsync(userModel, password);
+        }
+
+        // FindByIdAsync finder brugeren via Identity's eget Id (string/GUID)
+        // Vi bruger ikke længere int UserID da Identity genererer sit eget unikke Id
+        public async Task<IdentityResult> DeleteUser(string userId)
+        {
+            var user = await GetUserByID(userId);
+            return await _userManager.DeleteAsync(user);
         }
 
         public async Task<List<UserModel>> GetAllUsers()
         {
-            return await _context.Users.ToListAsync();
+            return _userManager.Users.ToList();
         }
 
-        public async Task<UserModel> GetUserByID(int userID)
+        public async Task<UserModel> GetUserByID(string userId)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserID == userID);
+            return await _userManager.FindByIdAsync(userId);
         }
 
         public async Task<UserModel> GetUserByUserName(string userName)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            return await _userManager.FindByNameAsync(userName);
         }
 
-        public async Task UpdateUser(int userID, UserModel usermodel)
+        // Vi opdaterer ikke password her - det håndteres separat via Identity's ChangePasswordAsync
+        // IdentityResult returneres så kalderen kan se om opdateringen lykkedes eller fejlede
+        public async Task<IdentityResult> UpdateUser(string userId, UserModel userModel)
         {
-            var user = await GetUserByID(userID);
-
-            user.UserName = usermodel.UserName;
-            user.UserPassword = usermodel.UserPassword;
-            user.UserRole = usermodel.UserRole;
-
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            var user = await GetUserByID(userId);
+            user.UserName = userModel.UserName;
+            user.UserRole = userModel.UserRole;
+            user.DepartmentId = userModel.DepartmentId;
+            return await _userManager.UpdateAsync(user);
         }
 
-        
+
     }
 
 }

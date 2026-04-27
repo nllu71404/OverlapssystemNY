@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
@@ -14,14 +13,12 @@ namespace OverlapssytemApplication.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordHasher<UserModel> _passwordHasher;
         private readonly ILogger<UserService> _logger;
 
         public UserService(
-            IUserRepository userRepository, IPasswordHasher<UserModel> passwordHasher, ILogger<UserService> logger)
+            IUserRepository userRepository, ILogger<UserService> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -29,9 +26,8 @@ namespace OverlapssytemApplication.Services
         {
             try
             {
-                var data = await _userRepository.GetAllUsers();
-                var users = data ?? new List<UserModel>();
-                return Result.Ok(users);
+                var users = await _userRepository.GetAllUsers();
+                return Result.Ok(users ?? new List<UserModel>());
             }
             catch (Exception ex)
             {
@@ -40,19 +36,19 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        public async Task<Result<UserModel>> GetUserByIdAsync(int userID)
+        public async Task<Result<UserModel>> GetUserByIdAsync(string userId)
         {
-            if (userID <= 0) return Error.Validation("Ugyldigt bruger-id");
+            if (string.IsNullOrWhiteSpace(userId)) return Error.Validation("Ugyldigt bruger-id");
 
             try
             {
-                var user = await _userRepository.GetUserByID(userID);
+                var user = await _userRepository.GetUserByID(userId);
                 if (user == null) return Error.NotFound("Brugeren blev ikke fundet");
                 return Result.Ok(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fejl ved indlæsning af bruger med id {UserId}", userID);
+                _logger.LogError(ex, "Fejl ved indlæsning af bruger med id {UserId}", userId);
                 return Error.Technical("Fejl ved indlæsning af bruger");
             }
         }
@@ -74,113 +70,68 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        public async Task<Result> DeleteUserAsync(int id)
+        public async Task<Result> DeleteUserAsync(string userId)
         {
-            if (id <= 0) return Error.Validation("Ugyldigt bruger-id");
+            if (string.IsNullOrWhiteSpace(userId)) return Error.Validation("Ugyldigt bruger-id");
 
             try
             {
-                await _userRepository.DeleteUser(id);
+                var result = await _userRepository.DeleteUser(userId);
+                if (!result.Succeeded)
+                    return Error.NotFound("Brugeren findes ikke");
                 return Result.Ok();
-            }
-            catch (KeyNotFoundException)
-            {
-                return Error.NotFound("Brugeren findes ikke");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kunne ikke slette bruger med id {UserId}", id);
+                _logger.LogError(ex, "Kunne ikke slette bruger med id {UserId}", userId);
                 return Error.Technical("Kunne ikke slette brugeren");
             }
         }
 
 
-        public async Task<Result<int>> CreateNewUserAsync(UserModel usermodel)
+        public async Task<Result> CreateNewUserAsync(UserModel userModel, string password)
         {
-            if (usermodel == null) return Error.Validation("Brugermodellen er påkrævet");
+            if (userModel == null) return Error.Validation("Brugermodellen er påkrævet");
 
-            if (string.IsNullOrWhiteSpace(usermodel.UserName))
+            if (string.IsNullOrWhiteSpace(userModel.UserName))
                 return Error.Validation("Brugernavnet er påkrævet");
-
-            if (string.IsNullOrWhiteSpace(usermodel.UserPassword))
-                return Error.Validation("Kodeordet er påkrævet");
 
             try
             {
-                // Tjekker om brugernavnet allerede er i brug
-                var existing = await _userRepository.GetUserByUserName(usermodel.UserName);
-                if (existing != null)
-                {
-                    return Error.Validation("Brugernavnet er allerede i brug");
-                }
+                var existing = await _userRepository.GetUserByUserName(userModel.UserName);
+                if (existing != null) return Error.Validation("Brugernavnet er allerede i brug");
 
-                // Hasher kodeordet før det gemmes
-                var hashed = _passwordHasher.HashPassword(usermodel, usermodel.UserPassword);
-                usermodel.UserPassword = hashed;
+                var result = await _userRepository.CreateUser(userModel, password);
+                if (!result.Succeeded)
+                    return Error.Validation(string.Join(", ", result.Errors.Select(e => e.Description)));
 
-                var newUserId = await _userRepository.CreateUser(usermodel);
-                return Result.Ok(newUserId);
+                return Result.Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kunne ikke oprette bruger {UserName}", usermodel.UserName);
+                _logger.LogError(ex, "Kunne ikke oprette bruger {UserName}", userModel.UserName);
                 return Error.Technical("Kunne ikke oprette bruger");
             }
         }
 
-        public async Task<Result> UpdateUserAsync(UserModel usermodel)
+        public async Task<Result> UpdateUserAsync(string userId, UserModel userModel)
         {
-            if (usermodel == null) return Error.Validation("Brugermodellen er påkrævet");
-            if (usermodel.UserID <= 0) return Error.Validation("Ugyldigt bruger-id");
+            if (string.IsNullOrWhiteSpace(userId)) return Error.Validation("Ugyldigt bruger-id");
+            if (userModel == null) return Error.Validation("Brugerrollen er påkrævet");
 
             try
             {
-                await _userRepository.UpdateUser(usermodel.UserID, usermodel);
+                var result = await _userRepository.UpdateUser(userId, userModel);
+                if (!result.Succeeded)
+                    return Error.NotFound("Brugeren blev ikke fundet");
                 return Result.Ok();
-            }
-            catch (KeyNotFoundException)
-            {
-                return Error.NotFound("Brugeren blev ikke fundet");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kunne ikke opdatere bruger med id {UserName}", usermodel.UserID);
+                _logger.LogError(ex, "Kunne ikke opdatere bruger med id {UserName}", userId);
                 return Error.Technical("Kunne ikke opdatere brugeren");
             }
-        }
-
-        public async Task<Result> ValidateUserAsync(string username, string password)
-        {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            {
-                return Error.Validation("Udfyld brugernavn og kodeord");
-            }
-
-            try
-            {
-                var user = await _userRepository.GetUserByUserName(username);
-
-                if (user == null)
-                {
-                    return Error.Validation("Brugernavnet eller kodeordet er forkert");
-                }
-
-                var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.UserPassword, password);
-                if (verifyResult != PasswordVerificationResult.Success)
-                {
-                    return Error.Validation("Brugernavn eller kodeordet er forkert");
-                }
-
-                return Result.Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Fejl ved validering af bruger {UserName}", username);
-                return Error.Technical("Fejl ved validering af bruger");
-            }
-        }
-
-        
+        }        
     }
 }
         

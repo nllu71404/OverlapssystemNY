@@ -10,7 +10,6 @@ namespace OverlapssystemShared
     {
         public string UserName { get; set; }
         public string Password { get; set; }
-        public record UserRequestDTO(string UserName, string Password);
 
     }
 }

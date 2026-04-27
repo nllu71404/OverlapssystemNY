@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace OverlapssystemInfrastructure.Data
 {
-    public class OverlapDbContext : DbContext
+    public class OverlapDbContext : IdentityDbContext<UserModel>
     {
         public OverlapDbContext(DbContextOptions<OverlapDbContext> options) : base(options)
         { }
@@ -19,21 +20,20 @@ namespace OverlapssystemInfrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Konfigurér UserModel
+
+            // UserModel - fjern UserID, UserName og UserPassword da Identity håndterer dem
             modelBuilder.Entity<UserModel>(entity =>
             {
-                entity.HasKey(e => e.UserID);
-                entity.Property(e => e.UserName).IsRequired();
-                entity.Property(e => e.UserPassword).IsRequired();
                 entity.HasOne<DepartmentModel>()
                       .WithMany()
                       .HasForeignKey(e => e.DepartmentId)
                       .OnDelete(DeleteBehavior.SetNull);
             });
-            // Konfigurér DepartmentModel
+
+            // DepartmentModel forbliver uændret
             modelBuilder.Entity<DepartmentModel>(entity =>
             {
-                entity.ToTable("Department", t => t.ExcludeFromMigrations()); //Finder den eksisterende DepartmentModel og navngiver den "Departments" i databasen
+                entity.ToTable("Department", t => t.ExcludeFromMigrations());
                 entity.HasKey(e => e.DepartmentID);
                 entity.Property(e => e.Name).IsRequired();
             });

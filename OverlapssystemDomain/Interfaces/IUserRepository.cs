@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using OverlapssystemDomain.Entities;
 
 namespace OverlapssystemDomain.Interfaces
@@ -11,11 +12,12 @@ namespace OverlapssystemDomain.Interfaces
     {
             
         Task<List<UserModel>> GetAllUsers();
-        Task<UserModel> GetUserByID(int userID);
+        Task<UserModel> GetUserByID(string userId);
         Task<UserModel> GetUserByUserName(string userName);
-        Task<int> CreateUser(UserModel usermodel);
-        Task UpdateUser(int userID, UserModel usermodel);
-        Task DeleteUser(int userID);
-            
+        Task<IdentityResult> CreateUser(UserModel userModel, string password);
+        Task<IdentityResult> UpdateUser(string userId, UserModel userModel);
+
+        Task<IdentityResult> DeleteUser(string userId);
+
     }
 }

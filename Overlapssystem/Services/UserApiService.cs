@@ -17,7 +17,7 @@ namespace Overlapssystem.Services
             return await _http.GetFromJsonAsync<List<UserModel>>("api/Brugere/HenterBrugere");
         }
         //Hent på ID
-        public async Task<UserModel> GetUserByID(int userID)
+        public async Task<UserModel> GetUserByID(string userID)
         {
             return await _http.GetFromJsonAsync<UserModel>($"api/Brugere/HenterBrugere/{userID}");
         }
@@ -29,18 +29,17 @@ namespace Overlapssystem.Services
         }
 
         //Tilføj
-        public async Task<int> CreateUser(AddUserDTO userDTO)
+        public async Task CreateUser(AddUserDTO userDTO)
         {
-            var response = await _http.PostAsJsonAsync($"api/Brugere/OpretBruger", userDTO);
-            return await response.Content.ReadFromJsonAsync<int>();
+            await _http.PostAsJsonAsync($"api/Brugere/OpretBruger", userDTO);
         }
         //Delete
-        public async Task DeleteUser(int userID)
+        public async Task DeleteUser(string userID)
         {
             await _http.DeleteAsync($"api/Brugere/{userID}");
         }
         //Update
-        public async Task UpdateUser(int userID, AddUserDTO userDTO)
+        public async Task UpdateUser(string userID, AddUserDTO userDTO)
         {
             await _http.PutAsJsonAsync($"api/Brugere/{userID}", userDTO);
         }
