@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Overlapssystem.Components;
 using Overlapssystem.Services;
+using Overlapssystem.TokenService;
 using OverlapssystemDomain.Interfaces;
 using OverlapssystemInfrastructure.Repositories;
 using OverlapssytemApplication.Interfaces;
@@ -10,6 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, AuthState>();
+builder.Services.AddScoped<AuthState>();
 
 // HttpClient
 builder.Services.AddScoped(sp => new HttpClient
@@ -26,6 +32,7 @@ builder.Services.AddScoped<DepartmentTaskApiService>();
 builder.Services.AddScoped<SpecialEventApiService>();
 builder.Services.AddScoped<EmployeePhoneApiService>();
 builder.Services.AddScoped<UserApiService>();
+builder.Services.AddScoped<AuthState>();
 
 var app = builder.Build();
 
@@ -38,6 +45,10 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseStaticFiles();
 app.UseAntiforgery();

@@ -1,10 +1,14 @@
 ﻿@page "/EditHandoverScheme/{departmentId:int}"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
 @using OverlapssystemDomain.Entities
 @using OverlapssystemDomain.Enums
 @using OverlapssystemDomain.Interfaces
 @using Overlapssystem.Services
 @using OverlapssystemShared
+
+@attribute [Authorize(Roles = "Administrator")]
+
 @inject IJSRuntime JS
 
 <h3>AdminEditHandoverScheme</h3>

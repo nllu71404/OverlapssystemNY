@@ -2,6 +2,8 @@
 @using OverlapssystemDomain.Entities
 @using Overlapssystem.Services
 @using OverlapssystemShared
+@using Overlapssystem.TokenService
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject IJSRuntime JS
 @inject MedicinApiService medicinApi
@@ -36,9 +38,16 @@
     </div>
     
     <!-- Opdater navn når man klikker væk -->
-    <input class="form-control"
-           value="@Resident.Name"
-           @onchange="OnNameChanged" />
+    <AuthorizeView Roles="Medarbejder,Administrator">
+    <Authorized>
+        <input class="form-control"
+               value="@Resident.Name"
+               @onchange="OnNameChanged" />
+    </Authorized>
+    <NotAuthorized>
+        <p class="form-control">Navnet er skjult</p>
+    </NotAuthorized>
+</AuthorizeView>
     
            <!-- Opdater status når man klikker væk -->
 <textarea class="form-control"

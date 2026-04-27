@@ -5,10 +5,12 @@
 @using OverlapssystemDomain.Interfaces
 @using Overlapssystem.Services
 @using OverlapssystemShared
+@using Overlapssystem.TokenService
 
 @inject UserApiService apiService
 @inject NavigationManager navigation
 @inject HttpClient Http
+@inject AuthState authstate 
 
 <div class="login-wrapper">
     <div class="login-card">
@@ -56,17 +58,20 @@
             var token = await apiService.ValidateUser(userName, password);
             if (token != null)
             {
-                // Gem tokenet i Authorization-headeren til fremtidige API kald
+                // Gem tokenet i Authorization-headeren
                 Http.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                // Decode JWT token og læs DepartmentId claim
+                // Fortæl Blazor at brugeren er logget ind
+                authstate.MarkUserAsAuthenticated(token);
+
+                // Decode JWT og naviger til korrekt HandoverScheme
                 var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
                 var departmentId = jwtToken.Claims
                     .FirstOrDefault(c => c.Type == "DepartmentId")?.Value;
 
-                if (!string.IsNullOrEmpty(departmentId) && departmentId != "")
+                if (!string.IsNullOrEmpty(departmentId))
                     navigation.NavigateTo($"/HandoverScheme/{departmentId}");
                 else
                     navigation.NavigateTo("/HandoverScheme");

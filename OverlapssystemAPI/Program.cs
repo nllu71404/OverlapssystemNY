@@ -15,6 +15,15 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowBlazorApp",
+      builder => builder.WithOrigins("https://localhost:7239")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod());
+});
+
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -81,11 +90,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+
 //Global error handling (tidlig)
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 //Secuity/ transport
 app.UseHttpsRedirection();
+
+//CORS
+app.UseCors("AllowBlazorApp");
 
 //Auth
 app.UseAuthentication();
