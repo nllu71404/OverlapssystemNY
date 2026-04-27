@@ -50,3 +50,18 @@
     .logout-btn:hover {
         background-color: #c0392b;
     }
+.login-btn-nav {
+    padding: 10px 24px;
+    font-size: 1rem;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-right: 8px;
+}
+
+    .login-btn-nav:hover {
+        background-color: #388e3c;
+    }

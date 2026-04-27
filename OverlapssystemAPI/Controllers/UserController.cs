@@ -49,6 +49,8 @@ namespace OverlapssystemAPI.Controllers
             var userModel = new UserModel
             {
                 UserName = userDTO.UserName,
+                DepartmentId = userDTO.DepartmentId,
+                UserRole = userDTO.UserRole
             };
             var result = await _userService.CreateNewUserAsync(userModel, userDTO.Password);
             return Handle(result);
@@ -79,7 +81,7 @@ namespace OverlapssystemAPI.Controllers
                 return Unauthorized(new { message = result.Error.Message ?? "Ingen adgang" });
             }
 
-            return Ok(true);
+            return Ok(new { token = result.Value});
         }
     }
 }

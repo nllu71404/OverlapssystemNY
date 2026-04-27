@@ -13,31 +13,39 @@ namespace OverlapssystemInfrastructure.Service
 {
     public class AuthService : IAuthService
     {
-        private readonly SignInManager<UserModel> _signInManager;
+        
+        private readonly UserManager<UserModel> _userManager;
+        private readonly JwtService _jwtService;
 
-        public AuthService(SignInManager<UserModel> signInManager)
+        public AuthService(UserManager<UserModel> userManager, JwtService jwtService)
         {
-            _signInManager = signInManager;
+            
+            _userManager = userManager;
+            _jwtService = jwtService;
         }
 
-        // SignInManager håndterer login og tjekker automatisk det hashede password
-        public async Task<Result> LoginAsync(string userName, string password)
+        // SignInManager validerer password og JWTservice genererer tokenet
+        public async Task<Result<string>> LoginAsync(string userName, string password)
         {
             if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
                 return Error.Validation("Udfyld brugernavn og kodeord");
 
-            var result = await _signInManager.PasswordSignInAsync(userName, password, false, false);
-            if (!result.Succeeded)
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null)
                 return Error.Validation("Brugernavn eller kodeord er forkert");
 
-            return Result.Ok();
+            var passwordValid = await _userManager.CheckPasswordAsync(user, password);
+            if (!passwordValid)
+                return Error.Validation("Brugernavn eller kodeord er forkert");
+
+            var token = _jwtService.GenerateToken(user);
+            return Result.Ok(token);
         }
 
         // SignInManager håndterer logout og afslutter brugerens session
-        public async Task<Result> LogoutAsync()
+        public Task<Result> LogoutAsync()
         {
-            await _signInManager.SignOutAsync();
-            return Result.Ok();
+            return Task.FromResult(Result.Ok());
         }
     }
 }

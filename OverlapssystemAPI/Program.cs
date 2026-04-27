@@ -8,18 +8,39 @@ using Microsoft.AspNetCore.Identity;
 using OverlapssystemDomain.Entities;
 using OverlapssystemInfrastructure.Data;
 using OverlapssystemInfrastructure.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
 
 // DbContext
 builder.Services.AddDbContext<OverlapDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ProjektDB")));
 
 // Identity
-builder.Services.AddIdentity<UserModel, IdentityRole>()
+builder.Services.AddIdentityCore<UserModel>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<OverlapDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddSignInManager();
 
 // Add services to the container.
 
@@ -43,6 +64,7 @@ builder.Services.AddScoped<IEmployeePhoneService, EmployeePhoneService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<JwtService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

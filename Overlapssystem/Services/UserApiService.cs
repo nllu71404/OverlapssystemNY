@@ -43,24 +43,19 @@ namespace Overlapssystem.Services
         {
             await _http.PutAsJsonAsync($"api/Brugere/{userID}", userDTO);
         }
-        //Validering
-        public async Task<bool> ValidateUser(string username, string password)
+        // Validering - returnerer JWT token ved succes, null ved fejl
+        public async Task<string?> ValidateUser(string username, string password)
         {
             var dto = new { UserName = username, Password = password };
-            var response = await _http.PostAsJsonAsync($"api/Brugere/ValiderBruger", dto);
+            var response = await _http.PostAsJsonAsync("api/User/ValiderBruger", dto);
 
             if (response.IsSuccessStatusCode)
             {
-                var success = await response.Content.ReadFromJsonAsync<bool>();
-                return success;
+                var result = await response.Content.ReadFromJsonAsync<TokenResponseDTO>();
+                return result?.Token;
             }
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                return false;
-            }
-            response.EnsureSuccessStatusCode();
-            return false;
 
+            return null;
         }
     }
 }

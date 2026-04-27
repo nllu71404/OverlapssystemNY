@@ -10,7 +10,7 @@ namespace OverlapssytemApplication.Interfaces
     public interface IAuthService
     {
         // Login validerer brugernavn og password via Identity
-        Task<Result> LoginAsync(string userName, string password);
+        Task<Result<string>> LoginAsync(string userName, string password);
 
         // Logout afslutter brugerens session
         Task<Result> LogoutAsync();
