@@ -24,7 +24,7 @@ builder.Services.AddScoped<PNMedicinApiService>();
 builder.Services.AddScoped<ShoppingApiService>();
 builder.Services.AddScoped<DepartmentTaskApiService>();
 builder.Services.AddScoped<SpecialEventApiService>();
-
+builder.Services.AddScoped<EmployeePhoneApiService>();
 
 var app = builder.Build();
 

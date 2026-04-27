@@ -63,6 +63,16 @@ namespace OverlapssytemApplication.Services
 
         }
 
+        //Hent på DepartmentID
+        public async Task<Result<List<EmployeePhoneModel>>> GetEmployeePhonesByDepartmentIdAsync(int departmentId)
+        {
+            var result = await _employeePhoneRepository.GetEmployeePhonesByDepartmentIdAsync(departmentId);
+            
+            EmployeePhones = result ?? new List<EmployeePhoneModel>();
+            
+            return Result<List<EmployeePhoneModel>>.Ok(EmployeePhones);
+        }
+
         //Gem ny medarbejder telefon
         public async Task<Result<int>> SaveNewEmployeePhoneAsync(EmployeePhoneModel employeePhone)
         {

@@ -11,6 +11,7 @@ namespace OverlapssystemDomain.Interfaces
     {
         Task<List<EmployeePhoneModel>> GetAllEmployeePhoneNumbersAsync();
         Task<EmployeePhoneModel> GetEmployeePhoneByIdAsync(int employeePhoneId);
+        Task<List<EmployeePhoneModel>> GetEmployeePhonesByDepartmentIdAsync(int departmentId);
         Task<int> SaveNewEmployeePhoneAsync(EmployeePhoneModel employeePhone);
         Task DeleteEmployeePhoneAsync(int employeePhoneId);
         Task UpdateEmployeePhoneAsync(EmployeePhoneModel employeePhone);

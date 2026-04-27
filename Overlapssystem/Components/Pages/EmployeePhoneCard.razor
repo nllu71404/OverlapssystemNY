@@ -1,0 +1,131 @@
+﻿@using OverlapssystemDomain.Entities
+@using Overlapssystem.Services
+@inject EmployeePhoneApiService employeePhoneApiService
+@inject IJSRuntime JS
+
+<div name="employee-phone-card">
+
+    <div class="employee-phone-card-header">
+        <h2>Telefonliste</h2>
+
+        @if (!IsReadOnly)
+        {
+            <button class="btn-plus"
+                    @onclick="() => OnAdd.InvokeAsync(DepartmentId)">
+                +
+            </button>
+        }
+    </div>
+    <table class="phone-table">
+        <thead>
+            <tr>
+                <th>Telefonnummer</th>
+                <th>Navn</th>
+                <th>Test</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var phone in EmployeePhones)
+            {
+                <tr>
+
+                    <!-- Telefonnummer -->
+                    <td>
+                        @if (IsReadOnly)
+                        {
+                            <span>@phone.PhoneNumber</span>
+                        }
+                        else
+                        {
+                            <input value="@phone.PhoneNumber"
+                                   @onchange="async e =>
+                                   {
+                                       phone.PhoneNumber = e.Value?.ToString();
+                                       await UpdateEmployeePhone(phone);
+                                   }" />
+                        }
+                    </td>
+
+                    <!-- Medarbejder navn -->
+                    <td>
+                        @if (IsReadOnly)
+                        {
+                            <span>@phone.EmployeeName</span>
+                        }
+                        else
+                        {
+                            <input value="@phone.EmployeeName"
+                                   @onchange="async e =>
+                                   {
+                                       phone.EmployeeName = e.Value?.ToString();
+                                       await UpdateEmployeePhone(phone);
+                                   }"
+                                     placeholder="Navn" />
+                        }
+                    </td>
+
+                    <!-- Test -->
+                    <td>
+                        <input type="checkbox"
+                               checked="@phone.Test"
+                               @onchange="async e =>
+                               {
+                                   phone.Test = (bool)e.Value;
+                                   await UpdateEmployeePhone(phone);
+                               }" />
+                      </td>
+
+                    <!-- Slet knap kun Admin -->
+                    @if (!IsReadOnly)
+                    {
+                        <td>
+                            <button class="btn-delete"
+                                    @onclick="() => OnDelete.InvokeAsync(phone)">
+                                Slet
+                            </button>
+                        </td>
+                    }
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+	[Parameter]
+	public int DepartmentId { get; set; }
+	[Parameter]
+	public bool IsReadOnly { get; set; } = false;
+
+	[Parameter]
+	public EventCallback<int> OnAdd { get; set; }
+	[Parameter]
+	public EventCallback<EmployeePhoneModel> OnDelete { get; set; }
+
+	
+	public List<EmployeePhoneModel> EmployeePhones { get; set; } = new();
+
+	protected override async Task OnParametersSetAsync()
+	{
+		EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+	}
+
+    public async Task RefreshAsync()
+    {
+        EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+        StateHasChanged();
+	}
+
+    public async Task UpdateEmployeePhone(EmployeePhoneModel phone)
+    {
+        await employeePhoneApiService.UpdateEmployeePhone(phone.EmployeePhoneID, phone);
+      
+	}
+
+
+
+
+}

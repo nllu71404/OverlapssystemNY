@@ -12,6 +12,7 @@ namespace OverlapssytemApplication.Interfaces
     {
         Task<Result<List<EmployeePhoneModel>>> GetAllEmployeePhoneNumbersAsync();
         Task<Result<EmployeePhoneModel>> GetEmployeePhoneByIdAsync(int employeePhoneId);
+        Task<Result<List<EmployeePhoneModel>>> GetEmployeePhonesByDepartmentIdAsync(int departmentId);
         Task<Result<int>> SaveNewEmployeePhoneAsync(EmployeePhoneModel employeePhone);
         Task<Result> DeleteEmployeePhoneAsync(int employeePhoneId);
         Task<Result> UpdateEmployeePhoneAsync(EmployeePhoneModel employeePhone);
