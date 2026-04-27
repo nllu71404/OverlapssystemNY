@@ -236,7 +236,7 @@ GO
 
 -- Delete an entry in the resident table
 CREATE OR ALTER PROCEDURE dbo.uspDeleteResident
-@ResidentId INT
+@ResidentID INT
 AS
 BEGIN
 DELETE FROM dbo.Resident WHERE ResidentID = @ResidentID
