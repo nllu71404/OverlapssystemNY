@@ -138,6 +138,7 @@ namespace OverlapssytemApplication.Services
         // Delete
         public async Task<Result> DeleteResidentAsync(int residentId)
         {
+
             if (residentId <= 0)
                 return Error.Validation("Ugyldigt ID");
 
@@ -155,9 +156,9 @@ namespace OverlapssytemApplication.Services
             {
                 return Error.NotFound("Beboer findes ikke");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke slette beboer");
+                return Error.Technical(ex.Message);
             }
         }
 

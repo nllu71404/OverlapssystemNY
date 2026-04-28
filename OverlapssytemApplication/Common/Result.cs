@@ -24,7 +24,7 @@ namespace OverlapssytemApplication.Common
 
         // Implicit conversions - gør at man bare kan returnere en Error i stedet for at skulle skrive Result.Fail(error)
         public static implicit operator Result(Error error)
-        => Result.Fail(error);
+        => Fail(error);
 
         // Helper 
         public static Result<T> Ok<T>(T value) => Result<T>.Ok(value);
@@ -35,7 +35,7 @@ namespace OverlapssytemApplication.Common
     {
         public T Value { get; }
 
-        private Result(T value, bool success, Error error)
+        private Result(T value, bool success, Error? error)
             : base(success, error)
         {
             Value = value;

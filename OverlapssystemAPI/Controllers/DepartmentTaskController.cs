@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
+using OverlapssystemShared;
+using OverlapssytemApplication.Common;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
-using OverlapssystemShared;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -20,28 +21,46 @@ namespace OverlapssystemAPI.Controllers
         [HttpGet("HentDepartmentTasks")]
         public async Task<IActionResult> GetAllDepartmentTasksAsync()
         {
-            var departmentTasks = await _departmentTaskService.GetAllDepartmentTasksAsync();
-            return Handle(departmentTasks);
+            var result = await _departmentTaskService.GetAllDepartmentTasksAsync();
+
+            if (!result.Success)
+                return Handle(result);
+
+            var dtoList = result.Value.Select(MapToDTO).ToList();
+
+            return Handle(Result.Ok(dtoList));
         }
 
         //Hent departmentTask på id
         [HttpGet("HentDepartmentTasksID/{departmentTaskId}")]
         public async Task<IActionResult> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
-            var departmentTasks = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
-            return Handle(departmentTasks);
+            var result = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
+
+            if (!result.Success)
+                return Handle(result);
+
+            var dto = MapToDTO(result.Value);
+
+            return Handle(Result.Ok(dto));
         }
 
         //Hent departmentTask på departmentID
         [HttpGet("HentDepartmentTaskByDepartmentId/{departmentId}")]
         public async Task<IActionResult> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
         {
-            var departmentTasks = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
-            return Handle(departmentTasks);
+            var result = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
+
+            if (!result.Success)
+                return Handle(result);
+
+            var dtoList = result.Value.Select(MapToDTO).ToList();
+
+            return Handle(Result.Ok(dtoList));
         }
 
-        //Tilføj
-        [HttpPut("TilføjDepartmentTask")]
+        //Tilføj --- Burde være post!
+        [HttpPost("TilføjDepartmentTask")]
         public async Task<IActionResult> SaveNewDepartmentTaskAsync([FromBody] AddDepartmentTaskDTO departmentTaskDTO)
         {
             var mappedModel = MapToAddDepartmentTaskModel(departmentTaskDTO);
@@ -55,7 +74,7 @@ namespace OverlapssystemAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDepartmentTaskAsync(int id, [FromBody] UpdateDepartmentTaskDTO departmentTaskDTO)
         {
-            var mappedModel = MapToUpdateDepartmentTaskModel(departmentTaskDTO);
+            var mappedModel = MapToUpdateDepartmentTaskModel(departmentTaskDTO, id);
             var result = await _departmentTaskService.UpdateDepartmentTaskAsync(mappedModel);
             return Handle(result);
         }
@@ -82,14 +101,26 @@ namespace OverlapssystemAPI.Controllers
             };
         }
 
-        private DepartmentTaskModel MapToUpdateDepartmentTaskModel(UpdateDepartmentTaskDTO dto)
+        private DepartmentTaskModel MapToUpdateDepartmentTaskModel(UpdateDepartmentTaskDTO dto, int id)
         {
             return new DepartmentTaskModel
             {
-                DepartmentTaskID = dto.DepartmentTaskID,
+                DepartmentTaskID = id,
                 DepartmentTaskTopic = dto.DepartmentTaskTopic,
                 EmployeeName = dto.EmployeeName,
                 ShiftType = dto.ShiftType
+            };
+        }
+
+        private DepartmentTaskDTO MapToDTO(DepartmentTaskModel model)
+        {
+            return new DepartmentTaskDTO
+            {
+                DepartmentTaskID = model.DepartmentTaskID,
+                DepartmentID = model.DepartmentID,
+                DepartmentTaskTopic = model.DepartmentTaskTopic,
+                EmployeeName = model.EmployeeName,
+                ShiftType = model.ShiftType
             };
         }
     }

@@ -33,6 +33,7 @@ namespace Overlapssystem.Facades
 
         public async Task DeleteResident(int residentId)
         {
+           
             await _residentApi.DeleteResident(residentId);
         }
 

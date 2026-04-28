@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
+using OverlapssystemShared;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -44,17 +45,17 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentService.SaveNewDepartmentAsync(departmentModel);
 
-           
+
             return Handle(result);
 
-      
+
         }
 
         //Slet
         [HttpDelete("{departmentId}")]
         public async Task<IActionResult> DeleteDepartment(int departmentId)
         {
-           var result = await _departmentService.DeleteDepartmentAsync(departmentId);
+            var result = await _departmentService.DeleteDepartmentAsync(departmentId);
             return Handle(result);
         }
 
@@ -64,6 +65,36 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentService.UpdateDepartmentAsync(departmentModel);
             return Handle(result);
+        }
+
+
+        // ----- Mapping -------
+
+        private DepartmentModel MapToAddDepartmentModel(AddDepartmentDTO departmentDTO)
+        {
+            return new DepartmentModel
+            {
+                Name = departmentDTO.Name
+
+            };
+        }
+
+        private DepartmentModel MapToUpdateDepartmentModel(DepartmentDTO departmentDTO)
+        {
+            return new DepartmentModel
+            {
+                DepartmentID = departmentDTO.DepartmentID,
+                Name = departmentDTO.Name
+            };
+        }
+
+        private DepartmentDTO MapToGetDepartmentDTO(DepartmentModel departmentModel)
+        {
+            return new DepartmentDTO
+            {
+                DepartmentID = departmentModel.DepartmentID,
+                Name = departmentModel.Name
+            };
         }
     }
 }

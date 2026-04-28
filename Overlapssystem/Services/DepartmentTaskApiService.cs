@@ -42,8 +42,8 @@ namespace Overlapssystem.Services
         //Tilføj
         public async Task<int> CreateDepartmentTask(AddDepartmentTaskDTO departmentTaskDto)
         {
-            var response = await _http.PutAsJsonAsync(
-             "api/DepartmentTask/TilfojDepartmentTask",
+            var response = await _http.PostAsJsonAsync(
+             "api/DepartmentTask/TilføjDepartmentTask",
              departmentTaskDto);
 
             return await response.ReadApiResponse<int>();

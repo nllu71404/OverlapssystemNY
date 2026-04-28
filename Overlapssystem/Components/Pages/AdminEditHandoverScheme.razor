@@ -107,6 +107,7 @@ else
     }
     private async Task DeleteResidentAsync(ResidentViewModel resident)
     {
+        Console.WriteLine(resident.ResidentId);
         await residentFacade.DeleteResident(resident.ResidentId);
 
         residents = await residentFacade.GetResidentByDepartment(departmentId);
