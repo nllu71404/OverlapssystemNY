@@ -8,7 +8,7 @@ namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PNMedicinController : ApiControllerBase
+    public class PNMedicinController : ApiControllerBase 
     {
         private readonly IPNMedicinService _pNMedicinService;
 
