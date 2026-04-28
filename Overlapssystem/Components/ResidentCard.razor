@@ -229,12 +229,7 @@
         _ => ""
     };
 
-    protected override void OnParametersSet()
-    {
-        Console.WriteLine($"DEBUG Resident.ResidentId = {Resident?.ResidentId}");
-        Console.WriteLine($"DEBUG OnSave = {OnSave.HasDelegate}");
-        Console.WriteLine($"DEBUG OnDelete = {OnDelete.HasDelegate}");
-    }
+   
 
     // Resident 
 
@@ -264,7 +259,7 @@
     }
     private async Task AddMedicinTimeAsync()
     {
-        Console.WriteLine($"ResidentID = {Resident.ResidentId}");
+        
 
         if (Resident?.ResidentId <= 0)
         {
@@ -441,10 +436,7 @@
         Resident.ResidentEmployee = e.Value?.ToString() ?? "";
         await SaveResident();
     }
-    //private async Task SaveResident()
-    //{
-    //    await OnSave.InvokeAsync(Resident);
-    //}
+  
 
     
 
