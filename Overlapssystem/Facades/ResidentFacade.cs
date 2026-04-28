@@ -28,7 +28,7 @@ namespace Overlapssystem.Facades
         public async Task UpdateResident(ResidentViewModel vm)
         {
             var dto = MapUpdateResident(vm);
-            await _residentApi.UpdateResident(vm.Id, dto);
+            await _residentApi.UpdateResident(vm.ResidentId, dto);
         }
 
         public async Task DeleteResident(int residentId)
@@ -46,14 +46,14 @@ namespace Overlapssystem.Facades
         public async Task<List<ResidentViewModel>> GetAllResidents()
         {
             var dtos = await _residentApi.GetAllResidents();
-            var residents = dtos.Select(dto => MapResident(dto)).ToList();
+            var residents = dtos.Select(MapResident).ToList();
             return residents;
         }
 
         public async Task<List<ResidentViewModel>> GetResidentByDepartment(int departmentId)
         {
             var dtos = await _residentApi.GetByDepartment(departmentId);
-            var residents = dtos.Select(dto => MapResident(dto)).ToList();
+            var residents = dtos.Select(MapResident).ToList();
             return residents;
         }
 
@@ -150,7 +150,7 @@ namespace Overlapssystem.Facades
         {
             return new UpdateResidentDTO
             {
-                Id = vm.Id,
+                ResidentId = vm.ResidentId,
                 DepartmentId = vm.DepartmentId,
                 Name = vm.Name,
                 Status = vm.Status,
@@ -181,7 +181,7 @@ namespace Overlapssystem.Facades
         {
             return new ResidentViewModel
             {
-                Id = dto.Id,
+                ResidentId = dto.ResidentId,
                 Name = dto.Name,
                 DepartmentId = dto.DepartmentId,
                 Status = dto.Status,
@@ -224,7 +224,7 @@ namespace Overlapssystem.Facades
         {
             return new AddMedicinTimeDTO
             {
-                ResidentId = vm.ResidentID,
+                ResidentID = vm.ResidentID,
                 MedicinTime = TimeSpan.TryParse(vm.MedicinTimeText, out var ts) ? ts : null,
                 IsChecked = vm.IsChecked
             };

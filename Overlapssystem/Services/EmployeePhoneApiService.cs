@@ -16,52 +16,51 @@ namespace Overlapssystem.Services
         }
 
         //Hent Alle
-        public async Task<List<EmployeePhoneViewModel>> GetAllEmployeePhoneNumbers()
+        public async Task<List<EmployeePhoneDTO>> GetAllEmployeePhoneNumbers()
         {
             var response = await _http.GetAsync(
             "api/EmployeePhone/HentAlleEmployeePhones");
 
-            var list = await response.ReadApiResponse<List<EmployeePhoneViewModel>>();
+            var list = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
 
-            return list ?? new List<EmployeePhoneViewModel>();
+            return list ?? new List<EmployeePhoneDTO>();
         }
 
         //Hent på Id
-        public async Task<EmployeePhoneViewModel> GetEmployeePhoneById(int employeePhoneId)
+        public async Task<EmployeePhoneDTO> GetEmployeePhoneById(int employeePhoneId)
         {
             var response = await _http.GetAsync(
             $"api/EmployeePhone/HentEmployeePhoneById/{employeePhoneId}");
 
-            return await response.ReadApiResponse<EmployeePhoneViewModel>();
+            return await response.ReadApiResponse<EmployeePhoneDTO>();
         }
 
-        public async Task<List<EmployeePhoneViewModel>> GetEmployeePhonesByDepartmentId(int departmentId)
+        public async Task<List<EmployeePhoneDTO>> GetEmployeePhonesByDepartmentId(int departmentId)
         {
             var response = await _http.GetAsync(
             $"api/EmployeePhone/HentEmployeePhonesByDepartmentId/{departmentId}");
 
-            var list = await response.ReadApiResponse<List<EmployeePhoneViewModel>>();
+            var list = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
 
-            return list ?? new List<EmployeePhoneViewModel>();
+            return list ?? new List<EmployeePhoneDTO>();
         }
 
         //Tilføj
-        public async Task AddNewEmployeePhone(EmployeePhoneViewModel employeePhoneModel)
+        public async Task<int> AddEmployeePhone(AddEmployeePhoneDTO employeePhoneDTO)
         {
             var response = await _http.PostAsJsonAsync(
              "api/EmployeePhone/TilføjEmployeePhone",
-             employeePhoneModel);
-
-            await response.ReadApiResponse<object>();
+             employeePhoneDTO);
+            var result = await response.ReadApiResponse<int>();
+            return result;
         }
 
         //Update
-        public async Task UpdateEmployeePhone(int employeePhoneId, EmployeePhoneViewModel employeePhoneModel)
+        public async Task UpdateEmployeePhone(int employeePhoneId, EmployeePhoneDTO employeePhoneDTO)
         {
             var response = await _http.PutAsJsonAsync(
             $"api/EmployeePhone/OpdaterEmployeePhone/{employeePhoneId}",
-            employeePhoneModel);
-
+            employeePhoneDTO);
             await response.ReadApiResponse<object>();
         }
 

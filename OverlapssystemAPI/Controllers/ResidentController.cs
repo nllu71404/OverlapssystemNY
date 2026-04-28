@@ -32,13 +32,9 @@ namespace OverlapssystemAPI.Controllers
         {
             var residentModel = MapToResidentModel(resident);
             var result = await _residentServices.CreateResidentAsync(residentModel);
-
-            if (!result.Success)
-            {
+       
                 return Handle(result);
-            }
-
-            return Created($"/api/resident/{result.Value}", result.Value);
+         
         }
 
         // Update

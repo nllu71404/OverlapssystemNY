@@ -11,11 +11,9 @@
 
 <h3>AdminEditHandoverScheme</h3>
 
-
-@inject DepartmentTaskApiService departmentTaskApi //Kig på denne
-@inject EmployeePhoneApiService employeePhoneApi// Kig på denne 
 @inject IResidentFacade residentFacade
 @inject IDepartmentTaskFacade departmentTaskFacade
+@inject IEmployeePhoneFacade employeePhoneFacade
 
 
 
@@ -99,8 +97,7 @@ else
         };
       
         var newID = await residentFacade.AddResident(vm);
-        vm.Id = newID;
-        residents.Add(vm);
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
         showCreateResident = false;
     }
     private async Task SaveResidentAsync(ResidentViewModel vm)
@@ -110,8 +107,9 @@ else
     }
     private async Task DeleteResidentAsync(ResidentViewModel resident)
     {
-        await residentFacade.DeleteResident(resident.Id);
-        residents.Remove(resident);
+        await residentFacade.DeleteResident(resident.ResidentId);
+
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
 
     // Parent creates the task and then asks the child to refresh.
@@ -152,7 +150,7 @@ else
             PhoneNumber = string.Empty,
             EmployeeName = string.Empty
         };
-        await employeePhoneApi.AddNewEmployeePhone(vm);
+        await employeePhoneFacade.AddEmployeePhone(vm);
         // Ask the child component to refresh its list
         if (employeePhoneCardRef is not null)
         {
@@ -160,11 +158,11 @@ else
         }
     }
 
-    private async Task DeleteEmployeePhoneNumber(EmployeePhoneViewModel vm) // Denne skal rettes så den får en Facade i stedet for at kalde API direkte
+    private async Task DeleteEmployeePhoneNumber(EmployeePhoneViewModel vm) 
     {
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette dette telefonnummer?");
         if (!ok) return;
-        await employeePhoneApi.DeleteEmployeePhone(vm.EmployeePhoneID);
+        await employeePhoneFacade.DeleteEmployeePhone(vm.EmployeePhoneID);
         if (employeePhoneCardRef is not null)
         {
             await employeePhoneCardRef.RefreshAsync();

@@ -17,7 +17,7 @@
 <h5>Beboere</h5>
 
 
-@if (!residents.Any())
+@if (residents == null || !residents.Any())
 {
     <p>Ingen beboere fundet</p>
 }
@@ -49,16 +49,18 @@ else
     [Parameter]
     public int departmentId { get; set; }
 
+
+    private bool isLoading = true;
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             residents = await residentFacade.GetResidentByDepartment(departmentId);
         }
-        catch (Exception ex)
+        finally
         {
-            Console.WriteLine(ex.Message);
-            residents = new();
+            isLoading = false;
         }
     }
 
@@ -70,7 +72,7 @@ else
 
     private async Task DeleteResidentAsync(ResidentViewModel vm)
     {
-        await residentFacade.DeleteResident(vm.Id);
+        await residentFacade.DeleteResident(vm.ResidentId);
         residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
     private void LogOut()

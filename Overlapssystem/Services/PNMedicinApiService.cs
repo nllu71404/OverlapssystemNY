@@ -15,17 +15,14 @@ namespace Overlapssystem.Services
         }
 
         //Hent
-        public async Task<List<PNMedicinViewModel>> GetPNMedicinByResidentId(int residentId)
+        public async Task<List<PNMedicinDTO>> GetPNMedicinByResidentId(int residentId)
         {
             var response = await _http.GetAsync(
                 $"api/PNMedicin/PNMedicintider/{residentId}");
 
             var dtoList = await response.ReadApiResponse<List<PNMedicinDTO>>();
 
-            return dtoList?
-                .Select(MapToViewModel)
-                .ToList()
-                ?? new List<PNMedicinViewModel>();
+            return dtoList?.ToList() ?? new List<PNMedicinDTO>();
         }
         //Tilføj
         public async Task<int> AddPNMedicinTime(AddPNMedicinDTO addPNMedicinDTO)
@@ -56,18 +53,6 @@ namespace Overlapssystem.Services
             await response.ReadApiResponse<object>();
         }
 
-        // ------ Mapping ------
-
-        private PNMedicinViewModel MapToViewModel(PNMedicinDTO dto)
-        {
-            return new PNMedicinViewModel
-            {
-                PNMedicinID = dto.PNMedicinID,
-                ResidentID = dto.ResidentID,
-                Reason = dto.Reason,
-                PNTime = dto.PNTime
-               
-            };
-        }
+      
     }
 }

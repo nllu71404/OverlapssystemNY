@@ -4,11 +4,12 @@ using OverlapssytemApplication.Services;
 using OverlapssytemApplication.Interfaces;
 
 
+
 namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EmployeePhoneController : ControllerBase
+    public class EmployeePhoneController : ApiControllerBase
     {
         private readonly IEmployeePhoneService _employeePhoneService;
 
@@ -19,54 +20,50 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent alle medarbejdertelefonnumre
         [HttpGet("HentAlleEmployeePhones")]
-        public async Task<ActionResult> GetAllEmployeePhoneNumbersAsync()
+        public async Task<IActionResult> GetAllEmployeePhoneNumbersAsync()
         {
             var employeePhones = await _employeePhoneService.GetAllEmployeePhoneNumbersAsync();
-            return Ok(employeePhones.Value);
+            return Handle(employeePhones);
         }
 
         //Hent medarbejdertelefon på id
         [HttpGet("HentEmployeePhoneById/{employeePhoneId}")]
-        public async Task<ActionResult> GetEmployeePhoneByIdAsync(int employeePhoneId)
+        public async Task<IActionResult> GetEmployeePhoneByIdAsync(int employeePhoneId)
         {
-            var employeePhone = await _employeePhoneService.GetEmployeePhoneByIdAsync(employeePhoneId);
-            if (employeePhone == null)
-            {
-                return NotFound();
-            }
-            return Ok(employeePhone.Value);
+            var result = await _employeePhoneService.GetEmployeePhoneByIdAsync(employeePhoneId);
+            return Handle(result);
         }
 
         //Hent medarbejdertelefoner på departmentId
         [HttpGet("HentEmployeePhonesByDepartmentId/{departmentId}")]
-        public async Task<ActionResult> GetEmployeePhonesByDepartmentIdAsync(int departmentId)
+        public async Task<IActionResult> GetEmployeePhonesByDepartmentIdAsync(int departmentId)
         {
-            var employeePhones = await _employeePhoneService.GetEmployeePhonesByDepartmentIdAsync(departmentId);
-            return Ok(employeePhones.Value);
+            var result = await _employeePhoneService.GetEmployeePhonesByDepartmentIdAsync(departmentId);
+            return Handle(result);
         }
 
         //Tilføj/Gem et medarbejdertelefonnummer
         [HttpPost("TilføjEmployeePhone")]
-        public async Task<ActionResult> SaveNewEmployeePhoneAsync([FromBody] EmployeePhoneModel employeePhoneModel)
+        public async Task<IActionResult> SaveNewEmployeePhoneAsync([FromBody] EmployeePhoneModel employeePhoneModel)
         {
             var result = await _employeePhoneService.SaveNewEmployeePhoneAsync(employeePhoneModel);
-            return Ok(result.Value);
+            return Handle(result);
         }
 
         //Update et medarbejdertelefonnummer
         [HttpPut("OpdaterEmployeePhone/{employeePhoneId}")]
-        public async Task<ActionResult> UpdateEmployeePhoneAsync(int employeePhoneId, [FromBody] EmployeePhoneModel employeePhoneModel)
+        public async Task<IActionResult> UpdateEmployeePhoneAsync(int employeePhoneId, [FromBody] EmployeePhoneModel employeePhoneModel)
         {
-            await _employeePhoneService.UpdateEmployeePhoneAsync(employeePhoneModel);
-            return Ok(employeePhoneModel);
+            var result = await _employeePhoneService.UpdateEmployeePhoneAsync(employeePhoneModel);
+            return Handle(result);
         }
 
         //Delete et medarbejdertelefonnummer
         [HttpDelete("SletEmployeePhone/{employeePhoneId}")]
-        public async Task<ActionResult> DeleteEmployeePhoneAsync(int employeePhoneId)
+        public async Task<IActionResult> DeleteEmployeePhoneAsync(int employeePhoneId)
         {
-            await _employeePhoneService.DeleteEmployeePhoneAsync(employeePhoneId);
-            return Ok(employeePhoneId);
+            var result = await _employeePhoneService.DeleteEmployeePhoneAsync(employeePhoneId);
+            return Handle(result);
         }
 
 

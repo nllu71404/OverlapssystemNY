@@ -1,7 +1,9 @@
 ﻿@using OverlapssystemDomain.Entities
 @using Overlapssystem.Services
 @using Overlapssystem.ViewModels
-@inject EmployeePhoneApiService employeePhoneApiService
+@using Overlapssystem.Interfaces
+
+@inject IEmployeePhoneFacade employeePhoneFacade
 @inject IJSRuntime JS
 
 <div name="employee-phone-card">
@@ -109,20 +111,20 @@
 	
 	public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
 
-    protected override async Task OnParametersSetAsync() // Denne skal bruge en facade, så den ikke har direkte adgang til API'et
+    protected override async Task OnParametersSetAsync() 
 	{
-		EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+		EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
 	}
 
-    public async Task RefreshAsync() // Denne skal bruge en facade, så den ikke har direkte adgang til API'et
+    public async Task RefreshAsync() 
     {
-        EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+        EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
         StateHasChanged();
 	}
 
-    public async Task UpdateEmployeePhone(EmployeePhoneViewModel phone) // Denne skal bruge en facade, så den ikke har direkte adgang til API'et
+    public async Task UpdateEmployeePhone(EmployeePhoneViewModel phone) 
     {
-        await employeePhoneApiService.UpdateEmployeePhone(phone.EmployeePhoneID, phone);
+        await employeePhoneFacade.UpdateEmployeePhone(phone);
       
 	}
 

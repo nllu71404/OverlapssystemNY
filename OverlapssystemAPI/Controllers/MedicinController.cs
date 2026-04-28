@@ -40,8 +40,8 @@ namespace OverlapssystemAPI.Controllers
         [HttpDelete("{medicinTimeId}")]
         public async Task<IActionResult> DeleteMedicin(int medicinTimeId)
         {
-            await _medicinServices.DeleteMedicinAsync(medicinTimeId);
-            return Ok(medicinTimeId);
+            var result = await _medicinServices.DeleteMedicinAsync(medicinTimeId);
+            return Handle(result);
         }
 
         //Update
@@ -49,8 +49,8 @@ namespace OverlapssystemAPI.Controllers
         public async Task<IActionResult> UpdateMedicin(int medicinTimeId, [FromBody] UpdateMedicinTimeDTO medicinDTO)
         {
             var mappedModel = MapToUpdateMedicinModel(medicinDTO);
-            await _medicinServices.UpdateMedicinAsync(mappedModel);
-            return Ok(medicinTimeId);
+            var result = await _medicinServices.UpdateMedicinAsync(mappedModel);
+            return Handle(result);
         }
 
 
@@ -58,9 +58,9 @@ namespace OverlapssystemAPI.Controllers
         [HttpPut("SetChecked/{id}")]
         public async Task<IActionResult> SetMedicinChecked(int id, [FromBody] SetMedicinCheckedDTO medicinDTO)
         {
-            
-            await _medicinServices.SetMedicinCheckedAsync(id, medicinDTO.IsChecked);
-            return Ok();
+
+            var result = await _medicinServices.SetMedicinCheckedAsync(id, medicinDTO.IsChecked);
+            return Handle(result);
         }
 
 
@@ -84,7 +84,7 @@ namespace OverlapssystemAPI.Controllers
         {
             return new MedicinModel
             {
-                ResidentID = medicinDTO.ResidentId,
+                ResidentID = medicinDTO.ResidentID,
                 MedicinTime = medicinDTO.MedicinTime,
                 IsChecked = medicinDTO.IsChecked,
 

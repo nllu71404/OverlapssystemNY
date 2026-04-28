@@ -229,6 +229,13 @@
         _ => ""
     };
 
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine($"DEBUG Resident.ResidentId = {Resident?.ResidentId}");
+        Console.WriteLine($"DEBUG OnSave = {OnSave.HasDelegate}");
+        Console.WriteLine($"DEBUG OnDelete = {OnDelete.HasDelegate}");
+    }
+
     // Resident 
 
     private async Task SaveResident()
@@ -255,13 +262,23 @@
       
         await residentFacade.UpdateMedicin(vm);
     }
-
     private async Task AddMedicinTimeAsync()
     {
+        Console.WriteLine($"ResidentID = {Resident.ResidentId}");
+
+        if (Resident?.ResidentId <= 0)
+        {
+            await JS.InvokeAsync<object>(
+                "alert",
+                "Resident er ikke indlæst korrekt"
+            );
+            return;
+        }
+
         var vm = new MedicinViewModel
-            {
-                ResidentID = Resident.Id,
-            };
+        {
+            ResidentID = Resident.ResidentId
+        };
 
         var id = await residentFacade.AddMedicinTime(vm);
         vm.MedicinTimeID = id;
@@ -304,13 +321,15 @@
     {
         var vm = new PNMedicinViewModel
         {
-            ResidentID = Resident.Id,
+            ResidentID = Resident.ResidentId,
         };
        
         var id = await residentFacade.AddPNMedicinTime(vm);
         vm.PNMedicinID = id;
 
         Resident.PNMedicin.Add(vm);
+
+        Console.WriteLine($"ResidentID = {Resident.ResidentId}");
 
     }
 
@@ -338,7 +357,7 @@
     {
         var vm = new ShoppingViewModel
         {
-            ResidentID = Resident.Id,
+            ResidentID = Resident.ResidentId,
         };
        
         var id = await residentFacade.AddShopping(vm);
@@ -371,7 +390,7 @@
     {
        var vm = new SpecialEventViewModel
         {
-            ResidentID = Resident.Id,
+            ResidentID = Resident.ResidentId,
         };
        
         var id = await residentFacade.AddSpecialEvent(vm);

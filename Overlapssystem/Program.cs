@@ -30,8 +30,8 @@ builder.Services.AddScoped<SpecialEventApiService>();
 builder.Services.AddScoped<EmployeePhoneApiService>();
 builder.Services.AddScoped<IResidentFacade, ResidentFacade>();
 builder.Services.AddScoped<IDepartmentTaskFacade, DepartmentTaskFacade>();
-
-
+builder.Services.AddScoped<IDepartmentFacade, DepartmentFacade>();
+builder.Services.AddScoped<IEmployeePhoneFacade, EmployeePhoneFacade>();
 
 var app = builder.Build();
 

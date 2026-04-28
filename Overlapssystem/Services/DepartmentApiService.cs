@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Json;
 using OverlapssystemDomain.Entities;
+using OverlapssystemShared;
+using Overlapssystem.Services.Extensions;
 
 namespace Overlapssystem.Services
 {
@@ -12,39 +14,49 @@ namespace Overlapssystem.Services
         }
 
         //Hent Alle
-        public async Task<List<DepartmentModel>> GetAllDepartments()
+        public async Task<List<DepartmentDTO>> GetAllDepartments()
         {
-            return await _http.GetFromJsonAsync<List<DepartmentModel>>("api/Department/HentAlleDepartments");
+            var response = await _http.GetAsync("api/Department/HentAlleDepartments");
+            var departmentList = await response.ReadApiResponse<List<DepartmentDTO>>();
+            return departmentList?.ToList() ?? new List<DepartmentDTO>();
         }
 
         //Hent by Id
-        public async Task<DepartmentModel> GetDepartmentById(int departmentId)
+        public async Task<DepartmentDTO> GetDepartmentById(int departmentId)
         {
-            return await _http.GetFromJsonAsync<DepartmentModel>($"api/Department/HentAlleDepartmentsByID/{departmentId}");
+            var response = await _http.GetAsync($"api/Department/HentAlleDepartmentsByID/{departmentId}");
+            var department = await response.ReadApiResponse<DepartmentDTO>();
+            return department;
         }
 
         //Hent by Name
-        public async Task<DepartmentModel> GetDepartmentByName(string departmentName)
+        public async Task<DepartmentDTO> GetDepartmentByName(string departmentName)
         {
-            return await _http.GetFromJsonAsync<DepartmentModel>($"api/Department/HentAlleDepartmentsByName/{departmentName}");
+            var response = await _http.GetAsync($"api/Department/HentAlleDepartmentsByName/{departmentName}");
+            var department = await response.ReadApiResponse<DepartmentDTO>();
+            return department;
         }
 
         //Tilføj
-        public async Task SaveNewDepartment(DepartmentModel departmentModel)
+        public async Task<int> AddDepartment(AddDepartmentDTO departmentDTO)
         {
-            await _http.PostAsJsonAsync("api/Department/TilføjAfdeling", departmentModel);
+            var response = await _http.PostAsJsonAsync("api/Department/TilføjAfdeling", departmentDTO);
+            var departmentId = await response.ReadApiResponse<int>();
+            return departmentId;
         }
 
         //Update
-        public async Task UpdateDepartment(int departmentId, DepartmentModel departmentModel)
+        public async Task UpdateDepartment(int departmentId, DepartmentDTO departmentDTO)
         {
-            await _http.PutAsJsonAsync($"api/Department/{departmentId}", departmentModel);
+            var response = await _http.PutAsJsonAsync($"api/Department/{departmentId}", departmentDTO);
+            await response.ReadApiResponse<object>();
         }
 
         //Delete
         public async Task DeleteDepartment(int departmentId)
         {
-            await _http.DeleteAsync($"api/Department/{departmentId}");
+            var response = await _http.DeleteAsync($"api/Department/{departmentId}");
+            await response.ReadApiResponse<object>();
         }
     }
 }

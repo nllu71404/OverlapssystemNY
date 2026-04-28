@@ -1,8 +1,13 @@
-﻿namespace Overlapssystem.ViewModels
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OverlapssystemShared
 {
-    public class EmployeePhoneViewModel
+    public class AddEmployeePhoneDTO
     {
-        public int EmployeePhoneID { get; set; }
         public int? DepartmentID { get; set; }
         public string? EmployeeName { get; set; } = "";
         public string? PhoneNumber { get; set; } = "";

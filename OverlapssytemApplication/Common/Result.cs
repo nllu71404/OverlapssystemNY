@@ -10,9 +10,9 @@ namespace OverlapssytemApplication.Common
     public class Result
     {
         public bool Success { get; }
-        public Error Error { get; }
+        public Error? Error { get; }
 
-        protected Result(bool success, Error error)
+        protected Result(bool success, Error? error)
         {
             Success = success;
             Error = error;

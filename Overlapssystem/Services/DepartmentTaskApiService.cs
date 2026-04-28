@@ -18,7 +18,8 @@ namespace Overlapssystem.Services
         public async Task<List<DepartmentTaskDTO>> GetAllDepartmentTask()
         {
             var response = await _http.GetAsync("api/DepartmentTask/HentDepartmentsTasks");
-            return await response.ReadApiResponse<List<DepartmentTaskDTO>>();
+            var dtoList = await response.ReadApiResponse<List<DepartmentTaskDTO>>();
+            return dtoList?.ToList() ?? new List<DepartmentTaskDTO>();
         }
         //Hent på ID
         public async Task<DepartmentTaskDTO> GetDepartmentTaskById(int id)

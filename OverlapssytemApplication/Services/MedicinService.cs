@@ -50,9 +50,9 @@ namespace OverlapssytemApplication.Services
 
                 return id; // implicit success
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke oprette medicin");
+                return Error.Technical(ex.Message);
             }
         }
 
