@@ -67,6 +67,11 @@ ShoppingDay NVARCHAR(100) NULL,
 ShoppingTime TIME NULL,
 PaymentMethod NVARCHAR(100) NULL
 
+CONSTRAINT FK_Shopping_Resident
+    FOREIGN KEY (ResidentID)
+    REFERENCES dbo.Resident(ResidentID)
+    ON DELETE CASCADE
+
 );
 GO
 
