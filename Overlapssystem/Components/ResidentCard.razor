@@ -386,29 +386,27 @@
        
         await residentFacade.UpdateShopping(vm);
     }
-    private async Task SaveSpecialEvent(int residentId)
+    // Special Event
+    private async Task AddSpecialEvent()
     {
-       var vm = new SpecialEventViewModel
+        var vm = new SpecialEventViewModel
         {
             ResidentID = Resident.ResidentId,
         };
-       
+
         var id = await residentFacade.AddSpecialEvent(vm);
         vm.SpecialEventID = id;
-
         Resident.SpecialEvents.Add(vm);
     }
     private async Task UpdateSpecialEvent(SpecialEventViewModel vm)
     {
-       
+
         await residentFacade.UpdateSpecialEvent(vm);
     }
-
     private async Task DeleteSpecialEvent(SpecialEventViewModel vm)
     {
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne særlige hændelse?");
         if (!ok) return;
-
         await residentFacade.DeleteSpecialEvent(vm);
         Resident.SpecialEvents.Remove(vm);
     }
