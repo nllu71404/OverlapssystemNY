@@ -47,9 +47,10 @@ namespace OverlapssytemApplication.Services
 
                 return Residents; // implicit success
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke hente beboere");
+                _logger.LogError(ex, "Fejl ved hentning af beboere");
+                return Error.Technical("Fejl ved hentning af beboere"); // Så vi ikke eksponerer tekniske detaljer i fejl til brugeren
             }
         }
 
@@ -67,20 +68,17 @@ namespace OverlapssytemApplication.Services
 
                 return Residents;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke hente beboere for afdeling");
+                _logger.LogError(ex, "Fejl ved hentning af beboere for afdeling {DepartmentId}", departmentId);
+                return Error.Technical("Fejl ved hentning af beboere for afdeling"); // Så vi ikke eksponerer tekniske detaljer i fejl til brugeren
             }
         }
 
         // Opret
         public async Task<Result<int>> CreateResidentAsync(ResidentModel resident)
         {
-            if (resident == null)
-                return Error.Validation("Resident må ikke være null");
-
-            if (string.IsNullOrWhiteSpace(resident.Name))
-                return Error.Validation("Navn er påkrævet");
+            
 
             if (resident.DepartmentId == null || resident.DepartmentId <= 0)
                 return Error.Validation("Afdelings ID er ikke sat");
@@ -89,25 +87,19 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _residentRepository.SaveNewResidentAsync(resident);
 
-                Residents = await _residentRepository
-                    .GetResidentByDepartmentIdAsync(resident.DepartmentId.Value)
-                    ?? new List<ResidentModel>();
-
                 return id; // implicit success
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fejl ved oprettelse af resident!");
+                _logger.LogError(ex, "Fejl ved oprettelse af beboer!");
 
-                return Error.Technical("Kunne ikke gemme resident");
+                return Error.Technical("Kunne ikke oprette beboer"); // Så vi ikke eksponerer tekniske detaljer i fejl til brugeren
             }
         }
 
         // Update
         public async Task<Result> UpdateResidentAsync(ResidentModel resident)
         {
-            if (resident == null)
-                return Error.Validation("Resident må ikke være null");
 
             if (resident.ResidentId <= 0)
                 return Error.Validation("Ugyldigt beboer ID");
@@ -119,18 +111,16 @@ namespace OverlapssytemApplication.Services
             {
                 await _residentRepository.UpdateResidentAsync(resident);
 
-                Residents = await _residentRepository
-                    .GetResidentByDepartmentIdAsync(resident.DepartmentId ?? SelectedDepartmentId)
-                    ?? new List<ResidentModel>();
-
                 return Result.Ok();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return Error.NotFound("Beboer blev ikke fundet");
+                _logger.LogError(ex, "Beboer blev ikke fundet");
+                return Error.NotFound("Kunne ikke finde beboer at opdatere");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Fejl ved opdatering af beboer");
                 return Error.Technical("Kunne ikke opdatere beboer");
             }
         }
@@ -140,26 +130,25 @@ namespace OverlapssytemApplication.Services
         {
 
             if (residentId <= 0)
-                return Error.Validation("Ugyldigt ID");
+                return Error.Validation("Ugyldigt beboer ID");
 
             try
             {
                 await _residentRepository.DeleteResidentAsync(residentId);
 
-                Residents = await _residentRepository
-                    .GetResidentByDepartmentIdAsync(SelectedDepartmentId)
-                    ?? new List<ResidentModel>();
-
                 return Result.Ok();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return Error.NotFound("Beboer findes ikke");
+               _logger.LogError(ex, "Beboer kan ikke findes");
+                return Error.NotFound("Kunne ikke finde beboer at slette");
             }
             catch (Exception ex)
             {
-                return Error.Technical(ex.Message);
+                _logger.LogError(ex, "Fejl ved sletning af beboer");
+                return Error.Technical("Kunne ikke slette beboer");
             }
+            
         }
 
         // Tildel department

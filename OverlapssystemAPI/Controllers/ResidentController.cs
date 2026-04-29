@@ -2,6 +2,7 @@
 using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -21,7 +22,14 @@ namespace OverlapssystemAPI.Controllers
         public async Task<IActionResult> GetResidents()
         {
             var result = await _residentServices.LoadResidentsAsync();
-            return Handle(result);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+            var residentDTOs = result.Value.Select(MapToGetResidentDTO).ToList();
+            return Handle(Result.Ok(residentDTOs));
+
         }
 
 
@@ -30,11 +38,11 @@ namespace OverlapssystemAPI.Controllers
         [HttpPost("OpretResident")]
         public async Task<IActionResult> CreateResident([FromBody] AddResidentDTO resident)
         {
-            var residentModel = MapToResidentModel(resident);
+            var residentModel = MapToAddResidentModel(resident);
             var result = await _residentServices.CreateResidentAsync(residentModel);
-       
-                return Handle(result);
-         
+
+            return Handle(result);
+
         }
 
         // Update
@@ -58,14 +66,22 @@ namespace OverlapssystemAPI.Controllers
         [HttpGet("Department/{id}")]
         public async Task<IActionResult> GetByDepartment(int id)
         {
+
             var result = await _residentServices.LoadResidentsByDepartmentAsync(id);
-            return Handle(result);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            var residentDTOs = result.Value.Select(MapToGetResidentDTO).ToList();
+            return Handle(Result.Ok(residentDTOs));
         }
-    
 
-    // ---- Mapping helpers -----
 
-     private ResidentModel MapToResidentModel(AddResidentDTO dto)
+        // ---- Mapping helpers -----
+
+        private static ResidentModel MapToAddResidentModel(AddResidentDTO dto)
         {
             return new ResidentModel
             {
@@ -80,7 +96,7 @@ namespace OverlapssystemAPI.Controllers
             };
         }
 
-        private ResidentModel MapToUpdateResidentModel(UpdateResidentDTO dto, int id)
+        private static ResidentModel MapToUpdateResidentModel(UpdateResidentDTO dto, int id)
         {
             return new ResidentModel
             {
@@ -96,6 +112,22 @@ namespace OverlapssystemAPI.Controllers
             };
         }
 
+        private static UpdateResidentDTO MapToGetResidentDTO(ResidentModel model)
+        {
+            return new UpdateResidentDTO
+            {
+                ResidentId = model.ResidentId,
+                Name = model.Name,
+                DepartmentId = model.DepartmentId,
+                Status = model.Status,
+                Activity = model.Activity,
+                Family = model.Family,
+                ResidentEmployee = model.ResidentEmployee,
+                Risiko = model.Risiko,
+                Mood = model.Mood
+            };
+
+        }
     }
 }
 

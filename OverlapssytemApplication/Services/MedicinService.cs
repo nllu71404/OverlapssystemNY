@@ -8,23 +8,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace OverlapssytemApplication.Services
 {
     public class MedicinService : IMedicinService
     {
         private readonly IMedicinRepository _medicinRepository;
+        private readonly ILogger _logger;
 
-        public MedicinService(IMedicinRepository medicinRepository)
+        public MedicinService(IMedicinRepository medicinRepository, ILogger logger)
         {
             _medicinRepository = medicinRepository;
+            _logger = logger;
         }
 
         // Hent medicin
         public async Task<Result<List<MedicinModel>>> GetMedicinByResidentIdAsync(int residentId)
         {
             if (residentId <= 0)
-                return Error.Validation("Ugyldigt resident ID");
+                return Error.Validation("Ugyldigt beboer ID");
 
             try
             {
@@ -32,18 +35,18 @@ namespace OverlapssytemApplication.Services
 
                 return result ?? new List<MedicinModel>(); // implicit success
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke hente medicin");
+                _logger.LogError(ex, "Fejl ved hentning af medicintider");
+                return Error.Technical("Kunne ikke hente medicintider");
             }
         }
 
         // Tilføj medicin
         public async Task<Result<int>> AddMedicinTimeAsync(MedicinModel medicinModel)
         {
-            if (medicinModel == null)
-                return Error.Validation("Medicin må ikke være null");
-
+            if (medicinModel.ResidentID <= 0)
+                return Error.Validation("Ugyldigt beboer ID");
             try
             {
                 var id = await _medicinRepository.SaveNewMedicinAsync(medicinModel);
@@ -52,7 +55,8 @@ namespace OverlapssytemApplication.Services
             }
             catch (Exception ex)
             {
-                return Error.Technical(ex.Message);
+                _logger.LogError(ex, "Fejl ved oprettelse af medicintid");
+                return Error.Technical("Kunne ikke oprette medicintid");
             }
         }
 
@@ -60,7 +64,7 @@ namespace OverlapssytemApplication.Services
         public async Task<Result> DeleteMedicinAsync(int medicinId)
         {
             if (medicinId <= 0)
-                return Error.Validation("Ugyldigt medicin ID");
+                return Error.Validation("Ugyldigt medicintid ID");
 
             try
             {
@@ -68,21 +72,26 @@ namespace OverlapssytemApplication.Services
 
                 return Result.Ok();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return Error.NotFound("Medicin blev ikke fundet");
+                _logger.LogError(ex, "Medicintid blev ikke fundet");
+                return Error.NotFound("Kunne ikke finde medicintid at slette");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke slette medicin");
+                _logger.LogError(ex, "Fejl ved sletning af medicintid");
+                return Error.Technical("Kunne ikke slette medicintid");
             }
         }
 
         // Opdater medicin
         public async Task<Result> UpdateMedicinAsync(MedicinModel medicinModel)
         {
-            if (medicinModel == null)
-                return Error.Validation("Medicin må ikke være null");
+            if (medicinModel.ResidentID <= 0)
+                return Error.Validation("Ugyldigt beboer ID");
+
+            if (medicinModel.MedicinTimeID <= 0)
+                return Error.Validation("Ugyldigt medicintid ID");
 
             try
             {
@@ -90,13 +99,15 @@ namespace OverlapssytemApplication.Services
 
                 return Result.Ok();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return Error.NotFound("Medicin blev ikke fundet");
+                _logger.LogError(ex, "Medicintid blev ikke fundet");
+                return Error.NotFound("Kunne ikke finde medicintid at opdatere");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke opdatere medicin");
+                _logger.LogError(ex, "Fejl ved opdatering af medicintid");
+                return Error.Technical("Kunne ikke opdatere medicintid");
             }
         }
 
@@ -110,9 +121,6 @@ namespace OverlapssytemApplication.Services
             {
                 var medicin = await _medicinRepository.GetMedicinByIdAsync(medicinTimeId);
 
-                if (medicin == null)
-                    return Error.NotFound("Medicin blev ikke fundet");
-
                 medicin.IsChecked = isChecked;
                 medicin.MedicinCheckTimeStamp = isChecked ? DateTime.UtcNow : null;
 
@@ -120,9 +128,15 @@ namespace OverlapssytemApplication.Services
 
                 return Result.Ok();
             }
-            catch (Exception)
+            catch (KeyNotFoundException ex)
             {
-                return Error.Technical("Kunne ikke opdatere medicin status");
+                _logger.LogError(ex, "Medicintid blev ikke fundet");
+                return Error.Technical("Medicintid kunne ikke findes ved opdatering af medicinstatus");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fejl ved opdatering af medicinstatus");
+                return Error.Technical("Kunne ikke opdatere medicinstatus");
             }
         }
     }

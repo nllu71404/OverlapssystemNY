@@ -2,6 +2,7 @@
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
 using OverlapssytemApplication.Interfaces;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -20,34 +21,35 @@ namespace OverlapssystemAPI.Controllers
         [HttpGet("Shopping/{residentId}")]
         public async Task<IActionResult> GetShoppingByResidentId(int residentId)
         {
-            var shopping = await _shoppingService.GetShoppingByResidentIdAsync(residentId);
-            return Handle(shopping);
+            
+            var result = await _shoppingService.GetShoppingByResidentIdAsync(residentId);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            var shoppingDTOs = result.Value.Select(MapToGetShoppingModel).ToList();
+            return Handle(Result.Ok(shoppingDTOs));
         }
 
         //Tilføj
         [HttpPost("TilføjShopping")]
         public async Task<IActionResult> SaveNewShopping([FromBody] AddShoppingDTO addShoppingDTO)
         {
-            var shopping = new ShoppingModel
-            {
-                ResidentID = addShoppingDTO.ResidentID,
-                Day = addShoppingDTO.Day,
-                Time = addShoppingDTO.Time,
-                PaymentMethod = addShoppingDTO.PaymentMethod
-            };
-            
-            
-            var id = await _shoppingService.SaveNewShoppingAsync(shopping);
-           
-                return Handle(id); //Fejlhåndtering
+            var shoppingModel = MapToAddShoppingModel(addShoppingDTO);
+            var result = await _shoppingService.SaveNewShoppingAsync(shoppingModel);
 
-      
+            return Handle(result); 
+
+
         }
 
         //Update
         [HttpPut("{shoppingId}")]
-        public async Task<IActionResult> UpdateShopping(int shoppingId, [FromBody] ShoppingModel shoppingModel)
+        public async Task<IActionResult> UpdateShopping(int shoppingId, [FromBody] UpdateShoppingDTO shoppingDTO)
         {
+            var shoppingModel = MapToUpdateShoppingModel(shoppingDTO);
             var result = await _shoppingService.UpdateShoppingAsync(shoppingModel);
             return Handle(result);
         }
@@ -58,6 +60,43 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _shoppingService.DeleteShoppingAsync(shoppingId);
             return Handle(result);
+        }
+
+
+        // ----- Mapping -----
+
+        private static ShoppingModel MapToAddShoppingModel(AddShoppingDTO shoppingDTO)
+        {
+            return new ShoppingModel
+            {
+                ResidentID = shoppingDTO.ResidentID,
+                Day = shoppingDTO.Day,
+                Time = shoppingDTO.Time,
+                PaymentMethod = shoppingDTO.PaymentMethod
+            };
+        }
+        private static ShoppingModel MapToUpdateShoppingModel(UpdateShoppingDTO shoppingDTO)
+        {
+            return new ShoppingModel
+            {
+                ShoppingID = shoppingDTO.ShoppingID,
+                ResidentID = shoppingDTO.ResidentID,
+                Day = shoppingDTO.Day,
+                Time = shoppingDTO.Time,
+                PaymentMethod = shoppingDTO.PaymentMethod
+            };
+        }
+
+        private static UpdateShoppingDTO MapToGetShoppingModel(ShoppingModel shoppingModel)
+        {
+            return new UpdateShoppingDTO
+            {
+                ShoppingID = shoppingModel.ShoppingID,
+                ResidentID = shoppingModel.ResidentID,
+                Day = shoppingModel.Day,
+                Time = shoppingModel.Time,
+                PaymentMethod = shoppingModel.PaymentMethod
+            };
         }
     }
 }

@@ -9,7 +9,7 @@ namespace OverlapssystemShared
     public class PNMedicinDTO
     {
         public int PNMedicinID { get; set; }
-        public int ResidentID { get; set; }
+        public int? ResidentID { get; set; }
         public DateTime? PNTime { get; set; }
         public string Reason { get; set; } = "";
     }

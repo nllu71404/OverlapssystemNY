@@ -2,7 +2,7 @@
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
 using OverlapssytemApplication.Interfaces;
-using OverlapssytemApplication.Services;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -20,33 +20,36 @@ namespace OverlapssystemAPI.Controllers
         [HttpGet("HentSpecialEventForBorger/{residentId}")]
         public async Task<IActionResult> GetSpecialTaskByResidentID(int residentId)
         {
-            var specialEvent = await _specialEventService.GetSpecialEventByResidentIdAsync(residentId);
-            return Handle(specialEvent); 
+            var result = await _specialEventService.GetSpecialEventByResidentIdAsync(residentId);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            var specialEventDTOs = result.Value.Select(MapToGetSpecialEventDTO).ToList();
+            return Handle(Result.Ok(specialEventDTOs)); 
         }
         //Tilføj
         [HttpPost("TilføjSpecialEvent")]
         public async Task<IActionResult> AddSpecialEvent([FromBody] AddSpecialEventDTO addSpecialEventDTO)
         {
-            var specialEvent = new SpecialEventModel
-            {
-                ResidentID = addSpecialEventDTO.ResidentID,
-                SpecialEventNote = addSpecialEventDTO.SpecialEventNote,
-                SpecialEventDateTime = addSpecialEventDTO.SpecialEventDateTime,
-            };
+           var specialEventModel = MapToAddSpecialEventModel(addSpecialEventDTO);
 
-            var specialId = await _specialEventService.SaveNewSpecialEventAsync(specialEvent);
+            var result = await _specialEventService.SaveNewSpecialEventAsync(specialEventModel);
             
          
-            return Handle(specialId); //Fejlhåndtering
+            return Handle(result);
 
     
         }
 
         //Update
         [HttpPut("{specialEventID}")]
-        public async Task<IActionResult> UpdateSpecialTask(int specialEventID, [FromBody] SpecialEventModel specialEventModel)
+        public async Task<IActionResult> UpdateSpecialTask(int specialEventID, [FromBody] UpdateSpecialEventDTO specialEventDTO)
         {
-           var result = await _specialEventService.UpdateSpecialEventAsync(specialEventModel);
+            var specialEventModel = MapToUpdateSpecialEventModel(specialEventDTO);
+            var result = await _specialEventService.UpdateSpecialEventAsync(specialEventModel);
             return Handle(result);
         }
 
@@ -56,6 +59,43 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _specialEventService.DeleteSpecialEventAsync(specialEventID);
             return Handle(result);
+        }
+
+
+        // ----- Mapping ----- 
+        
+        
+        
+        private static SpecialEventModel MapToAddSpecialEventModel(AddSpecialEventDTO addSpecialEventDTO)
+        {
+            return new SpecialEventModel
+            {
+                ResidentID = addSpecialEventDTO.ResidentID,
+                SpecialEventNote = addSpecialEventDTO.SpecialEventNote,
+                SpecialEventDateTime = addSpecialEventDTO.SpecialEventDateTime,
+            };
+        }
+
+        private static SpecialEventModel MapToUpdateSpecialEventModel(UpdateSpecialEventDTO updateSpecialEventDTO)
+        {
+            return new SpecialEventModel
+            {
+                SpecialEventID = updateSpecialEventDTO.SpecialEventID,
+                ResidentID = updateSpecialEventDTO.ResidentID,
+                SpecialEventNote = updateSpecialEventDTO.SpecialEventNote,
+                SpecialEventDateTime = updateSpecialEventDTO.SpecialEventDateTime,
+            };
+        }
+
+        private static UpdateSpecialEventDTO MapToGetSpecialEventDTO(SpecialEventModel specialEventModel)
+        {
+            return new UpdateSpecialEventDTO
+            {
+                SpecialEventID = specialEventModel.SpecialEventID,
+                ResidentID = specialEventModel.ResidentID,
+                SpecialEventNote = specialEventModel.SpecialEventNote,
+                SpecialEventDateTime = specialEventModel.SpecialEventDateTime,
+            };
         }
     }
 }

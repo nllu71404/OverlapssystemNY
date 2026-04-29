@@ -59,7 +59,7 @@ namespace OverlapssystemAPI.Controllers
             return Handle(Result.Ok(dtoList));
         }
 
-        //Tilføj --- Burde være post!
+        //Tilføj 
         [HttpPost("TilføjDepartmentTask")]
         public async Task<IActionResult> SaveNewDepartmentTaskAsync([FromBody] AddDepartmentTaskDTO departmentTaskDTO)
         {

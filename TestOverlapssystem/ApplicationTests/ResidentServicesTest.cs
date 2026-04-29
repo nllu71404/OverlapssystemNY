@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
+using OverlapssytemApplication.Common.Errors;
 using OverlapssytemApplication.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 
@@ -14,9 +16,9 @@ namespace TestOverlapssystem.ApplicationTests
     [TestClass]
     public sealed class ResidentServicesTest
     {
-        private Mock<IResidentRepository> _residentRepoMock;
-        private Mock<IMedicinRepository> _medicinRepoMock;
-        private ResidentServices _service;
+        private  Mock<IResidentRepository> _residentRepoMock;
+        private  Mock<ILogger<ResidentServices>> _loggerMock;
+        private  ResidentServices _service;
 
         // GLOBAL ARRANGE (kører før hver test)
         [TestInitialize]
@@ -24,19 +26,19 @@ namespace TestOverlapssystem.ApplicationTests
         {
             //Opretter mock-repositories
             _residentRepoMock = new Mock<IResidentRepository>();
-            _medicinRepoMock = new Mock<IMedicinRepository>();
+            _loggerMock = new Mock<ILogger<ResidentServices>>();
 
             //Opretter ResidentServices, med mocked afhængigheder
-            _service = new ResidentServices(_residentRepoMock.Object, _medicinRepoMock.Object);
+            _service = new ResidentServices(_residentRepoMock.Object, _loggerMock.Object);
         }
 
         [TestMethod]
-        public async Task LoadResidentsAsync_WhenCalled_ReturnsResidentsAndUpdatesState()
+        public async Task LoadResidentsAsync_WhenSuccess_ReturnsResidents()
         {
             // Arrange
             var residents = new List<ResidentModel>
     {
-        new ResidentModel { ResidentId = 1, Name = "Ninna" }
+        new() { ResidentId = 1, Name = "Ninna" }
     };
 
             _residentRepoMock
@@ -47,159 +49,262 @@ namespace TestOverlapssystem.ApplicationTests
             var result = await _service.LoadResidentsAsync();
 
             // Assert
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("Ninna", result[0].Name);
-            CollectionAssert.AreEqual(result, _service.Residents);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(1, result.Value.Count);
+            Assert.AreEqual("Ninna", result.Value[0].Name);
+            CollectionAssert.AreEqual(result.Value, _service.Residents);
+        }
+
+
+        [TestMethod]
+        public async Task LoadResidentsAsync_WhenException_ReturnsTechnicalError()
+        {
+            //Arrange
+            _residentRepoMock.Setup(r => r.GetAllResidentsAsync())
+                     .ThrowsAsync(new Exception("fejl"));
+
+            //Act
+            var result = await _service.LoadResidentsAsync();
+
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Technical, result.Error.Type);
+            Assert.AreEqual("Fejl ved hentning af beboere", result.Error.Message);
+        
         }
 
         [TestMethod]
-        public async Task UpdateResidentAsync_WhenCalled_CallsRepositoryAndReloadsResidents()
+        public async Task LoadResidentsByDepartmentAsync_WhenSuccess_ReturnsResidents()
+        {
+            //Arrange
+            _residentRepoMock.Setup(r => r.GetResidentByDepartmentIdAsync(1))
+                     .ReturnsAsync(new List<ResidentModel>
+                     {
+                 new() { ResidentId = 1 }
+                     });
+
+            //Act
+            var result = await _service.LoadResidentsByDepartmentAsync(1);
+
+            //Assert
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(1, result.Value.Count);
+            
+        }
+
+        [TestMethod]
+        public async Task LoadResidentsByDepartmentAsync_WhenInvalidId_ReturnsValidationError()
+        {
+            //Act
+            var result = await _service.LoadResidentsByDepartmentAsync(0);
+
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Validation, result.Error.Type);
+            Assert.AreEqual("Ugyldigt afdelingsID", result.Error.Message);
+        }
+
+        [TestMethod]
+        public async Task LoadResidentsByDepartmentAsync_WhenExeption_ReturnsTechnicalError()
+        {
+
+            //Arrange
+            _residentRepoMock.Setup(r => r.GetResidentByDepartmentIdAsync(1))
+                     .ThrowsAsync(new Exception("fejl"));
+
+            //Act
+            var result = await _service.LoadResidentsByDepartmentAsync(1);
+
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Technical, result.Error.Type);
+            Assert.AreEqual("Fejl ved hentning af beboere for afdeling", result.Error.Message);
+        }
+
+        [TestMethod]
+        public async Task CreateResidentAsync_WhenSuccess_CreatesResidentAndReturnsId()
         {
             // Arrange
-            var resident = new ResidentModel { ResidentId = 1, DepartmentId = 2 };
+            var resident = new ResidentModel { DepartmentId = 2, Name = "Ny beboer" };
 
             _residentRepoMock
-                .Setup(r => r.GetResidentByDepartmentIdAsync(2))
-                .ReturnsAsync(new List<ResidentModel>());
+                .Setup(r => r.SaveNewResidentAsync(resident))
+                .ReturnsAsync(10);
 
             // Act
-            await _service.UpdateResidentAsync(resident);
+            var result = await _service.CreateResidentAsync(resident);
 
             // Assert
-            _residentRepoMock.Verify(r => r.UpdateResidentAsync(resident), Times.Once);
-            _residentRepoMock.Verify(r => r.GetResidentByDepartmentIdAsync(2), Times.Once);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(10, result.Value);
+            
         }
 
         [TestMethod]
-        public async Task DeleteResidentAsync_WhenCalled_CallsRepository()
+        public async Task CreateResidentAsync_WhenInvalidDepartment_ReturnsValidationError()
         {
-            // Arrange
-            int residentId = 1;
+            //Arrange
+            var resident = new ResidentModel { DepartmentId = 0, Name = "Ny beboer" };
 
-            // Act
-            await _service.DeleteResidentAsync(residentId);
+            //Act
+            var result = await _service.CreateResidentAsync(resident);
 
-            // Assert
-            _residentRepoMock.Verify(r => r.DeleteResidentAsync(residentId), Times.Once);
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Validation, result.Error.Type);
+            Assert.AreEqual("Afdelings ID er ikke sat", result.Error.Message);
         }
 
         [TestMethod]
-        public async Task CreateResidentAsync_WhenCalled_SavesResidentAndReloadsList()
+        public async Task UpdateResidentAsync_WhenSuccess_UpdatesResidentAndReturnsOk()
         {
-            // Arrange
-            var resident = new ResidentModel { DepartmentId = 2 };
-
-            _residentRepoMock
-                .Setup(r => r.GetResidentByDepartmentIdAsync(2))
-                .ReturnsAsync(new List<ResidentModel>());
-
-            // Act
-            await _service.CreateResidentAsync(resident);
-
-            // Assert
-            _residentRepoMock.Verify(r => r.SaveNewResidentAsync(resident), Times.Once);
-            _residentRepoMock.Verify(r => r.GetResidentByDepartmentIdAsync(2), Times.Once);
-        }
-
-        [TestMethod]
-        public void SetDepartment_DepartmentIdIsNotNull_CreatesANewResidentWithSelectedDepartmentId()
-        {
-            // Arrange
-            int departmentId = 5;
-
-            // Act
-            _service.SetDepartment(departmentId);
-
-            // Assert
-            Assert.AreEqual(departmentId, _service.SelectedDepartmentId);
-            Assert.IsNotNull(_service.NewResident);
-            Assert.AreEqual(departmentId, _service.NewResident.DepartmentId);
-        }
-
-        [TestMethod]
-        public async Task LoadMedicinTimesAsync_WhenCalled_LoadsMedicinTimesIntoResident()
-        {
-            // Arrange
-            var resident = new ResidentModel { ResidentId = 1 };
-            var medicinTimes = new List<MedicinModel>
+            //Arrange
+            var resident = new ResidentModel
             {
-                new MedicinModel { MedicinTimeID = 1 },
-                new MedicinModel { MedicinTimeID = 2 }
+                ResidentId = 1,
+                Name = "Ninna"
             };
 
-            _medicinRepoMock
-                .Setup(r => r.GetMedicinByResidentIdAsync(resident.ResidentId))
-                .ReturnsAsync(medicinTimes);
+            _residentRepoMock.Setup(r => r.UpdateResidentAsync(resident))
+                     .Returns(Task.CompletedTask);
+            //Act
+            var result = await _service.UpdateResidentAsync(resident);
 
-            // Act
-            await _service.LoadMedicinTimesAsync(resident);
-
-            // Assert
-            Assert.IsNotNull(resident.MedicinTimes);
-            Assert.AreEqual(2, resident.MedicinTimes.Count);
-            CollectionAssert.AreEqual(medicinTimes, resident.MedicinTimes);
+            //Assert
+            Assert.IsTrue(result.Success);
         }
 
         [TestMethod]
-        public async Task AddMedicinTimeAsync_ResidentIdAndTimeIsNotNull_CreatesMedicinTimeAndCallsRepo()
+        public async Task UpdateResidentAsync_WhenInvalidId_ReturnsValidationError()
         {
-            // Arrange
-            int residentId = 3;
-            DateTime medTimeDate = new DateTime(2026, 4, 9, 8, 0, 0);
-            int expectedId = 4;
-
-            MedicinModel capturedMedTime = null;
-            _medicinRepoMock
-                .Setup(r => r.SaveNewMedicinAsync(It.IsAny<MedicinModel>()))
-                .Callback<MedicinModel>(m => capturedMedTime = m)
-                .ReturnsAsync(expectedId);
-
-            // Act
-            await _service.AddMedicinTimeAsync(residentId, medTimeDate);
-
-            // Assert
-            Assert.IsNotNull(capturedMedTime);
-            Assert.AreEqual(residentId, capturedMedTime.ResidentID);
-            Assert.AreEqual(medTimeDate, capturedMedTime.MedicinTime);
-            Assert.IsNull(capturedMedTime.MedicinCheckTimeStamp);
-            _medicinRepoMock.Verify(r => r.SaveNewMedicinAsync(It.IsAny<MedicinModel>()), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task ToggleMedicinGivenAsync_WhenTimestampIsNull_SetsTimestampAndSaves()
-        {
-            // Arrange
-            var medTime = new MedicinModel
+            //Arrange
+            var resident = new ResidentModel
             {
-                MedicinTimeID = 1,
-                MedicinCheckTimeStamp = null
+                ResidentId = 0,
+                Name = "Ninna"
             };
 
-            // Act
-            await _service.ToggleMedicinGivenAsync(medTime);
+            //Act
+            var result = await _service.UpdateResidentAsync(resident);
 
-            // Assert
-            Assert.IsNotNull(medTime.MedicinCheckTimeStamp);
-            _medicinRepoMock.Verify(m => m.UpdateMedicinAsync(medTime), Times.Once);
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Validation, result.Error.Type);
+            Assert.AreEqual("Ugyldigt beboer ID", result.Error.Message);
         }
 
         [TestMethod]
-        public async Task ToggleMedicinGivenAsync_WhenTimestampExists_NullsTimestamp()
+        public async Task UpdateResidentAsync_WhenEmptyName_ReturnsValidationError()
         {
-            // Arrange
-            var medTime = new MedicinModel
+            //Arrange
+            var resident = new ResidentModel
             {
-                MedicinTimeID = 1,
-                MedicinCheckTimeStamp = DateTime.Now
+                ResidentId = 1,
+                Name = ""
             };
 
-            // Act
-            await _service.ToggleMedicinGivenAsync(medTime);
+            //Act
+            var result = await _service.UpdateResidentAsync(resident);
 
-            // Assert
-            Assert.IsNull(medTime.MedicinCheckTimeStamp);
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Validation, result.Error.Type);
+            Assert.AreEqual("Navn er påkrævet", result.Error.Message);
         }
 
+        [TestMethod]
+        public async Task UpdateResidentAsync_WhenNotFoundException_ReturnsNotFoundError()
+        {
+            //Arrange
+            var resident = new ResidentModel
+            {
+                ResidentId = 1,
+                Name = "Ninna"
+            };
+
+            _residentRepoMock.Setup(r => r.UpdateResidentAsync(resident))
+                     .ThrowsAsync(new KeyNotFoundException());
+
+            //Act
+            var result = await _service.UpdateResidentAsync(resident);
+
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.NotFound, result.Error.Type);
+            Assert.AreEqual("Kunne ikke finde beboer at opdatere", result.Error.Message);
+        }
+
+        [TestMethod]
+        public async Task DeleteResidentAsync_WhenSuccess_ReturnsOk()
+        {
+            //Arrange
+            _residentRepoMock.Setup(r => r.DeleteResidentAsync(1))
+                     .Returns(Task.CompletedTask);
+
+            //Act
+            var result = await _service.DeleteResidentAsync(1);
+
+            //Assert
+            Assert.IsTrue(result.Success);
+        }
+
+        [TestMethod]
+        public async Task DeleteResidentAsync_WhenInvalidId_ReturnsValidationError()
+        {
+            //Act
+            var result = await _service.DeleteResidentAsync(0);
+
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Validation, result.Error.Type);
+            Assert.AreEqual("Ugyldigt beboer ID", result.Error.Message);
+        }
+
+        [TestMethod]
+        public async Task DeleteResidentAsync_WhenNotFoundException_ReturnsNotFoundError()
+        {
+            
+            //Arrange
+            _residentRepoMock.Setup(r => r.DeleteResidentAsync(1))
+                     .ThrowsAsync(new KeyNotFoundException());
+
+            //Act
+            var result = await _service.DeleteResidentAsync(1);
+
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.NotFound, result.Error.Type);
+            Assert.AreEqual("Kunne ikke finde beboer at slette", result.Error.Message);
+
+        }
+
+        [TestMethod]
+        public async Task DeleteResidentAsync_WhenException_ReturnsTechnicalError()
+        {
+
+            //Arrange
+            _residentRepoMock.Setup(r => r.DeleteResidentAsync(1))
+                     .ThrowsAsync(new Exception());
+
+            //Act
+            var result = await _service.DeleteResidentAsync(1);
+
+            //Assert
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(ErrorType.Technical, result.Error.Type);
+            Assert.AreEqual("Kunne ikke slette beboer", result.Error.Message);
+        }
+
+        [TestMethod]
+        public void SetDepartment_WhenSuccess_SetsValues()
+        {
+            _service.SetDepartment(5);
+
+            Assert.AreEqual(5, _service.SelectedDepartmentId);
+            Assert.AreEqual(5, _service.NewResident.DepartmentId);
+        }
+
+ 
 
 
     }

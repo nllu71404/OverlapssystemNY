@@ -10,7 +10,7 @@ namespace OverlapssystemShared
     {
         public int MedicinTimeID { get; set; }
 
-        public int ResidentID { get; set; }
+        public int? ResidentID { get; set; }
 
         public TimeSpan? MedicinTime { get; set; }
 

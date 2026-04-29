@@ -7,7 +7,7 @@ namespace OverlapssystemShared
 {
     public class AddMedicinTimeDTO
     {
-        public int ResidentID { get; set; }
+        public int? ResidentID { get; set; }
         public TimeSpan? MedicinTime { get; set; }
 
         public bool IsChecked { get; set; }

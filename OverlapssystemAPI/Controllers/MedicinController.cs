@@ -3,6 +3,7 @@ using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
+using OverlapssytemApplication.Common;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -21,19 +22,26 @@ namespace OverlapssystemAPI.Controllers
         [HttpGet("HentMedicinForBorger/{residentId}")]
         public async Task<IActionResult> GetMedicinByResidentId(int residentId)
         {
-            var medicin = await _medicinServices.GetMedicinByResidentIdAsync(residentId);
-            return Handle(medicin);
+            var result = await _medicinServices.GetMedicinByResidentIdAsync(residentId);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            var medicinDTOs = result.Value.Select(MapToGetMedicinTimeDTO).ToList();
+            return Handle(Result.Ok(medicinDTOs));
         }
 
         // Tilføjer medicintid 
         [HttpPost("TilføjMedicin")]
         public async Task<IActionResult> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
         {
-           var mappedModel = MapToAddMedicinModel(medicinDTO);
-           var id = await _medicinServices.AddMedicinTimeAsync(mappedModel);
-           return Handle(id);
+            var mappedModel = MapToAddMedicinModel(medicinDTO);
+            var id = await _medicinServices.AddMedicinTimeAsync(mappedModel);
+            return Handle(id);
 
-            
+
         }
 
         //Delete
@@ -65,9 +73,9 @@ namespace OverlapssystemAPI.Controllers
 
 
 
-    
 
-    // ---- Mapping ----
+
+        // ---- Mapping ----
 
         private MedicinModel MapToUpdateMedicinModel(UpdateMedicinTimeDTO medicinDTO)
         {
@@ -91,6 +99,18 @@ namespace OverlapssystemAPI.Controllers
             };
         }
 
-       
+        private MedicinTimeDTO MapToGetMedicinTimeDTO(MedicinModel medicinModel)
+        {
+            return new MedicinTimeDTO
+            {
+                MedicinTimeID = medicinModel.MedicinTimeID,
+                ResidentID = medicinModel.ResidentID,
+                MedicinTime = medicinModel.MedicinTime,
+                IsChecked = medicinModel.IsChecked,
+                MedicinCheckTimeStamp = medicinModel.MedicinCheckTimeStamp
+            };
+
+
+        }
     }
 }

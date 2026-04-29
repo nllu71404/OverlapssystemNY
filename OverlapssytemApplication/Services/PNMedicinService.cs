@@ -70,29 +70,21 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        public async Task<Result<int>> AddPNMedicinAsync(
-            int residentId, DateTime? pNTime, string reason)
+        public async Task<Result<int>> AddPNMedicinAsync(PNMedicinModel pNMedicinModel)
         {
-            // Validering er i UI (som du allerede har besluttet)
-            if (residentId <= 0)
+           
+            if (pNMedicinModel.ResidentID <= 0)
                 return Error.Validation("Ugyldigt resident ID");
 
             try
             {
-                var pNMedicin = new PNMedicinModel
-                {
-                    ResidentID = residentId,
-                    PNTime = pNTime,
-                    Reason = reason
-                };
-
-                var id = await _pnmedicinrepository.SaveNewPNMedicinAsync(pNMedicin);
+                var id = await _pnmedicinrepository.SaveNewPNMedicinAsync(pNMedicinModel);
 
                 return id; // implicit success
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke oprette PN medicin");
+                return Error.Technical(ex.Message);
             }
         }
 
