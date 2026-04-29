@@ -4,22 +4,39 @@
 @using Overlapssystem.Facades;
 @using Overlapssystem.ViewModels;
 @using Overlapssystem.Interfaces;
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject IDepartmentTaskFacade departmentTaskFacade
 @inject IJSRuntime JS
 
 <div class="department-task-card">
     <div class="task-card-header">
-        <select class="shift-select" @bind="selectedShift">
-            <option value="@ShiftType.Dag">Dagvagt</option>
-            <option value="@ShiftType.Aften">Aftenvagt</option>
-            <option value="@ShiftType.Nat">Nattevagt</option>
-        </select>
-        @if (!IsReadOnly)
-        {
-            <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync(DepartmentId)">+</button>
-        }
+        <AuthorizeView>
+            <Authorized>
+                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                {
+                    <select class="shift-select" @bind="selectedShift">
+                        <option value="@ShiftType.Dag">Dagvagt</option>
+                        <option value="@ShiftType.Aften">Aftenvagt</option>
+                        <option value="@ShiftType.Nat">Nattevagt</option>
+                    </select>
+                    @if (context.User.IsInRole("Administrator"))
+                    {
+                        <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync(DepartmentId)">+</button>
+                    }
+                }
+                else if (context.User.IsInRole("Simpel"))
+                {
+                    <select disabled class="form-control">
+                        <option value="@ShiftType.Dag" selected="@(dpTask.ShiftType == ShiftType.Dag)"></option>
+                        <option value="@ShiftType.Aften" selected="@(dpTask.ShiftType == ShiftType.Aften)"></option>
+                        <option value="@ShiftType.Aften" selected="@(dpTask.ShiftType == ShiftType.Nat)"></option>
+                    </select>
+                }
+            </Authorized>
+        </AuthorizeView>
     </div>
+
     <table class="task-table">
         <thead>
             <tr>
@@ -32,34 +49,60 @@
             {
                 <tr>
                     <td>
-                        @if (IsReadOnly)
-                        {
-                            <span>@task.DepartmentTaskTopic</span>
-                        }
-                        else
-                        {
-                            <input value="@task.DepartmentTaskTopic"
-                                   @onchange="async e => {
-                                   task.DepartmentTaskTopic = e.Value?.ToString();
-                                   await UpdateDepartmentTask(task);
-                               }" />
-                    }
+                        <AuthorizeView>
+                            <Authorized>
+
+                                @if (context.User.IsInRole("Administrator"))
+                                {
+                                    <input value="@task.DepartmentTaskTopic"
+                                           @onchange="async e => {
+                                           task.DepartmentTaskTopic = e.Value?.ToString();
+                                           await UpdateDepartmentTask(task);
+                                       }" />
+                                }
+                                else if (context.User.IsInRole("Medarbejder"))
+                                {
+                                    <span>@task.DepartmentTaskTopic</span>
+                                }
+                                else if (context.User.IsInRole("Simpel"))
+                                {
+                                <input value="@task.DepartmentTaskTopic" disabled />
+                                }
+                                
+                            </Authorized>
+                        </AuthorizeView>    
+                    
                 </td>
                 <td>
-                    <input value="@task.EmployeeName"
-                           @onchange="async e => {
-                           task.EmployeeName = e.Value?.ToString();
-                           await UpdateDepartmentTask(task);
-                                                          }"
-                           placeholder="Navn" />
+                    <AuthorizeView>
+                        <Authorized>
+                            @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                            {
+                                <input value="@task.EmployeeName"
+                                       @onchange="async e => {
+                                       task.EmployeeName = e.Value?.ToString();
+                                       await UpdateDepartmentTask(task);
+                                   }"
+                                   placeholder="Navn" />
+                            }
+                            else if (context.User.IsInRole("Simpel"))
+                            {
+                                <input value="@task.EmployeeName" disabled />
+                            }
+                        </Authorized>
+                    </AuthorizeView>
+                    
                 </td>
             </tr>
-                        }
+            }
         </tbody>
     </table>
 </div>
 
 @code {
+    [Parameter]
+    public DepartmentTaskViewModel dpTask { get; set; } = new();
+
     private ShiftType selectedShift = ShiftType.Dag;
     [Parameter]
     public int DepartmentId { get; set; }

@@ -22,22 +22,24 @@ namespace OverlapssystemInfrastructure.Service
         }
 
         // Genererer et JWT token med brugerens id, brugernavn og rolle
-        public string GenerateToken(UserModel user)
+        public string GenerateToken(UserModel user, IList<string> roles)
         {
-            var claims = new[]
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id),
+        new Claim(ClaimTypes.Name, user.UserName ?? ""),
+        new Claim("DepartmentId", user.DepartmentId?.ToString() ?? "")
+    };
+
+            // Tilføj Identity roller som claims
+            foreach (var role in roles)
             {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName ?? ""),
-            new Claim(ClaimTypes.Role, user.UserRole.ToString()),
-            // DepartmentId gemmes i tokenet så Blazor ved hvilken afdeling brugeren tilhører
-            new Claim("DepartmentId", user.DepartmentId?.ToString() ?? "")
-        };
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],

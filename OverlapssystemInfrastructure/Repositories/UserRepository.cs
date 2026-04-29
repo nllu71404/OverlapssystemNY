@@ -25,7 +25,7 @@ namespace OverlapssystemInfrastructure.Repositories
 
         // CreateAsync opretter brugeren i databasen og hasher passwordet automatisk
         // Vi sender password som separat parameter da Identity aldrig gemmer det i plaintext
-        public async Task<IdentityResult> CreateUser(UserModel userModel, string password)
+        public async Task<IdentityResult> CreateUser(UserModel userModel, string password, string role)
         {
             return await _userManager.CreateAsync(userModel, password);
         }
@@ -59,11 +59,15 @@ namespace OverlapssystemInfrastructure.Repositories
         {
             var user = await GetUserByID(userId);
             user.UserName = userModel.UserName;
-            user.UserRole = userModel.UserRole;
+            user.FirstName = userModel.FirstName;
+            user.LastName = userModel.LastName;
             user.DepartmentId = userModel.DepartmentId;
             return await _userManager.UpdateAsync(user);
         }
-
+        public async Task<IdentityResult> AddToRoleAsync(UserModel user, string role)
+        {
+            return await _userManager.AddToRoleAsync(user, role);
+        }
 
     }
 

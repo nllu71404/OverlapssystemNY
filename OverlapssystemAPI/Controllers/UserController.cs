@@ -49,10 +49,11 @@ namespace OverlapssystemAPI.Controllers
             var userModel = new UserModel
             {
                 UserName = userDTO.UserName,
-                DepartmentId = userDTO.DepartmentId,
-                UserRole = userDTO.UserRole
+                FirstName = userDTO.FirstName,
+                LastName = userDTO.LastName,
+                DepartmentId = userDTO.DepartmentId
             };
-            var result = await _userService.CreateNewUserAsync(userModel, userDTO.Password);
+            var result = await _userService.CreateNewUserAsync(userModel, userDTO.Password, userDTO.Role);
             return Handle(result);
         }
 

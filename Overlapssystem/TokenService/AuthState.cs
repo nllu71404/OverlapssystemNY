@@ -1,36 +1,71 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Principal;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 
 namespace Overlapssystem.TokenService
 {
     public class AuthState : AuthenticationStateProvider
     {
+        private readonly IJSRuntime _js;
         private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
 
-        // Kaldes af Blazor for at få den aktuelle brugers authentication state
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        public AuthState(IJSRuntime js)
         {
-            return Task.FromResult(new AuthenticationState(_currentUser));
+            _js = js;
+        }
+
+
+        // Kaldes af Blazor for at få den aktuelle brugers authentication state
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            // Hent token fra sessionStorage ved hver side load
+            try
+            {
+                var token = await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
+
+                if (string.IsNullOrEmpty(token))
+                    return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+
+                _currentUser = BuildClaimsPrincipal(token);
+                return new AuthenticationState(_currentUser);
+            }
+            catch
+            {
+                // JS er ikke klar endnu under pre-rendering
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
         }
 
         // Kaldes når brugeren logger ind med et JWT token
-        public void MarkUserAsAuthenticated(string token)
+        public async Task MarkUserAsAuthenticated(string token)
         {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            var identity = new ClaimsIdentity(jwtToken.Claims, "jwt");
-            _currentUser = new ClaimsPrincipal(identity);
-
+            await _js.InvokeVoidAsync("sessionStorage.setItem", "authToken", token);
+            _currentUser = BuildClaimsPrincipal(token);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
-
         // Kaldes når brugeren logger ud
-        public void MarkUserAsLoggedOut()
+        public async Task MarkUserAsLoggedOut()
         {
+            await _js.InvokeVoidAsync("sessionStorage.removeItem", "authToken");
             _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
+
+        private ClaimsPrincipal BuildClaimsPrincipal(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var claims = jwtToken.Claims.Select(c =>
+                c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    ? new Claim(ClaimTypes.Role, c.Value)
+                    : c).ToList();
+            var identity = new ClaimsIdentity(claims, "jwt");
+            return new ClaimsPrincipal(identity);
+        }
+
+        
+        
     }
 }

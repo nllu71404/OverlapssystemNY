@@ -89,10 +89,9 @@ namespace OverlapssytemApplication.Services
         }
 
 
-        public async Task<Result> CreateNewUserAsync(UserModel userModel, string password)
+        public async Task<Result> CreateNewUserAsync(UserModel userModel, string password, string role)
         {
             if (userModel == null) return Error.Validation("Brugermodellen er påkrævet");
-
             if (string.IsNullOrWhiteSpace(userModel.UserName))
                 return Error.Validation("Brugernavnet er påkrævet");
 
@@ -101,9 +100,12 @@ namespace OverlapssytemApplication.Services
                 var existing = await _userRepository.GetUserByUserName(userModel.UserName);
                 if (existing != null) return Error.Validation("Brugernavnet er allerede i brug");
 
-                var result = await _userRepository.CreateUser(userModel, password);
+                var result = await _userRepository.CreateUser(userModel, password, role);
                 if (!result.Succeeded)
                     return Error.Validation(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+                // Tildel Identity rolle
+                await _userRepository.AddToRoleAsync(userModel, role);
 
                 return Result.Ok();
             }

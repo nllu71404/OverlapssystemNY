@@ -38,7 +38,10 @@ namespace OverlapssystemInfrastructure.Service
             if (!passwordValid)
                 return Error.Validation("Brugernavn eller kodeord er forkert");
 
-            var token = _jwtService.GenerateToken(user);
+            // Hent brugerens Identity roller
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var token = _jwtService.GenerateToken(user, roles);
             return Result.Ok(token);
         }
 

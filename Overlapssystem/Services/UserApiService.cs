@@ -46,13 +46,28 @@ namespace Overlapssystem.Services
         // Validering - returnerer JWT token ved succes, null ved fejl
         public async Task<string?> ValidateUser(string username, string password)
         {
+            //var dto = new { UserName = username, Password = password };
+            //var response = await _http.PostAsJsonAsync("api/User/ValiderBruger", dto);
+
+            //if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadFromJsonAsync<TokenResponseDTO>();
+            //    return result?.Token;
+            //}
+
+            //return null;
             var dto = new { UserName = username, Password = password };
             var response = await _http.PostAsJsonAsync("api/User/ValiderBruger", dto);
 
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<TokenResponseDTO>();
-                return result?.Token;
+                var token = result?.Token;
+
+                // Log the token for debugging purposes (remove in production)
+                Console.WriteLine($"Generated Token: {token}");
+
+                return token;
             }
 
             return null;

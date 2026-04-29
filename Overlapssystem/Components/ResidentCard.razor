@@ -4,6 +4,7 @@
 @using OverlapssystemShared
 @using Overlapssystem.ViewModels
 @using Overlapssystem.Interfaces
+@using Overlapssystem.TokenService
 @using Microsoft.AspNetCore.Components.Authorization
 
 @inject IJSRuntime JS
@@ -15,99 +16,202 @@
     <!-- Viser UI/design for en beboer-->
     <!-- TOP 1 -->
     <div class="top-row">
-        <select @bind="Resident.Risiko" class="form-select">
-            <option value="@Risiko.Green">Grøn</option>
-            <option value="@Risiko.Yellow">Gul</option>
-            <option value="@Risiko.Red">Rød</option>
-        </select>
+        <AuthorizeView>
+            <Authorized>
+                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                {
+                    <select @bind="Resident.Risiko" class="form-select">
+                        <option value="@Risiko.Green">Grøn</option>
+                        <option value="@Risiko.Yellow">Gul</option>
+                        <option value="@Risiko.Red">Rød</option>
+                    </select>
+                } else if (context.User.IsInRole("Simpel"))
+                {
+                    <select disabled class="form-select">
+                        <option value="@Risiko.Green" selected="@(Resident.Risiko == Risiko.Green)">Grøn</option>
+                        <option value="@Risiko.Yellow" selected="@(Resident.Risiko == Risiko.Yellow)">Gul</option>
+                        <option value="@Risiko.Red" selected="@(Resident.Risiko == Risiko.Red)">Rød</option>
+                    </select>
+                }
+            </Authorized>
+        </AuthorizeView>
 
-        <!-- Noget af denne kode, kan samles til én metode -->
+       
         <div class="mood-buttons">
-            <button class="@(Resident.Mood == Mood.Happy ? "mood-selected" : "mood-btn")"
-                    @onclick="async () => { Resident.Mood = Mood.Happy; await SaveResident(); }">
-                😊
-            </button>
-            <button class="@(Resident.Mood == Mood.Neutral ? "mood-selected" : "mood-btn")"
-                    @onclick="async () => { Resident.Mood = Mood.Neutral; await SaveResident(); }">
-                😐
-            </button>
-            <button class="@(Resident.Mood == Mood.Sad ? "mood-selected" : "mood-btn")"
-                    @onclick="async () => { Resident.Mood = Mood.Sad; await SaveResident(); }">
-                😢
-            </button>
+            <AuthorizeView>
+                <Authorized>
+                    @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                    {
+                        <button class="@(Resident.Mood == Mood.Happy ? "mood-selected" : "mood-btn")"
+                                @onclick="async () => { Resident.Mood = Mood.Happy; await SaveResident(); }">
+                            😊
+                        </button>
+                        <button class="@(Resident.Mood == Mood.Neutral ? "mood-selected" : "mood-btn")"
+                                @onclick="async () => { Resident.Mood = Mood.Neutral; await SaveResident(); }">
+                            😐
+                        </button>
+                        <button class="@(Resident.Mood == Mood.Sad ? "mood-selected" : "mood-btn")"
+                                @onclick="async () => { Resident.Mood = Mood.Sad; await SaveResident(); }">
+                            😢
+                        </button>
+                    }
+                    else if (context.User.IsInRole("Simpel"))
+                    {
+                        <select disabled class="form-select">
+                            <option value="@Risiko.Green" selected="@(Resident.Risiko == Risiko.Green)">Grøn</option>
+                            <option value="@Risiko.Yellow" selected="@(Resident.Risiko == Risiko.Yellow)">Gul</option>
+                            <option value="@Risiko.Red" selected="@(Resident.Risiko == Risiko.Red)">Rød</option>
+                        </select>
+                    }
+                </Authorized>
+            </AuthorizeView>
         </div>
     </div>
     
     <!-- Opdater navn når man klikker væk -->
-    <AuthorizeView Roles="Medarbejder,Administrator">
-    <Authorized>
-        <input class="form-control"
-               value="@Resident.Name"
-               @onchange="OnNameChanged" />
-    </Authorized>
-    <NotAuthorized>
-        <p class="form-control">Navnet er skjult</p>
-    </NotAuthorized>
-</AuthorizeView>
+
+    <AuthorizeView>
+        <Authorized>
+            @if (context.User.IsInRole("Administrator"))
+            {
+                <!-- Admin kan tilføje/fjerne/redigere -->
+                <input class="form-control"
+                       value="@Resident.Name"
+                       @onchange="OnNameChanged" />
+            }
+            else if (context.User.IsInRole("Medarbejder"))
+            {
+                <!-- Medarbejder kan redigere -->
+                <input class="form-control" value="@Resident.Name" disabled />
+            }
+            else if (context.User.IsInRole("Simpel"))
+            {
+                <!-- Simpel kan kun se -->
+                <p class="form-control">Navnet er skjult</p>
+            }
+        </Authorized>
+    </AuthorizeView>
     
            <!-- Opdater status når man klikker væk -->
     <label class="resident-label">Status</label>
-<textarea class="form-control"
-          @onchange="OnStatusChanged" placeholder="Udfyld status for beboer">@Resident.Status</textarea>
+    <AuthorizeView>
+        <Authorized>
+            @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+            {
+                <textarea class="form-control"
+                @onchange="OnStatusChanged" placeholder="Udfyld status for beboer">@Resident.Status</textarea>
+            } else if (context.User.IsInRole("Simpel"))
+            {
+                <textarea class="form-control" disabled>@Resident.Status</textarea>
+            }
+            </Authorized>
+    </AuthorizeView>
+
     
           <!-- Opdater Activity + Family når man klikker væk -->
     <div class="two-column">
         <label class="resident-label">Aktivitet</label>
-        <textarea @onchange="OnActivityChanged" placeholder="Udfyld aktivitet">@Resident.Activity</textarea>
+        <AuthorizeView>
+            <Authorized>
+                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                {
+                    <textarea @onchange="OnActivityChanged" placeholder="Udfyld aktivitet">@Resident.Activity</textarea>
+                }
+                else if (context.User.IsInRole("Simpel"))
+                {
+                    <textarea class="form-control" disabled>@Resident.Activity</textarea>
+                }
+            </Authorized>
+        </AuthorizeView>
+        
         <label class="resident-label">Familie kontakt</label>
-        <textarea @onchange="OnFamilyChanged" placeholder="Udfyld familie kontakt">@Resident.Family</textarea>
+        <AuthorizeView>
+            <Authorized>
+                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                {
+                    <textarea @onchange="OnFamilyChanged" placeholder="Udfyld familie kontakt">@Resident.Family</textarea>
+                }
+                else if (context.User.IsInRole("Simpel"))
+                {
+                    <textarea class="form-control" disabled>@Resident.Family</textarea>
+                }
+            </Authorized>
+        </AuthorizeView>
     </div>
     
           <!-- Opdater ResidentEmployee når man klikker væk -->
     <div class="two-column">
         <label class="resident-label">Beboer ansvarlig</label>
-        <textarea class="form-control"
-                  placeholder="Skriv medarbejder navn"
-                  @onchange="OnResidentEmployeeChanged">@Resident.ResidentEmployee</textarea>
+        <AuthorizeView>
+            <Authorized>
+                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                {
+                    <textarea class="form-control"
+                              placeholder="Skriv medarbejder navn"
+                              @onchange="OnResidentEmployeeChanged">@Resident.ResidentEmployee</textarea>
+                }
+                else if (context.User.IsInRole("Simpel"))
+                {
+                    <textarea class="form-control" disabled>@Resident.ResidentEmployee</textarea>
+                }
+            </Authorized>
+        </AuthorizeView>
+        
     </div>
 
     <!-- MEDICIN -->
     <div class="section">
         <div class="section-header">
             <strong>MEDICIN TIDER</strong>
-            <button class="btn-plus" @onclick="AddMedicinTimeAsync">+</button>
+            <AuthorizeView Roles="Administrator">
+                <Authorized>
+                    <button class="btn-plus" @onclick="AddMedicinTimeAsync">+</button>
+                </Authorized>
+            </AuthorizeView>
+            
         </div>
 
         <ul>
-        @foreach (var med in Resident.MedicinTimes)
-        {
+            @foreach (var med in Resident.MedicinTimes)
+            {
                 <li>
-                    <input type="time"
-                           value="@med.MedicinTimeText"
-                           @onchange="async e => {
-                           med.MedicinTimeText = e.Value?.ToString();
-                           await UpdateMedicinTimeAsync(med);
-                       }" />
-
-                <input type="checkbox"
-                       checked="@med.IsChecked"
-                       @onchange="async e => {
-                       await SetMedicinChecked(med, (bool)e.Value!);
-                       med.IsChecked = (bool)e.Value!;
-                                  }" />
-
-                @if (med.IsChecked && med.MedicinCheckTimeStampText != null)
-                {
-                    <span>
-                        Krydset af kl. @med.MedicinCheckTimeStampText
-                    </span>
-                }
-                <button class="btn btn-danger btn-sm"
-                        @onclick="() => DeleteMedicinTimeAsync(med)">
-                    Slet
-                </button>
+                    <AuthorizeView>
+                        <Authorized>
+                            @if(context.User.IsInRole("Administrator") || context.User.IsInRole("Medarbejder"))
+                            {
+                                <input type="time"
+                                       value="@med.MedicinTimeText"
+                                       @onchange="async e => {
+                                       med.MedicinTimeText = e.Value?.ToString();
+                                       await UpdateMedicinTimeAsync(med);
+                                   }" />
+                              <input type="checkbox"
+                                     checked="@med.IsChecked"
+                                     @onchange="async e => {
+                                   await SetMedicinChecked(med, (bool)e.Value!);
+                                   med.IsChecked = (bool)e.Value!;
+                               }" />
+                                    @if (med.IsChecked && med.MedicinCheckTimeStampText != null)
+                                    {
+                                        <span>Krydset af kl. @med.MedicinCheckTimeStampText</span>
+                                    }
+                                    @if (context.User.IsInRole("Administrator"))
+                                    {
+                                        <button class="btn btn-danger btn-sm"
+                                                @onclick="() => DeleteMedicinTimeAsync(med)">
+                                            Slet
+                                        </button>
+                                    }
+                            }  else if (context.User.IsInRole("Simpel"))
+                            {
+                            <span>@med.MedicinTimeText</span>
+                            <input type="checkbox" checked="@med.IsChecked" disabled />
+                            }
+                        </Authorized>
+                </AuthorizeView>
+                
             </li>
-            }
+                        }
                 
         </ul>
     </div>
@@ -117,26 +221,41 @@
     <div class="section">
         <div class="section-header">
             <strong>PN MEDICIN</strong>
-            <button class="btn-plus"
+            <AuthorizeView Roles="Medarbejder,Administrator">
+                <Authorized>
+                    <button class="btn-plus"
                     @onclick="AddPNMedicinAsync">+</button>
+                </Authorized>
+            </AuthorizeView>
+            
         </div>
 
         <ul>
             @foreach (var pn in Resident.PNMedicin)
             {
                 <li>
-                    <input type="datetime-local"
-                           @bind="pn.PNTime" @bind:after="() => UpdatePNMedicinTimeAsync(pn)" />
+                    <AuthorizeView>
+                        <Authorized>
+                            @if (context.User.IsInRole("Administrator") || context.User.IsInRole("Medarbejder"))
+                            {
+                                <!-- Medarbejder kan redigere -->
+                                <input type="datetime-local"
+                                       @bind="pn.PNTime" @bind:after="() => UpdatePNMedicinTimeAsync(pn)" />
 
-                    <textarea class="form-control"
-                              @bind="pn.Reason"
-                              @bind:after="() => UpdatePNMedicinTimeAsync(pn)"
-                              placeholder="Årsag"></textarea>
+                                <textarea class="form-control"
+                                          @bind="pn.Reason"
+                                          @bind:after="() => UpdatePNMedicinTimeAsync(pn)"
+                                          placeholder="Årsag"></textarea>
+                                <button class="btn btn-danger btn-sm" @onclick="() => DeletePNMedicin(pn)">Slet</button>
 
-                    <button class="btn btn-danger btn-sm"
-                            @onclick="() => DeletePNMedicin(pn)">
-                        Slet
-                    </button>
+                            } else if (context.User.IsInRole("Simpel"))
+                            {
+                                <span>@pn.PNTime</span>
+                                <textarea class="form-control" disabled>@pn.Reason</textarea>
+                            }
+                        </Authorized>
+                    </AuthorizeView>
+                    
                 </li>
             }
         </ul>
@@ -146,36 +265,57 @@
     <div class="section">
         <div class="section-header">
             <strong>HANDLEDAG</strong>
-            <button class="btn-plus" @onclick="AddShopping">+</button>
+            <AuthorizeView Roles="Administrator">
+                <Authorized>
+                    <button class="btn-plus" @onclick="AddShopping">+</button>
+                </Authorized>
+            </AuthorizeView>
+            
         </div>
 
         <ul>
             @foreach (var shopping in Resident.Shopping)
             {
                 <li>
-                    <select @bind="shopping.Day" @bind:after="() => UpdateShopping(shopping)">
-                        @foreach (var day in Enum.GetValues<Day>())
-                        {
-                            <option value="@day">@day</option>
-                        }
-                    </select>
+                    <AuthorizeView>
+                        <Authorized>
+                            @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                            {
+                                <select @bind="shopping.Day" @bind:after="() => UpdateShopping(shopping)">
+                                    @foreach (var day in Enum.GetValues<Day>())
+                                    {
+                                        <option value="@day">@day</option>
+                                    }
+                                </select>
 
-                    <input type="time"
-                           value="@shopping.TimeText"
-                           @onchange="async e => {
-                           shopping.TimeText = e.Value?.ToString();
-                           await UpdateShopping(shopping);
-                       }" />
+                                <input type="time"
+                                       value="@shopping.TimeText"
+                                       @onchange="async e => {
+                                       shopping.TimeText = e.Value?.ToString();
+                                       await UpdateShopping(shopping);
+                                   }" />
 
-                <input class="form-control"
-                       @bind="shopping.PaymentMethod"
-                       @bind:after="() => UpdateShopping(shopping)"
-                       placeholder="Betalingsmetode" />
-
-                <button class="btn btn-danger btn-sm"
-                        @onclick="() => DeleteShopping(shopping)">
-                    Slet
-                </button>
+                            <input class="form-control"
+                                   @bind="shopping.PaymentMethod"
+                                   @bind:after="() => UpdateShopping(shopping)"
+                                   placeholder="Betalingsmetode" />
+                                
+                                @if (context.User.IsInRole("Administrator"))
+                                {
+                                <button class="btn btn-danger btn-sm"
+                                        @onclick="() => DeleteShopping(shopping)">
+                                    Slet
+                                </button>
+                                }
+                            }
+                            else if (context.User.IsInRole("Simpel"))
+                            {
+                            <span>@shopping.Day</span>
+                            <input type="time" value=@shopping.TimeText disabled />
+                            <textarea class="form-control" disabled>@shopping.PaymentMethod</textarea>
+                            }
+                        </Authorized>
+                    </AuthorizeView>
             </li>
                         }
         </ul>
@@ -185,35 +325,55 @@
     <div class="section">
         <div class="section-header">
             <strong>SÆRLIG HÆNDELSE</strong>
-            <button class="btn-plus" @onclick="AddSpecialEvent">+</button>
+            <AuthorizeView Roles="Medarbejder,Administrator">
+                <Authorized>
+                    <button class="btn-plus" @onclick="AddSpecialEvent">+</button>
+                </Authorized>
+            </AuthorizeView>
             </div>
 
             <ul>
             @foreach(var specialEvent in Resident.SpecialEvents)
             {
-                <input type="datetime-local"
-                       value="@specialEvent.SpecialEventDateTimeText"
-                       @onchange="async e => {
-                           specialEvent.SpecialEventDateTimeText = e.Value?.ToString();
-                           await UpdateSpecialEvent(specialEvent);
-                       }" />
+                <AuthorizeView>
+                    <Authorized>
+                        @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                        {
+                            <input type="datetime-local"
+                                   value="@specialEvent.SpecialEventDateTimeText"
+                                   @onchange="async e => {
+                                   specialEvent.SpecialEventDateTimeText = e.Value?.ToString();
+                                   await UpdateSpecialEvent(specialEvent);
+                               }" />
 
-                <textarea class="form-control"
-                          @bind="specialEvent.SpecialEventNote"
-                          @bind:after="() => UpdateSpecialEvent(specialEvent)"
-                          placeholder="Udfyld forløb for særlig hændelse"></textarea>
-
-            }
+                        <textarea class="form-control"
+                                  @bind="specialEvent.SpecialEventNote"
+                                  @bind:after="() => UpdateSpecialEvent(specialEvent)"
+                                  placeholder="Udfyld forløb for særlig hændelse"></textarea>
+                        }
+                        else if (context.User.IsInRole("Simpel"))
+                        {
+                        <input type="datetime-local" value="@specialEvent.SpecialEventDateTimeText" disabled />
+                        <textarea class="form-control" disabled>@specialEvent.SpecialEventNote</textarea>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+                        }
         </ul>
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-        <!-- Får tilføjet brugeradgang senere, så se bort fra knappen for nu -->
-        <button class="btn-delete" @onclick="() => ConfirmDeleteAsync()">
-            Slet beboer
-        </button>
-    </div>
+    <AuthorizeView Roles="Administrator">
+        <Authorized>
+            <!-- FOOTER -->
+            <div class="footer">
+                <!-- Får tilføjet brugeradgang senere, så se bort fra knappen for nu -->
+                <button class="btn-delete" @onclick="() => ConfirmDeleteAsync()">
+                    Slet beboer
+                </button>
+            </div>
+        </Authorized>
+    </AuthorizeView>
+    
 
 </div>
 
@@ -439,20 +599,4 @@
         Resident.ResidentEmployee = e.Value?.ToString() ?? "";
         await SaveResident();
     }
-  
-
-    
-
-    
-
-  
-
-  
-
-    
-
-   
-
-   
-   
 }

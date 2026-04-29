@@ -1,4 +1,5 @@
-﻿@page "/login"
+﻿@page "/"
+@page "/login"
 @rendermode InteractiveServer
 @using OverlapssystemDomain.Entities
 @using OverlapssystemDomain.Enums
@@ -16,9 +17,13 @@
     <div class="login-card">
         <h2>Log ind</h2>
 
-        <div class="input-group">
-            <input type="text" placeholder="Indtast brugernavn" @bind="userName" />
-        </div>
+        <input list="brugere"
+               placeholder="Vælg eller indtast brugernavn"
+               @bind="userName" />
+        <datalist id="brugere">
+            <option value="Slot" />
+            <option value="Skov" />
+        </datalist>
 
         <div class="input-group">
             <input type="password" placeholder="Indtast password" @bind="password" />
@@ -63,7 +68,7 @@
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 // Fortæl Blazor at brugeren er logget ind
-                authstate.MarkUserAsAuthenticated(token);
+                await authstate.MarkUserAsAuthenticated(token);
 
                 // Decode JWT og naviger til korrekt HandoverScheme
                 var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();

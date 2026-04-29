@@ -1,19 +1,21 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Overlapssystem.TokenService
+@using Overlapssystem
+
+<!DOCTYPE html>
+This is my app.razor
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
-    <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="Overlapssystem.styles.css" />
-    <HeadOutlet />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<base href="/" />
+	<link rel="stylesheet" href="app.css" />
+	<link rel="stylesheet" href="Overlapssystem.styles.css" />
+	<HeadOutlet />
 </head>
-
 <body>
-    <Routes />
-    <script src="_framework/blazor.web.js"></script>
+	<Routes />
+	<script src="_framework/blazor.web.js"></script>
 </body>
-
 </html>
-

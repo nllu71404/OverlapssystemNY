@@ -14,10 +14,11 @@ namespace OverlapssystemDomain.Interfaces
         Task<List<UserModel>> GetAllUsers();
         Task<UserModel> GetUserByID(string userId);
         Task<UserModel> GetUserByUserName(string userName);
-        Task<IdentityResult> CreateUser(UserModel userModel, string password);
+        Task<IdentityResult> CreateUser(UserModel userModel, string password, string role);
         Task<IdentityResult> UpdateUser(string userId, UserModel userModel);
 
         Task<IdentityResult> DeleteUser(string userId);
+        Task<IdentityResult> AddToRoleAsync(UserModel user, string role);
 
     }
 }
