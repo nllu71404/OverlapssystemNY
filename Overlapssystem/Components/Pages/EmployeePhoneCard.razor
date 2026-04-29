@@ -1,6 +1,9 @@
 ﻿@using OverlapssystemDomain.Entities
 @using Overlapssystem.Services
-@inject EmployeePhoneApiService employeePhoneApiService
+@using Overlapssystem.ViewModels
+@using Overlapssystem.Interfaces
+
+@inject IEmployeePhoneFacade employeePhoneFacade
 @inject IJSRuntime JS
 
 <div name="employee-phone-card">
@@ -103,25 +106,25 @@
 	[Parameter]
 	public EventCallback<int> OnAdd { get; set; }
 	[Parameter]
-	public EventCallback<EmployeePhoneModel> OnDelete { get; set; }
+	public EventCallback<EmployeePhoneViewModel> OnDelete { get; set; }
 
 	
-	public List<EmployeePhoneModel> EmployeePhones { get; set; } = new();
+	public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
 
-	protected override async Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync() 
 	{
-		EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+		EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
 	}
 
-    public async Task RefreshAsync()
+    public async Task RefreshAsync() 
     {
-        EmployeePhones = await employeePhoneApiService.GetEmployeePhonesByDepartmentId(DepartmentId);
+        EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
         StateHasChanged();
 	}
 
-    public async Task UpdateEmployeePhone(EmployeePhoneModel phone)
+    public async Task UpdateEmployeePhone(EmployeePhoneViewModel phone) 
     {
-        await employeePhoneApiService.UpdateEmployeePhone(phone.EmployeePhoneID, phone);
+        await employeePhoneFacade.UpdateEmployeePhone(phone);
       
 	}
 

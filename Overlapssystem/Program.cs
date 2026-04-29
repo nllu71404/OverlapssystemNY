@@ -6,6 +6,9 @@ using OverlapssystemDomain.Interfaces;
 using OverlapssystemInfrastructure.Repositories;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
+using Overlapssystem.Facades;
+using Overlapssystem.Interfaces;
+using Overlapssystem.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,8 +34,10 @@ builder.Services.AddScoped<ShoppingApiService>();
 builder.Services.AddScoped<DepartmentTaskApiService>();
 builder.Services.AddScoped<SpecialEventApiService>();
 builder.Services.AddScoped<EmployeePhoneApiService>();
-builder.Services.AddScoped<UserApiService>();
-builder.Services.AddScoped<AuthState>();
+builder.Services.AddScoped<IResidentFacade, ResidentFacade>();
+builder.Services.AddScoped<IDepartmentTaskFacade, DepartmentTaskFacade>();
+builder.Services.AddScoped<IDepartmentFacade, DepartmentFacade>();
+builder.Services.AddScoped<IEmployeePhoneFacade, EmployeePhoneFacade>();
 
 var app = builder.Build();
 

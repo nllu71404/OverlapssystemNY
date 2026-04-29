@@ -5,6 +5,8 @@
 @using OverlapssystemDomain.Enums
 @using OverlapssystemDomain.Interfaces
 @using Overlapssystem.Services
+@using Overlapssystem.Interfaces
+@using Overlapssystem.ViewModels
 @using OverlapssystemShared
 
 @attribute [Authorize(Roles = "Administrator")]
@@ -13,9 +15,11 @@
 
 <h3>AdminEditHandoverScheme</h3>
 
-@inject ResidentApiService api
-@inject DepartmentTaskApiService departmentTaskApi
-@inject EmployeePhoneApiService employeePhoneApi
+@inject IResidentFacade residentFacade
+@inject IDepartmentTaskFacade departmentTaskFacade
+@inject IEmployeePhoneFacade employeePhoneFacade
+
+
 
 <!-- Du opretter en ny beboer-->
 <button @onclick="() => showCreateResident = !showCreateResident">
@@ -60,19 +64,22 @@ else
                    OnAdd="AddEmployeePhoneNumber"
                    OnDelete="DeleteEmployeePhoneNumber" />
 
+
+
 @code {
     private bool showCreateResident = false;
     [Parameter]
     public int departmentId { get; set; }
 
     private DepartmentTaskCard? departmentTaskCardRef;
+
     private EmployeePhoneCard? employeePhoneCardRef;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            residents = await api.GetByDepartment(departmentId);
+            residents = await residentFacade.GetResidentByDepartment(departmentId);
         }
         catch (Exception ex)
         {
@@ -84,40 +91,42 @@ else
 
     private async Task LoadAllResidentsAsync()
     {
-        residents = await api.GetAllResidents();
+        residents = await residentFacade.GetAllResidents();
     }
-    private async Task CreateResidentAsync(ResidentModel resident)
+    private async Task CreateResidentAsync()
     {
-        newResident.DepartmentId = departmentId;
-        var newID = await api.CreateResident(resident);
-        resident.ResidentId = newID;
-        residents.Add(resident);
-        newResident = new ResidentModel { Risiko = Risiko.Green };
+        var vm = new ResidentViewModel
+        {
+            DepartmentId = departmentId
+        };
+      
+        var newID = await residentFacade.AddResident(vm);
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
         showCreateResident = false;
     }
-    private async Task SaveResidentAsync(ResidentModel resident)
+    private async Task SaveResidentAsync(ResidentViewModel vm)
     {
-        await api.UpdateResident(resident.ResidentId, resident);
-        residents = await api.GetByDepartment(departmentId);
+        await residentFacade.UpdateResident(vm);
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
-    private async Task DeleteResidentAsync(ResidentModel resident)
+    private async Task DeleteResidentAsync(ResidentViewModel resident)
     {
-        await api.DeleteResident(resident.ResidentId);
-        residents.Remove(resident);
+        await residentFacade.DeleteResident(resident.ResidentId);
+
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
 
     // Parent creates the task and then asks the child to refresh.
     private async Task AddDepartmentTask(int deptId)
     {
-        var newTask = new DepartmentTaskModel
+        var vm = new DepartmentTaskViewModel
         {
             DepartmentID = deptId,
-            DepartmentTaskTopic = string.Empty,
-            EmployeeName = string.Empty
+            DepartmentTaskTopic = string.Empty
         };
 
-        await departmentTaskApi.CreateDepartmentTask(newTask);
-
+       await departmentTaskFacade.AddDepartmentTask(vm);
+       
         // Ask the child component to refresh its list
         if (departmentTaskCardRef is not null)
         {
@@ -125,11 +134,11 @@ else
         }
     }
 
-    private async Task DeleteDepartmentTask(DepartmentTaskModel task)
+    private async Task DeleteDepartmentTask(DepartmentTaskViewModel vm)
     {
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne opgave?");
         if (!ok) return;
-        await departmentTaskApi.DeleteDepartmentTask(task.DepartmentTaskID);
+        await departmentTaskFacade.DeleteDepartmentTask(vm.DepartmentTaskID);
 
         if (departmentTaskCardRef is not null)
         {
@@ -137,36 +146,35 @@ else
         }
     }
 
-    
-    private async Task AddEmployeePhoneNumber(int deptId)
+    private async Task AddEmployeePhoneNumber(int deptId) //Denne skal rettes så den får en Facade i stedet for at kalde API direkte
     {
-        var newPhone = new EmployeePhoneModel
+        var vm = new EmployeePhoneViewModel
         {
             DepartmentID = deptId,
             PhoneNumber = string.Empty,
             EmployeeName = string.Empty
         };
-        await employeePhoneApi.SaveNewEmployeePhone(newPhone);
+        await employeePhoneFacade.AddEmployeePhone(vm);
         // Ask the child component to refresh its list
-        if (employeePhoneCardRef is not null)
-        {
-            await employeePhoneCardRef.RefreshAsync();
-        }
-	}
-
-    private async Task DeleteEmployeePhoneNumber(EmployeePhoneModel phone)
-    {
-        var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette dette telefonnummer?");
-        if (!ok) return;
-        await employeePhoneApi.DeleteEmployeePhone(phone.EmployeePhoneID);
-
         if (employeePhoneCardRef is not null)
         {
             await employeePhoneCardRef.RefreshAsync();
         }
     }
 
-    List<ResidentModel> residents = new();
-    ResidentModel newResident = new ResidentModel { Risiko = Risiko.Green };
+    private async Task DeleteEmployeePhoneNumber(EmployeePhoneViewModel vm) 
+    {
+        var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette dette telefonnummer?");
+        if (!ok) return;
+        await employeePhoneFacade.DeleteEmployeePhone(vm.EmployeePhoneID);
+        if (employeePhoneCardRef is not null)
+        {
+            await employeePhoneCardRef.RefreshAsync();
+        }
+    }
+
+
+    List<ResidentViewModel> residents = new();
+    ResidentViewModel newResident = new ResidentViewModel { Risiko = Risiko.Green };
 
 }

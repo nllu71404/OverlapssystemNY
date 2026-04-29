@@ -1,5 +1,9 @@
-﻿using System.Net.Http.Json;
+﻿using Overlapssystem.Services.Extensions;
+using Overlapssystem.ViewModels;
 using OverlapssystemDomain.Entities;
+using OverlapssystemShared;
+using System.Net.Http.Json;
+using System.Reflection;
 
 namespace Overlapssystem.Services
 {
@@ -12,38 +16,61 @@ namespace Overlapssystem.Services
         }
 
         //Hent Alle
-        public async Task<List<EmployeePhoneModel>> GetAllEmployeePhoneNumbers()
+        public async Task<List<EmployeePhoneDTO>> GetAllEmployeePhoneNumbers()
         {
-            return await _http.GetFromJsonAsync<List<EmployeePhoneModel>>("api/EmployeePhone/HentAlleEmployeePhones");
+            var response = await _http.GetAsync(
+            "api/EmployeePhone/HentAlleEmployeePhones");
+
+            var list = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
+
+            return list ?? new List<EmployeePhoneDTO>();
         }
 
         //Hent på Id
-        public async Task<EmployeePhoneModel> GetEmployeePhoneById(int employeePhoneId)
+        public async Task<EmployeePhoneDTO> GetEmployeePhoneById(int employeePhoneId)
         {
-            return await _http.GetFromJsonAsync<EmployeePhoneModel>($"api/EmployeePhone/HentEmployeePhoneById/{employeePhoneId}");
+            var response = await _http.GetAsync(
+            $"api/EmployeePhone/HentEmployeePhoneById/{employeePhoneId}");
+
+            return await response.ReadApiResponse<EmployeePhoneDTO>();
         }
 
-        public async Task<List<EmployeePhoneModel>> GetEmployeePhonesByDepartmentId(int departmentId)
+        public async Task<List<EmployeePhoneDTO>> GetEmployeePhonesByDepartmentId(int departmentId)
         {
-            return await _http.GetFromJsonAsync<List<EmployeePhoneModel>>($"api/EmployeePhone/HentEmployeePhonesByDepartmentId/{departmentId}");
+            var response = await _http.GetAsync(
+            $"api/EmployeePhone/HentEmployeePhonesByDepartmentId/{departmentId}");
+
+            var list = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
+
+            return list ?? new List<EmployeePhoneDTO>();
         }
 
         //Tilføj
-        public async Task SaveNewEmployeePhone(EmployeePhoneModel employeePhoneModel)
+        public async Task<int> AddEmployeePhone(AddEmployeePhoneDTO employeePhoneDTO)
         {
-            await _http.PostAsJsonAsync("api/EmployeePhone/TilføjEmployeePhone", employeePhoneModel);
+            var response = await _http.PostAsJsonAsync(
+             "api/EmployeePhone/TilføjEmployeePhone",
+             employeePhoneDTO);
+            var result = await response.ReadApiResponse<int>();
+            return result;
         }
 
         //Update
-        public async Task UpdateEmployeePhone(int employeePhoneId, EmployeePhoneModel employeePhoneModel)
+        public async Task UpdateEmployeePhone(int employeePhoneId, EmployeePhoneDTO employeePhoneDTO)
         {
-            await _http.PutAsJsonAsync($"api/EmployeePhone/OpdaterEmployeePhone/{employeePhoneId}", employeePhoneModel);
+            var response = await _http.PutAsJsonAsync(
+            $"api/EmployeePhone/OpdaterEmployeePhone/{employeePhoneId}",
+            employeePhoneDTO);
+            await response.ReadApiResponse<object>();
         }
 
         //Delete
         public async Task DeleteEmployeePhone(int employeePhoneId)
         {
-            await _http.DeleteAsync($"api/EmployeePhone/SletEmployeePhone/{employeePhoneId}");
+            var response = await _http.DeleteAsync(
+            $"api/EmployeePhone/SletEmployeePhone/{employeePhoneId}");
+
+            await response.ReadApiResponse<object>();
         }
 
     }

@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Services\**" />
+    <Content Remove="Components\Services\**" />
+    <EmbeddedResource Remove="Components\Services\**" />
+    <None Remove="Components\Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OverlapssystemAPI\OverlapssystemAPI.csproj" />
     <ProjectReference Include="..\OverlapssytemApplication\OverlapssytemApplication.csproj" />
 	  <ProjectReference Include="..\OverlapssystemShared\OverlapssystemShared.csproj" />

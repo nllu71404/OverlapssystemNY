@@ -44,10 +44,10 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentService.SaveNewDepartmentAsync(departmentModel);
 
-            if(!result.Success)
+           
             return Handle(result);
 
-            return Created($"/api/Department/{result.Value}", result.Value);
+      
         }
 
         //Slet

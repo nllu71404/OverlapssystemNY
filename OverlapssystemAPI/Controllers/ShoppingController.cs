@@ -38,11 +38,10 @@ namespace OverlapssystemAPI.Controllers
             
             
             var id = await _shoppingService.SaveNewShoppingAsync(shopping);
-            if (!id.Success)
+           
                 return Handle(id); //Fejlhåndtering
 
-            //Hvis succes, returneres 201 Created med lokationen for den nye ressource
-            return Created($"/api/shopping/{id.Value}", id.Value);
+      
         }
 
         //Update

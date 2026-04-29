@@ -1,5 +1,8 @@
-﻿using System.Net.Http.Json;
+﻿using Overlapssystem.Services.Extensions;
+using Overlapssystem.ViewModels;
 using OverlapssystemDomain.Entities;
+using OverlapssystemShared;
+using System.Net.Http.Json;
 
 namespace Overlapssystem.Services
 {
@@ -12,38 +15,57 @@ namespace Overlapssystem.Services
         }
 
         //Hent
-        public async Task<List<DepartmentTaskModel>> GetAllDepartmentTask()
+        public async Task<List<DepartmentTaskDTO>> GetAllDepartmentTask()
         {
-            return await _http.GetFromJsonAsync<List<DepartmentTaskModel>>("api/DepartmentTask/HentDepartmentsTasks");
+            var response = await _http.GetAsync("api/DepartmentTask/HentDepartmentsTasks");
+            var dtoList = await response.ReadApiResponse<List<DepartmentTaskDTO>>();
+            return dtoList?.ToList() ?? new List<DepartmentTaskDTO>();
         }
         //Hent på ID
-        public async Task<DepartmentTaskModel> GetDepartmentTaskById(int id)
+        public async Task<DepartmentTaskDTO> GetDepartmentTaskById(int id)
         {
-            return await _http.GetFromJsonAsync<DepartmentTaskModel>($"api/DepartmentTask/HentDepartmentTasksID/{id}");
+            var response = await _http.GetAsync(
+             $"api/DepartmentTask/HentDepartmentTasksID/{id}");
+
+            return await response.ReadApiResponse<DepartmentTaskDTO>();
         }
 
         //Hent på department ID
-        public async Task<List<DepartmentTaskModel>> GetDepartmentTasksByDepartmentId(int departmentId)
+        public async Task<List<DepartmentTaskDTO>> GetDepartmentTasksByDepartmentId(int departmentId)
         {
-            return await _http.GetFromJsonAsync<List<DepartmentTaskModel>>($"api/DepartmentTask/HentDepartmentTaskByDepartmentId/{departmentId}");
+            var response = await _http.GetAsync(
+            $"api/DepartmentTask/HentDepartmentTaskByDepartmentId/{departmentId}");
+
+            return await response.ReadApiResponse<List<DepartmentTaskDTO>>();
         }
 
         //Tilføj
-        public async Task CreateDepartmentTask(DepartmentTaskModel departmentTaskModel)
+        public async Task<int> CreateDepartmentTask(AddDepartmentTaskDTO departmentTaskDto)
         {
-            await _http.PutAsJsonAsync($"api/DepartmentTask/TilføjDepartmentTask", departmentTaskModel);
+            var response = await _http.PutAsJsonAsync(
+             "api/DepartmentTask/TilfojDepartmentTask",
+             departmentTaskDto);
+
+            return await response.ReadApiResponse<int>();
         }
 
         //Update
-        public async Task UpdateDepartmentTask(int id, DepartmentTaskModel departmentTaskModel)
+        public async Task UpdateDepartmentTask(int id, UpdateDepartmentTaskDTO departmentTaskDto)
         {
-            await _http.PutAsJsonAsync($"api/DepartmentTask/{id}", departmentTaskModel);
+            var response = await _http.PutAsJsonAsync(
+           $"api/DepartmentTask/{id}",
+           departmentTaskDto);
+
+            await response.ReadApiResponse<object>();
         }
 
         //Delete
         public async Task DeleteDepartmentTask(int id)
         {
-            await _http.DeleteAsync($"api/DepartmentTask/{id}");
+            var response = await _http.DeleteAsync(
+             $"api/DepartmentTask/{id}");
+
+            await response.ReadApiResponse<object>();
         }
     }
 }

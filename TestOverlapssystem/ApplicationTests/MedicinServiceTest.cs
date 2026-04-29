@@ -37,7 +37,7 @@ namespace TestOverlapssystem.ApplicationTests
             var medTime = new MedicinModel
             {
                 MedicinTimeID = 1,
-                MedicinTime = new DateTime(2026, 4, 9, 8, 30, 0),
+                MedicinTime = new TimeSpan(8, 30, 0),
                 IsChecked = false,
                 MedicinCheckTimeStamp = null
             };
@@ -62,7 +62,7 @@ namespace TestOverlapssystem.ApplicationTests
             var medTime = new MedicinModel
             {
                 MedicinTimeID = 2,
-                MedicinTime = new DateTime(2026, 3, 9, 9, 30, 0),
+                MedicinTime = new TimeSpan(9, 30, 0),
                 IsChecked = true,
                 MedicinCheckTimeStamp = DateTime.UtcNow
             };

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OverlapssytemApplication.Common;
 using OverlapssytemApplication.Common.Errors;
+using OverlapssystemAPI.Common;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -10,31 +11,46 @@ namespace OverlapssystemAPI.Controllers
         protected IActionResult Handle(Result result)
         {
             if (result.Success)
-                return Ok();
+                return Ok(new ApiResponse<object>
+                {
+                    Success = true,
+                   
+                });
 
-            return HandleFailure(result);
+            return HandleFailure<object>(result.Error);
         }
 
         protected IActionResult Handle<T>(Result<T> result)
         {
             if (result.Success)
-                return Ok(result.Value);
+                return Ok(new ApiResponse<T>
+                {
+                    Success = true,
+                    Data = result.Value,
+                });
 
-            return HandleFailure(result);
+            return HandleFailure<T>(result.Error);
         }
 
-        private IActionResult HandleFailure(Result result)
+        private IActionResult HandleFailure<T>(Error error)
         {
-            if (result.Error == null)
-                return StatusCode(500, "En ukendt fejl opstod");
-
-            return result.Error.Type switch
+            
+            var response = new ApiResponse<T>
             {
-                ErrorType.NotFound => NotFound(result.Error.Message),
-                ErrorType.Validation => BadRequest(result.Error.Message),
-                ErrorType.Technical => StatusCode(500, result.Error.Message),
-                _ => StatusCode(500, result.Error.Message)
+                Success = false,
+                Error = error?.Message ?? "En ukendt fejl opstod"
+            };
+
+
+            return error?.Type switch
+            {
+                ErrorType.NotFound => NotFound(response),
+                ErrorType.Validation => BadRequest(response),
+                ErrorType.Technical => StatusCode(500, response),
+                _ => StatusCode(500, response)
             };
         }
     }
+
+   
 }

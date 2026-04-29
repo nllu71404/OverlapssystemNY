@@ -8,7 +8,7 @@ namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PNMedicinController : ApiControllerBase
+    public class PNMedicinController : ApiControllerBase 
     {
         private readonly IPNMedicinService _pNMedicinService;
 
@@ -32,10 +32,10 @@ namespace OverlapssystemAPI.Controllers
            
             var id = await _pNMedicinService.AddPNMedicinAsync(addPNMedicinDTO.ResidentID, addPNMedicinDTO.PNTime, addPNMedicinDTO.Reason);
 
-            if (!id.Success)
+           
                 return Handle(id);
             
-            return Created($"/api/PNMedicin/{id.Value}", id.Value);
+           
         }
 
         //Update

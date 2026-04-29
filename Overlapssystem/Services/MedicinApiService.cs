@@ -1,6 +1,11 @@
-﻿using System.Net.Http.Json;
+﻿using Overlapssystem.Services.Extensions;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
+using OverlapssystemAPI.Common;
+using System.Net.Http.Json;
+using Overlapssystem.ViewModels;
+using System.Net.Http.Json;
+
 
 namespace Overlapssystem.Services
 {
@@ -13,35 +18,49 @@ namespace Overlapssystem.Services
         }
 
         //Hent
-        public async Task<List<MedicinModel>> GetMedicinByResidentId(int residentId)
+        public async Task<List<MedicinTimeDTO>> GetMedicinByResidentId(int residentId)
         {
-            return await _http.GetFromJsonAsync<List<MedicinModel>>($"api/Medicin/HentMedicinForBorger/{residentId}");
+            var response = await _http.GetAsync($"api/Medicin/HentMedicinForBorger/{residentId}");
+
+            var dtoList = await response.ReadApiResponse<List<MedicinTimeDTO>>();
+
+            return dtoList?.ToList() ?? new List<MedicinTimeDTO>();
         }
 
         //Tilføj
         public async Task<int> AddMedicinTime(AddMedicinTimeDTO addMedicinTimeDTO)
         {
             var response = await _http.PostAsJsonAsync("api/Medicin/TilføjMedicin", addMedicinTimeDTO);
-            return await response.Content.ReadFromJsonAsync<int>();
+            return await response.ReadApiResponse<int>();
         }
 
         //Update
-        public async Task UpdateMedicin(int medicinTimeId, MedicinModel medicinModel)
+        public async Task UpdateMedicin(int medicinTimeId, UpdateMedicinTimeDTO medicinDTO)
         {
-            await _http.PutAsJsonAsync($"api/Medicin/{medicinTimeId}", medicinModel);
+            var response = await _http.PutAsJsonAsync(
+                $"api/Medicin/{medicinTimeId}",
+                medicinDTO);
+
+            await response.ReadApiResponse<object>();
         }
 
         //Delete
         public async Task DeleteMedicin(int medicinTimeId)
         {
-            await _http.DeleteAsync($"api/Medicin/{medicinTimeId}");
+            var response = await _http.DeleteAsync(
+                $"api/Medicin/{medicinTimeId}");
+
+            await response.ReadApiResponse<object>();
         }
 
 
         public async Task SetMedicinChecked(int medicinTimeId, bool isChecked)
         {
-            await _http.PutAsJsonAsync($"api/Medicin/SetChecked/{medicinTimeId}", new { isChecked });
+            var response = await _http.PutAsJsonAsync($"api/Medicin/SetChecked/{medicinTimeId}", new { isChecked });
+            await response.ReadApiResponse<object>();
         }
+
+       
 
     }
 }

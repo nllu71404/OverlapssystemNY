@@ -113,6 +113,12 @@ namespace OverlapssystemInfrastructure.Repositories
 
             await connection.OpenAsync();
             object? result = await command.ExecuteScalarAsync();
+
+            if (result == null || result == DBNull.Value)
+            {
+                throw new Exception("Stored procedure returnerede ikke et ID");
+            }
+
             return Convert.ToInt32(result);
         }
 

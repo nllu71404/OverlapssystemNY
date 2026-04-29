@@ -1,5 +1,6 @@
 ﻿using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
+using Overlapssystem.Services.Extensions;
 
 namespace Overlapssystem.Services
 {
@@ -12,28 +13,32 @@ namespace Overlapssystem.Services
         }
 
         //Hent
-        public async Task<List<SpecialEventModel>> GetSpecialEventByResidentID(int residentId)
+        public async Task<List<UpdateSpecialEventDTO>> GetSpecialEventByResidentID(int residentId)
         {
-            return await _http.GetFromJsonAsync<List<SpecialEventModel>>($"api/SpecialEvent/HentSpecialEventForBorger/{residentId}");
+            var response = await _http.GetAsync($"api/SpecialEvent/HentSpecialEventForBorger/{residentId}");
+            var dtoList = await response.ReadApiResponse<List<UpdateSpecialEventDTO>>();
+            return dtoList?.ToList() ?? new List<UpdateSpecialEventDTO>();
         }
 
         //Tilføj
         public async Task<int> AddSpecialEvent(AddSpecialEventDTO addSpecialEventDTO)
         {
             var response = await _http.PostAsJsonAsync("api/SpecialEvent/TilføjSpecialEvent", addSpecialEventDTO);
-            return await response.Content.ReadFromJsonAsync<int>();
+            return await response.ReadApiResponse<int>();
         }
 
         //Update
-        public async Task UpdateSpecialEvent(int specialEventID, SpecialEventModel specialEventModel)
+        public async Task UpdateSpecialEvent(int specialEventID, UpdateSpecialEventDTO specialEventDto)
         {
-            await _http.PutAsJsonAsync($"api/SpecialEvent/{specialEventID}", specialEventModel);
+            var response = await _http.PutAsJsonAsync($"api/SpecialEvent/{specialEventID}", specialEventDto);
+            await response.ReadApiResponse<object>();
         }
 
         //Delete
         public async Task DeleteSpecialEvent(int specialEventID)
         {
-            await _http.DeleteAsync($"api/SpecialEvent/{specialEventID}");
+            var response = await _http.DeleteAsync($"api/SpecialEvent/{specialEventID}");
+            await response.ReadApiResponse<object>();
         }
     }
 }

@@ -5,8 +5,10 @@
 @using OverlapssystemDomain.Interfaces
 @using Overlapssystem.Services
 @using OverlapssystemShared
+@using Overlapssystem.ViewModels
+@using Overlapssystem.Interfaces
 
-@inject ResidentApiService api
+@inject IResidentFacade residentFacade
 @inject NavigationManager Navigation
 
 
@@ -15,7 +17,7 @@
 <h5>Beboere</h5>
 
 
-@if (!residents.Any())
+@if (residents == null || !residents.Any())
 {
     <p>Ingen beboere fundet</p>
 }
@@ -48,29 +50,31 @@ else
     [Parameter]
     public int departmentId { get; set; }
 
+
+    private bool isLoading = true;
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            residents = await api.GetByDepartment(departmentId);
+            residents = await residentFacade.GetResidentByDepartment(departmentId);
         }
-        catch (Exception ex)
+        finally
         {
-            Console.WriteLine(ex.Message);
-            residents = new();
+            isLoading = false;
         }
     }
 
-    private async Task SaveResidentAsync(ResidentModel resident)
+    private async Task SaveResidentAsync(ResidentViewModel vm)
     {
-        await api.UpdateResident(resident.ResidentId, resident);
-        residents = await api.GetByDepartment(departmentId);
+        await residentFacade.UpdateResident(vm);
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
 
-    private async Task DeleteResidentAsync(ResidentModel resident)
+    private async Task DeleteResidentAsync(ResidentViewModel vm)
     {
-        await api.DeleteResident(resident.ResidentId);
-        residents = await api.GetByDepartment(departmentId);
+        await residentFacade.DeleteResident(vm.ResidentId);
+        residents = await residentFacade.GetResidentByDepartment(departmentId);
     }
     private void LogOut()
     {
@@ -81,5 +85,5 @@ else
         Navigation.NavigateTo("/login");
     }
 
-    List<ResidentModel> residents = new();
+    List<ResidentViewModel> residents = new();
 }

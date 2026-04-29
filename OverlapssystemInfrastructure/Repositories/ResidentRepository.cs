@@ -62,7 +62,7 @@ namespace OverlapssystemInfrastructure.Repositories
                             ? mood
                             : Mood.Neutral,
                         MedicinTimes = new List<MedicinModel>(),
-                        SpecialEvent = new List<SpecialEventModel>(),
+                        SpecialEvents = new List<SpecialEventModel>(),
                         PNMedicin = new List<PNMedicinModel>(),
                         Shopping = new List<ShoppingModel>()
                     };
@@ -136,10 +136,10 @@ namespace OverlapssystemInfrastructure.Repositories
                 if (reader["SpecialEventID"] != DBNull.Value)
                 {
                     var specialEventID = Convert.ToInt32(reader["SpecialEventID"]);
-                    if (!residentDict[residentId].SpecialEvent
+                    if (!residentDict[residentId].SpecialEvents
                         .Any(se => se.SpecialEventID == specialEventID))
                     {
-                        residentDict[residentId].SpecialEvent.Add(new SpecialEventModel
+                        residentDict[residentId].SpecialEvents.Add(new SpecialEventModel
                         {
                             SpecialEventID = specialEventID,
                             ResidentID = residentId,
@@ -193,7 +193,7 @@ namespace OverlapssystemInfrastructure.Repositories
                             ? mood
                             : Mood.Neutral,
                         MedicinTimes = new List<MedicinModel>(),
-                        SpecialEvent = new List<SpecialEventModel>(),
+                        SpecialEvents = new List<SpecialEventModel>(),
                         PNMedicin = new List<PNMedicinModel>(),
                         Shopping = new List<ShoppingModel>()
                     };
@@ -268,9 +268,9 @@ namespace OverlapssystemInfrastructure.Repositories
                 if (reader["SpecialEventID"] != DBNull.Value)
                 {
                     var specialEventID = Convert.ToInt32(reader["SpecialEventID"]);
-                    if (!residentDict[residentId].SpecialEvent
+                    if (!residentDict[residentId].SpecialEvents
                         .Any(se => se.SpecialEventID == specialEventID)){
-                        residentDict[residentId].SpecialEvent.Add(new SpecialEventModel
+                        residentDict[residentId].SpecialEvents.Add(new SpecialEventModel
                         {
                             SpecialEventID = specialEventID,
                             ResidentID = residentId,

@@ -36,11 +36,10 @@ namespace OverlapssystemAPI.Controllers
 
             var specialId = await _specialEventService.SaveNewSpecialEventAsync(specialEvent);
             
-            if (!specialId.Success) 
+         
             return Handle(specialId); //Fejlhåndtering
 
-            //Hvis succes, returneres 201 Created med lokationen for den nye ressource
-            return Created($"/api/SpecialEvent/{specialId.Value}", specialId.Value);
+    
         }
 
         //Update

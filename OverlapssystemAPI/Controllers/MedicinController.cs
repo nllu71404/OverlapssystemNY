@@ -16,7 +16,7 @@ namespace OverlapssystemAPI.Controllers
         {
             _medicinServices = medicinServices;
         }
-        
+
         //Hent
         [HttpGet("HentMedicinForBorger/{residentId}")]
         public async Task<IActionResult> GetMedicinByResidentId(int residentId)
@@ -29,47 +29,68 @@ namespace OverlapssystemAPI.Controllers
         [HttpPost("TilføjMedicin")]
         public async Task<IActionResult> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
         {
-            var medicinTime = new MedicinModel
-            {
-                ResidentID = medicinDTO.ResidentId,
-                MedicinTime = medicinDTO.MedicinTime,
-                IsChecked = false,
-            };
+           var mappedModel = MapToAddMedicinModel(medicinDTO);
+           var id = await _medicinServices.AddMedicinTimeAsync(mappedModel);
+           return Handle(id);
 
-            var time = await _medicinServices.AddMedicinTimeAsync(medicinTime);
-
-            if(!time.Success)
-           return Handle(time);
-
-            return Created($"/api/Medicin/{time.Value}", time.Value);
+            
         }
 
         //Delete
         [HttpDelete("{medicinTimeId}")]
         public async Task<IActionResult> DeleteMedicin(int medicinTimeId)
         {
-            await _medicinServices.DeleteMedicinAsync(medicinTimeId);
-            return Ok(medicinTimeId);
+            var result = await _medicinServices.DeleteMedicinAsync(medicinTimeId);
+            return Handle(result);
         }
 
         //Update
         [HttpPut("{medicinTimeId}")]
-        public async Task<IActionResult> UpdateMedicin(int medicinTimeId, [FromBody] MedicinModel medicinModel)
+        public async Task<IActionResult> UpdateMedicin(int medicinTimeId, [FromBody] UpdateMedicinTimeDTO medicinDTO)
         {
-            await _medicinServices.UpdateMedicinAsync(medicinModel);
-            return Ok(medicinTimeId);
+            var mappedModel = MapToUpdateMedicinModel(medicinDTO);
+            var result = await _medicinServices.UpdateMedicinAsync(mappedModel);
+            return Handle(result);
         }
 
 
         //Put: api/MedicinTid
         [HttpPut("SetChecked/{id}")]
-        public async Task<IActionResult> SetMedicinChecked(int id, [FromBody] AddMedicinTimeDTO medicinDTO)
+        public async Task<IActionResult> SetMedicinChecked(int id, [FromBody] SetMedicinCheckedDTO medicinDTO)
         {
-            await _medicinServices.SetMedicinCheckedAsync(id, medicinDTO.IsChecked);
-            return Ok();
+
+            var result = await _medicinServices.SetMedicinCheckedAsync(id, medicinDTO.IsChecked);
+            return Handle(result);
         }
 
 
 
+    
+
+    // ---- Mapping ----
+
+        private MedicinModel MapToUpdateMedicinModel(UpdateMedicinTimeDTO medicinDTO)
+        {
+            return new MedicinModel
+            {
+                MedicinTimeID = medicinDTO.MedicinTimeID,
+                MedicinTime = medicinDTO.MedicinTime,
+                IsChecked = medicinDTO.IsChecked,
+                MedicinCheckTimeStamp = medicinDTO.MedicinCheckTimeStamp
+            };
+        }
+
+        private MedicinModel MapToAddMedicinModel(AddMedicinTimeDTO medicinDTO)
+        {
+            return new MedicinModel
+            {
+                ResidentID = medicinDTO.ResidentID,
+                MedicinTime = medicinDTO.MedicinTime,
+                IsChecked = medicinDTO.IsChecked,
+
+            };
+        }
+
+       
     }
 }

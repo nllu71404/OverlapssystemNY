@@ -2,6 +2,8 @@
 using System;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
+using Overlapssystem.Services.Extensions;
+
 
 namespace Overlapssystem.Services
 {
@@ -16,33 +18,41 @@ namespace Overlapssystem.Services
             _http = http;
         }
 
-        public async Task<List<ResidentModel>> GetAllResidents()
+        public async Task<List<ResidentDTO>> GetAllResidents()
         {
-            return await _http.GetFromJsonAsync<List<ResidentModel>>("api/Resident/HenterResident");
+            var response = await _http.GetAsync("api/Resident/HenterResident");
+            var residentList = await response.ReadApiResponse<List<ResidentDTO>>();
+            return residentList?.ToList() ?? new List<ResidentDTO>();
         }
 
-        public async Task<int> CreateResident(ResidentModel resident)
+        public async Task<int> AddResident(AddResidentDTO resident)
         {
             var response = await _http.PostAsJsonAsync("api/Resident/OpretResident", resident);
-            return await response.Content.ReadFromJsonAsync<int>();
+
+            var residentId = await response.ReadApiResponse<int>();
+            return residentId;
         }
 
-        public async Task UpdateResident(int id, ResidentModel resident)
+        public async Task UpdateResident(int id, UpdateResidentDTO resident)
         {
-            await _http.PutAsJsonAsync($"api/Resident/{id}", resident);
+            var response = await _http.PutAsJsonAsync($"api/Resident/{id}", resident);
+            await response.ReadApiResponse<object>();
         }
 
         public async Task DeleteResident(int id)
         {
-            await _http.DeleteAsync($"api/Resident/{id}");
+            var response = await _http.DeleteAsync($"api/Resident/{id}");
+            await response.ReadApiResponse<object>();
         }
 
-        public async Task<List<ResidentModel>> GetByDepartment(int? id)
+        public async Task<List<ResidentDTO>> GetByDepartment(int? id)
         {
-            return await _http.GetFromJsonAsync<List<ResidentModel>>($"api/Resident/Department/{id}");
+            var response = await _http.GetAsync($"api/Resident/Department/{id}");
+            var residentList = await response.ReadApiResponse<List<ResidentDTO>>();
+            return residentList?.ToList() ?? new List<ResidentDTO>();
         }
 
-        
+       
 
     }
 }
