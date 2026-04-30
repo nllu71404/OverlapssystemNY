@@ -1,0 +1,99 @@
+﻿@page "/"
+@page "/login"
+@rendermode InteractiveServer
+@using OverlapssystemDomain.Entities
+@using OverlapssystemDomain.Enums
+@using OverlapssystemDomain.Interfaces
+@using Overlapssystem.Services
+@using OverlapssystemShared
+@using Overlapssystem.TokenService
+
+@inject UserApiService apiService
+@inject NavigationManager navigation
+@inject HttpClient Http
+@inject AuthState authstate 
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Log ind</h2>
+
+        <input list="brugere"
+               placeholder="Vælg eller indtast brugernavn"
+               @bind="userName" />
+        <datalist id="brugere">
+            <option value="Slot" />
+            <option value="Skov" />
+        </datalist>
+
+        <div class="input-group">
+            <input type="password" placeholder="Indtast password" @bind="password" />
+        </div>
+
+        <button class="login-btn" @onclick="HandleLogin">Login</button>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="error-msg">@errorMessage</p>
+        }
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public UserModel User { get; set; } = new();
+
+    private string userName = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Brugernavn og password må ikke være tomme.";
+            return;
+        }
+        try
+        {
+            isLoading = true;
+            // ValidateUser returnerer nu JWT token ved succes, null ved fejl
+            var token = await apiService.ValidateUser(userName, password);
+            if (token != null)
+            {
+                // Gem tokenet i Authorization-headeren
+                Http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Fortæl Blazor at brugeren er logget ind
+                await authstate.MarkUserAsAuthenticated(token);
+
+                // Decode JWT og naviger til korrekt HandoverScheme
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                var departmentId = jwtToken.Claims
+                    .FirstOrDefault(c => c.Type == "DepartmentId")?.Value;
+
+                if (!string.IsNullOrEmpty(departmentId))
+                    navigation.NavigateTo($"/HandoverScheme/{departmentId}");
+                else
+                    navigation.NavigateTo("/HandoverScheme");
+            }
+            else
+            {
+                errorMessage = "Ugyldigt brugernavn eller password.";
+            }
+
+        } catch (Exception ex)
+        {
+            errorMessage = $"Der opstod en fejl: {ex.Message}";
+        }
+        finally
+        {
+			isLoading = false;
+        }
+
+	}
+}

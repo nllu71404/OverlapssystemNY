@@ -7,19 +7,41 @@
 @using OverlapssystemShared
 @using Overlapssystem.ViewModels
 @using Overlapssystem.Interfaces
+@using Overlapssystem.TokenService
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject IResidentFacade residentFacade
 @inject NavigationManager Navigation
+@inject AuthState authState
 
 
 
 <h3>Overlapsseddel</h3>
 <h5>Beboere</h5>
 
+<AuthorizeView>
+    <Authorized>
+        <p>Logget ind som: @context.User.Identity?.Name</p>
+        <p>Rolle: @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
+
+    </Authorized>
+    <NotAuthorized>
+        <p>Ikke logget ind</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        <button @onclick="ShowCreateResident">
+            Opret beboer
+        </button>
+    </Authorized>
+</AuthorizeView>
 
 @if (residents == null || !residents.Any())
 {
     <p>Ingen beboere fundet</p>
+    
 }
 else
 {
@@ -30,33 +52,43 @@ else
                           OnSave="SaveResidentAsync"
                           OnDelete="DeleteResidentAsync" />
         }
+        @if (showCreateResident)
+        {
+            <ResidentCard Resident="newResident"
+                          OnSave="SaveResidentAsync"
+                          OnDelete="DeleteResidentAsync" />
+        }
     </div>
+
 }
-            <DepartmentTaskCard DepartmentId="departmentId"
-                            IsReadOnly="true" />
+            <DepartmentTaskCard DepartmentId="departmentId"/>
 
-            <EmployeePhoneCard DepartmentId="departmentId"
-				            IsReadOnly="true" />
+            <EmployeePhoneCard DepartmentId="departmentId"/>
 
-<!-- Log ud knap nederst -->
-<div class="logout-bar">
+<!-- Log ind knap nederst -->
+<div class="login-bar">
+    <button class="login-btn" @onclick="LogIn"> Log ind</button>
     <button class="logout-btn" @onclick="LogOut">Log ud</button>
 </div>
 
 @code {
-    
-    
+
+
     [Parameter]
     public int departmentId { get; set; }
 
-
+    private bool showCreateResident = false;
     private bool isLoading = true;
+
+    ResidentViewModel newResident = new ResidentViewModel { Risiko = Risiko.Green };
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            Console.WriteLine($"DepartmentId: {departmentId}");
             residents = await residentFacade.GetResidentByDepartment(departmentId);
+            Console.WriteLine($"Residents count; {residents?.Count}");
         }
         finally
         {
@@ -64,20 +96,60 @@ else
         }
     }
 
+    private async Task ShowCreateResident()
+    {
+        newResident = new ResidentViewModel
+        {
+            Risiko = Risiko.Green,
+            DepartmentId = departmentId,
+            Name = "Ny beboer" // Placeholder navn
+        };
+        var newID = await residentFacade.AddResident(newResident);
+        newResident.ResidentId = newID;
+        showCreateResident = true;
+        StateHasChanged();
+    }
+
     private async Task SaveResidentAsync(ResidentViewModel vm)
     {
         await residentFacade.UpdateResident(vm);
-        residents = await residentFacade.GetResidentByDepartment(departmentId);
+
+        if (vm == newResident)
+        {
+            showCreateResident = false;
+            residents = await residentFacade.GetResidentByDepartment(departmentId);
+            newResident = new ResidentViewModel { Risiko = Risiko.Green };
+        }
+        else
+        {
+            residents = await residentFacade.GetResidentByDepartment(departmentId);
+        }
+
+        StateHasChanged();
     }
 
     private async Task DeleteResidentAsync(ResidentViewModel vm)
     {
         await residentFacade.DeleteResident(vm.ResidentId);
+
+        if (vm == newResident)
+        {
+            showCreateResident = false;
+            newResident = new ResidentViewModel { Risiko = Risiko.Green };
+        }
+
         residents = await residentFacade.GetResidentByDepartment(departmentId);
+        StateHasChanged();
     }
-    private void LogOut()
+    private async Task LogOut()
     {
-        Navigation.NavigateTo("/");
+        await authState.MarkUserAsLoggedOut();
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+    private async Task LogIn()
+    {
+        await authState.MarkUserAsLoggedOut();
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 
     List<ResidentViewModel> residents = new();

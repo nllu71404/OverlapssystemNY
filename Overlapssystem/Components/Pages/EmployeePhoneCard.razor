@@ -2,6 +2,7 @@
 @using Overlapssystem.Services
 @using Overlapssystem.ViewModels
 @using Overlapssystem.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject IEmployeePhoneFacade employeePhoneFacade
 @inject IJSRuntime JS
@@ -11,13 +12,14 @@
     <div class="employee-phone-card-header">
         <h2>Telefonliste</h2>
 
-        @if (!IsReadOnly)
-        {
-            <button class="btn-plus"
-                    @onclick="() => OnAdd.InvokeAsync(DepartmentId)">
-                +
-            </button>
-        }
+        <AuthorizeView Roles="Administrator">
+            <Authorized>
+                <button class="btn-plus"
+                        @onclick="() => OnAdd.InvokeAsync(DepartmentId)">
+                    +
+                </button>
+            </Authorized>
+        </AuthorizeView>
     </div>
     <table class="phone-table">
         <thead>
@@ -35,61 +37,85 @@
 
                     <!-- Telefonnummer -->
                     <td>
-                        @if (IsReadOnly)
-                        {
-                            <span>@phone.PhoneNumber</span>
-                        }
-                        else
-                        {
-                            <input value="@phone.PhoneNumber"
-                                   @onchange="async e =>
-                                   {
-                                       phone.PhoneNumber = e.Value?.ToString();
-                                       await UpdateEmployeePhone(phone);
-                                   }" />
-                        }
+                        <AuthorizeView>
+                            <Authorized>
+                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                                {
+                                    <span>@phone.PhoneNumber</span>
+
+                                    @if (context.User.IsInRole("Administrator"))
+                                    {
+                                        <input value="@phone.PhoneNumber"
+                                               @onchange="async e =>
+                                               {
+                                                   phone.PhoneNumber = e.Value?.ToString();
+                                                   await UpdateEmployeePhone(phone);
+                                               }" />
+                                    }
+                                }
+                                else if (context.User.IsInRole("Simpel"))
+                                {
+                                    <input value="@employeePhoneViewModel.PhoneNumber" disabled />
+                                }
+                                
+                            </Authorized>
+                        </AuthorizeView>
                     </td>
 
                     <!-- Medarbejder navn -->
                     <td>
-                        @if (IsReadOnly)
-                        {
-                            <span>@phone.EmployeeName</span>
-                        }
-                        else
-                        {
-                            <input value="@phone.EmployeeName"
-                                   @onchange="async e =>
-                                   {
-                                       phone.EmployeeName = e.Value?.ToString();
-                                       await UpdateEmployeePhone(phone);
-                                   }"
-                                     placeholder="Navn" />
-                        }
+                        <AuthorizeView>
+                            <Authorized>
+                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                                {
+                                    <input value="@phone.EmployeeName"
+                                           @onchange="async e =>
+                                           {
+                                               phone.EmployeeName = e.Value?.ToString();
+                                               await UpdateEmployeePhone(phone);
+                                           }"
+                                             placeholder="Navn" />
+                                }
+                                else if (context.User.IsInRole("Simpel"))
+                                {
+                                    <input value="@employeePhoneViewModel.EmployeeName" disabled" />
+                                }
+                            </Authorized>
+                        </AuthorizeView>
                     </td>
 
                     <!-- Test -->
                     <td>
-                        <input type="checkbox"
-                               checked="@phone.Test"
-                               @onchange="async e =>
-                               {
-                                   phone.Test = (bool)e.Value;
-                                   await UpdateEmployeePhone(phone);
-                               }" />
+                        <AuthorizeView>
+                            <Authorized>
+                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                                {
+                                    <input type="checkbox"
+                                            checked="@phone.Test"
+                                            @onchange="async e =>
+                                            {
+                                                phone.Test = (bool)e.Value;
+                                                await UpdateEmployeePhone(phone);
+                                            }" />
+
+                                }
+                                else if (context.User.IsInRole("Simpel"))
+                                {
+                                    <input value="@employeePhoneViewModel.Test" disabled" />
+                                }
+                              </Authorized>
+                          </AuthorizeView>
                       </td>
 
                     <!-- Slet knap kun Admin -->
-                    @if (!IsReadOnly)
-                    {
-                        <td>
+                    <AuthorizeView Roles="Administrator">
+                            <Authorized>
                             <button class="btn-delete"
                                     @onclick="() => OnDelete.InvokeAsync(phone)">
                                 Slet
                             </button>
-                        </td>
-                    }
-
+                            </Authorized>
+                    </AuthorizeView>
                 </tr>
             }
         </tbody>
@@ -98,7 +124,10 @@
 
 
 @code {
-	[Parameter]
+    [Parameter]
+    public EmployeePhoneViewModel employeePhoneViewModel { get; set; } = new();
+
+    [Parameter]
 	public int DepartmentId { get; set; }
 	[Parameter]
 	public bool IsReadOnly { get; set; } = false;
