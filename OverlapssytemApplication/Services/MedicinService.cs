@@ -15,9 +15,9 @@ namespace OverlapssytemApplication.Services
     public class MedicinService : IMedicinService
     {
         private readonly IMedicinRepository _medicinRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<MedicinService> _logger;
 
-        public MedicinService(IMedicinRepository medicinRepository, ILogger logger)
+        public MedicinService(IMedicinRepository medicinRepository, ILogger<MedicinService> logger)
         {
             _medicinRepository = medicinRepository;
             _logger = logger;
