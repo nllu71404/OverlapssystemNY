@@ -42,8 +42,10 @@
             <tr>
                 <th>Særligt ansvarlige</th>
                 <th>Navn</th>
+                <th>Slet</th>
             </tr>
         </thead>
+
         <tbody>
             @foreach (var task in Tasks.Where(t => t.ShiftType == selectedShift))
             {
@@ -51,14 +53,14 @@
                     <td>
                         <AuthorizeView>
                             <Authorized>
-
                                 @if (context.User.IsInRole("Administrator"))
                                 {
                                     <input value="@task.DepartmentTaskTopic"
-                                           @onchange="async e => {
-                                           task.DepartmentTaskTopic = e.Value?.ToString();
-                                           await UpdateDepartmentTask(task);
-                                       }" />
+                                           @onchange="async e =>
+                                           {
+                                               task.DepartmentTaskTopic = e.Value?.ToString();
+                                               await UpdateDepartmentTask(task);
+                                           }" />
                                 }
                                 else if (context.User.IsInRole("Medarbejder"))
                                 {
@@ -66,38 +68,48 @@
                                 }
                                 else if (context.User.IsInRole("Simpel"))
                                 {
-                                <input value="@task.DepartmentTaskTopic" disabled />
+                                    <input value="@task.DepartmentTaskTopic" disabled />
                                 }
-                                
                             </Authorized>
-                        </AuthorizeView>    
-                    
-                </td>
-                <td>
-                    <AuthorizeView>
-                        <Authorized>
-                            @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
-                            {
-                                <input value="@task.EmployeeName"
-                                       @onchange="async e => {
-                                       task.EmployeeName = e.Value?.ToString();
-                                       await UpdateDepartmentTask(task);
-                                   }"
-                                   placeholder="Navn" />
-                            }
-                            else if (context.User.IsInRole("Simpel"))
-                            {
-                                <input value="@task.EmployeeName" disabled />
-                            }
-                        </Authorized>
-                    </AuthorizeView>
-                    
-                </td>
-            </tr>
+                        </AuthorizeView>
+                    </td>
+
+                    <td>
+                        <AuthorizeView>
+                            <Authorized>
+                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                                {
+                                    <input value="@task.EmployeeName"
+                                           @onchange="async e =>
+                                           {
+                                               task.EmployeeName = e.Value?.ToString();
+                                               await UpdateDepartmentTask(task);
+                                           }"
+                                             placeholder="Navn" />
+                                }
+                                else if (context.User.IsInRole("Simpel"))
+                                {
+                                    <input value="@task.EmployeeName" disabled />
+                                }
+                            </Authorized>
+                        </AuthorizeView>
+                    </td>
+
+                    <td>
+                        <AuthorizeView Roles="Administrator">
+                            <Authorized>
+                                <button class="btn-delete"
+                                        @onclick="() => OnDelete.InvokeAsync(task)">
+                                    Slet
+                                </button>
+                            </Authorized>
+                        </AuthorizeView>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
-</div>
+    </div>
 
 @code {
     [Parameter]
@@ -107,7 +119,7 @@
     [Parameter]
     public int DepartmentId { get; set; }
     [Parameter]
-	public bool IsReadOnly { get; set; } = false;   
+    public bool IsReadOnly { get; set; } = false;   
 
     // Parent will handle creation; we invoke it with the DepartmentId.
     [Parameter]
