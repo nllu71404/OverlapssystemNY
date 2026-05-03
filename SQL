@@ -1620,3 +1620,27 @@ VALUES
 (2, 'Nattmedicin runde',             '',     'Nat'),
 (2, 'Observation urolige beboere',   '',     'Nat'),
 (2, 'Morgenrapport klargøring',      '',     'Nat');
+
+-- Afdeling 1 - EmployeePhone
+INSERT INTO dbo.EmployeePhone (DepartmentID, PhoneNumber, EmployeeName, Test)
+VALUES
+(1, '30101001', 'Anna Jensen',     1),
+(1, '30101002', 'Mikkel Hansen',   1),
+(1, '30101003', 'Sara Nielsen',    1),
+(1, '30101004', 'Jonas Pedersen',  1),
+(1, '30101005', '',                0),
+(1, '30101006', '',                0),
+(1, '30101007', '',                0),
+(1, '30101008', '',                0);
+
+-- Afdeling 2 - EmployeePhone
+INSERT INTO dbo.EmployeePhone (DepartmentID, PhoneNumber, EmployeeName, Test)
+VALUES
+(2, '30202001', 'Maria Larsen',    1),
+(2, '30202002', 'Peter Madsen',    1),
+(2, '30202003', 'Camilla Holm',    1),
+(2, '30202004', 'Emil Andersen',   1),
+(2, '30202005', '',                0),
+(2, '30202006', '',                0),
+(2, '30202007', '',                0),
+(2, '30202008', '',                0);

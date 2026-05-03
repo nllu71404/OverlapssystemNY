@@ -11,6 +11,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 
 @inject IResidentFacade residentFacade
+@inject IDepartmentTaskFacade departmentTaskFacade
+@inject IEmployeePhoneFacade employeePhoneFacade
 @inject NavigationManager Navigation
 @inject AuthState authState
 
@@ -61,9 +63,15 @@ else
     </div>
 
 }
-            <DepartmentTaskCard DepartmentId="departmentId"/>
+            <DepartmentTaskCard @ref="departmentTaskCard"
+                DepartmentId="departmentId"
+                OnAdd="AddDepartmentTaskAsync"
+                OnDelete="DeleteDepartmentTaskAsync"/>
 
-            <EmployeePhoneCard DepartmentId="departmentId"/>
+            <EmployeePhoneCard @ref="employeePhoneCard"
+                DepartmentId="departmentId"
+                OnAdd="AddEmployeePhoneAsync"
+                OnDelete="DeleteEmployeePhoneAsync"/>
 
 <!-- Log ind knap nederst -->
 <div class="login-bar">
@@ -79,6 +87,8 @@ else
 
     private bool showCreateResident = false;
     private bool isLoading = true;
+    private DepartmentTaskCard? departmentTaskCard;
+    private EmployeePhoneCard? employeePhoneCard;
 
     ResidentViewModel newResident = new ResidentViewModel { Risiko = Risiko.Green };
 
@@ -141,6 +151,54 @@ else
         residents = await residentFacade.GetResidentByDepartment(departmentId);
         StateHasChanged();
     }
+
+    //Tilføj og slet DepartmentTask
+    private async Task AddDepartmentTaskAsync(int departmentId)
+    {
+        var newTask = new DepartmentTaskViewModel
+        {
+            DepartmentID = departmentId,
+            DepartmentTaskTopic = "Ny opgave",
+            EmployeeName = "",
+            ShiftType = ShiftType.Dag
+        };
+
+        await departmentTaskFacade.AddDepartmentTask(newTask);
+
+        if (departmentTaskCard is not null) await departmentTaskCard.RefreshAsync();
+    }
+
+    private async Task DeleteDepartmentTaskAsync(DepartmentTaskViewModel vm)
+    {
+        await departmentTaskFacade.DeleteDepartmentTask(vm.DepartmentTaskID);
+
+        if (departmentTaskCard is not null)
+            await departmentTaskCard.RefreshAsync();
+    }
+
+    private async Task AddEmployeePhoneAsync(int departmentId)
+    {
+        var empPhone = new EmployeePhoneViewModel
+            {
+                DepartmentID = departmentId,
+                EmployeeName = "Ny medarbejder",
+                PhoneNumber = "",
+                Test = false
+            };
+
+        await employeePhoneFacade.AddEmployeePhone(empPhone);
+
+        if (employeePhoneCard is not null) await employeePhoneCard.RefreshAsync();
+    }
+
+    private async Task DeleteEmployeePhoneAsync(EmployeePhoneViewModel vm)
+    {
+        await employeePhoneFacade.DeleteEmployeePhone(vm.EmployeePhoneID);
+
+        if (employeePhoneCard is not null)
+            await employeePhoneCard.RefreshAsync();
+    }
+
     private async Task LogOut()
     {
         await authState.MarkUserAsLoggedOut();
@@ -151,6 +209,7 @@ else
         await authState.MarkUserAsLoggedOut();
         Navigation.NavigateTo("/", forceLoad: true);
     }
-
     List<ResidentViewModel> residents = new();
+
+    
 }
