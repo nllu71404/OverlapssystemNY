@@ -34,9 +34,14 @@
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
-        <button @onclick="ShowCreateResident">
-            Opret beboer
-        </button>
+        <div class="admin-action-bar">
+            <button @onclick="ShowCreateResident">
+                Opret beboer
+            </button>
+            <button @onclick="GoToCreateUser">
+                Opret bruger
+            </button>
+        </div>
     </Authorized>
 </AuthorizeView>
 
@@ -75,8 +80,8 @@ else
 
 <!-- Log ind knap nederst -->
 <div class="login-bar">
-    <button class="login-btn" @onclick="LogIn"> Log ind</button>
-    <button class="logout-btn" @onclick="LogOut">Log ud</button>
+    <button @onclick="LogIn">Log ind</button>
+    <button @onclick="LogOut">Log ud </button>
 </div>
 
 @code {
@@ -92,18 +97,27 @@ else
 
     ResidentViewModel newResident = new ResidentViewModel { Risiko = Risiko.Green };
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        try
+        if (firstRender)
         {
-            Console.WriteLine($"DepartmentId: {departmentId}");
-            residents = await residentFacade.GetResidentByDepartment(departmentId);
-            Console.WriteLine($"Residents count; {residents?.Count}");
+            try
+            {
+                Console.WriteLine($"DepartmentId: {departmentId}");
+                residents = await residentFacade.GetResidentByDepartment(departmentId);
+                Console.WriteLine($"Residents count; {residents?.Count}");
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
         }
-        finally
-        {
-            isLoading = false;
-        }
+    }
+
+    private void GoToCreateUser()
+    {
+        Navigation.NavigateTo("/OpretBruger");
     }
 
     private async Task ShowCreateResident()

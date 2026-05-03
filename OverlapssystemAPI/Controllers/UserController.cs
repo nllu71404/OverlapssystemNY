@@ -66,13 +66,14 @@ namespace OverlapssystemAPI.Controllers
             return Ok(userId);
         }
 
-        //Update
-        [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserModel usermodel)
-        {
-            await _userService.UpdateUserAsync(userId, usermodel);
-            return Ok(userId);
-        }
+        ////Update
+        //[HttpPut("{userId}")]
+        //public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDTO userDTO)
+        //{
+        //    var userModel = MapToUpdateUserModel(userId, userDTO);
+        //    await _userService.UpdateUserAsync(userModel);
+        //    return Ok(userId);
+        //}
         //Validering
         [AllowAnonymous]
         [HttpPost("ValiderBruger")]
@@ -86,5 +87,16 @@ namespace OverlapssystemAPI.Controllers
 
             return Ok(new { token = result.Value});
         }
+
+        //// ----- Mapping ---- //
+        //private static UserModel MapToUpdateUserModel(UpdateUserDTO userDTO, int id)
+        //{
+        //    return new UserModel
+        //    {
+        //        FirstName = userDTO.FirstName,
+        //        LastName = userDTO.LastName,
+
+        //    };
+        //}
     }
 }
