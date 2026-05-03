@@ -2,6 +2,7 @@
 using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -73,6 +74,7 @@ namespace OverlapssystemAPI.Controllers
             return Ok(userId);
         }
         //Validering
+        [AllowAnonymous]
         [HttpPost("ValiderBruger")]
         public async Task<IActionResult> ValidateUser([FromBody] AddUserDTO userDTO)
         {
