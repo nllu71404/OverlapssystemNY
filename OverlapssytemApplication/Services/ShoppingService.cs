@@ -9,23 +9,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace OverlapssytemApplication.Services
 {
     public class ShoppingService : IShoppingService
     {
         private readonly IShoppingRepository _shoppingrepository;
+        private readonly ILogger<ShoppingService> _logger;
 
-        public ShoppingService(IShoppingRepository shoppingrepository)
+        public ShoppingService(IShoppingRepository shoppingrepository, ILogger<ShoppingService> logger)
         {
             _shoppingrepository = shoppingrepository;
+            _logger = logger;
         }
 
         // Hent shopping
         public async Task<Result<List<ShoppingModel>>> GetShoppingByResidentIdAsync(int residentId)
         {
             if (residentId <= 0)
-                return Error.Validation("Ugyldigt resident ID");
+                return Error.Validation("Ugyldigt beboer ID");
 
             try
             {
@@ -33,9 +36,10 @@ namespace OverlapssytemApplication.Services
 
                 return result ?? new List<ShoppingModel>(); // implicit success
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke hente shopping");
+                _logger.LogError(ex, "Fejl ved hentning af handledage");
+                return Error.Technical("Kunne ikke hente handledage");
             }
         }
 
@@ -43,7 +47,7 @@ namespace OverlapssytemApplication.Services
         public async Task<Result> DeleteShoppingAsync(int shoppingId)
         {
             if (shoppingId <= 0)
-                return Error.Validation("Ugyldigt shopping ID");
+                return Error.Validation("Ugyldigt handledag ID");
 
             try
             {
@@ -51,39 +55,45 @@ namespace OverlapssytemApplication.Services
 
                 return Result.Ok();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return Error.NotFound("Shopping findes ikke");
+                _logger.LogWarning(ex, "Handledag blev ikke fundet");
+                return Error.NotFound("Kunne ikke finde handledag at slette");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke slette shopping");
+                _logger.LogError(ex, "Fejl ved sletning af handledag");
+                return Error.Technical("Kunne ikke slette handledag");
             }
         }
 
         // Opret shopping
-        public async Task<Result<int>> SaveNewShoppingAsync(ShoppingModel shoppingModel)
+        public async Task<Result<int>> CreateShoppingAsync(ShoppingModel shopping)
         {
-            if (shoppingModel == null)
-                return Error.Validation("Shopping må ikke være null");
+            if (shopping.ResidentID <= 0)
+                return Error.Validation("Ugyldigt beboer ID");
 
             try
             {
-                var id = await _shoppingrepository.SaveNewShoppingAsync(shoppingModel);
+                var id = await _shoppingrepository.SaveNewShoppingAsync(shopping);
 
                 return id; // implicit success
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke oprette shopping");
+                _logger.LogError(ex, "Fejl ved oprettelse af handledag");
+                return Error.Technical("Kunne ikke oprette handledag");
             }
         }
 
         // Update shopping
         public async Task<Result> UpdateShoppingAsync(ShoppingModel shopping)
         {
-            if (shopping == null)
-                return Error.Validation("Shopping må ikke være null");
+            if (shopping.ShoppingID <= 0)
+                return Error.Validation("Ugyldigt handledag ID");
+
+            if (shopping.ResidentID <= 0)
+                return Error.Validation("Ugyldigt beboer ID");
 
             try
             {
@@ -91,13 +101,15 @@ namespace OverlapssytemApplication.Services
 
                 return Result.Ok();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return Error.NotFound("Shopping findes ikke");
+                _logger.LogWarning(ex, "Handledag blev ikke fundet");
+                return Error.NotFound("Kunne ikke finde handledag at opdatere");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Error.Technical("Kunne ikke opdatere shopping");
+                _logger.LogError(ex, "Fejl ved opdatering af handledag");
+                return Error.Technical("Kunne ikke opdatere handledag");
             }
         }
     }

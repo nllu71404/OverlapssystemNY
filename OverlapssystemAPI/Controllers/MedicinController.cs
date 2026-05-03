@@ -38,7 +38,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<IActionResult> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
         {
             var mappedModel = MapToAddMedicinModel(medicinDTO);
-            var id = await _medicinServices.AddMedicinTimeAsync(mappedModel);
+            var id = await _medicinServices.CreateMedicinTimeAsync(mappedModel);
             return Handle(id);
 
 

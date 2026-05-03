@@ -38,7 +38,7 @@ namespace OverlapssystemAPI.Controllers
         public async Task<IActionResult> AddPNMedicinTime([FromBody] AddPNMedicinDTO addPNMedicinDTO)
         { 
             var pNMedicinModel = MapToAddPNMedicinModel(addPNMedicinDTO);
-            var result = await _pNMedicinService.AddPNMedicinAsync(pNMedicinModel);
+            var result = await _pNMedicinService.CreatePNMedicinAsync(pNMedicinModel);
 
            
                 return Handle(result);
