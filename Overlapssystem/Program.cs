@@ -23,10 +23,16 @@ builder.Services.AddScoped<AuthState>();
 builder.Services.AddAuthentication("Bearer");
 
 // HttpClient
-builder.Services.AddScoped(sp => new HttpClient
+builder.Services.AddTransient<AuthTokenHandler>();
+
+builder.Services.AddHttpClient("Api", client =>
 {
-    BaseAddress = new Uri("https://localhost:7150")
-});
+    client.BaseAddress = new Uri("https://localhost:7150");
+})
+.AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddScoped(sp =>
+    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
 
 builder.Services.AddScoped<ResidentApiService>();
 builder.Services.AddScoped<MedicinApiService>();
@@ -41,6 +47,7 @@ builder.Services.AddScoped<IDepartmentTaskFacade, DepartmentTaskFacade>();
 builder.Services.AddScoped<IDepartmentFacade, DepartmentFacade>();
 builder.Services.AddScoped<IEmployeePhoneFacade, EmployeePhoneFacade>();
 builder.Services.AddScoped<UserApiService>();
+builder.Services.AddScoped<IUserFacade, UserFacade>();
 
 
 

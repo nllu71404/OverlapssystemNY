@@ -1,0 +1,110 @@
+﻿@page "/OpretBruger"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using Overlapssystem.Interfaces
+@using Overlapssystem.ViewModels
+
+@inject IUserFacade userFacade
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        <div class="login-wrapper">
+            <div class="login-card">
+                <h2>Opret bruger</h2>
+
+                <div class="input-group">
+                    <input placeholder="Brugernavn" @bind="newUser.UserName" />
+                </div>
+
+                <div class="input-group">
+                    <input type="password" placeholder="Password" @bind="newUser.Password" />
+                </div>
+
+                <div class="input-group">
+                    <input placeholder="Fornavn" @bind="newUser.FirstName" />
+                </div>
+
+                <div class="input-group">
+                    <input placeholder="Efternavn" @bind="newUser.LastName" />
+                </div>
+
+                <div class="input-group">
+                    <input type="number" placeholder="Afdeling ID" @bind="departmentId" />
+                </div>
+
+                <div class="input-group">
+                    <select @bind="newUser.Role">
+                        <option value="">Vælg rolle</option>
+                        <option value="Simpel">Simpel</option>
+                        <option value="Medarbejder">Medarbejder</option>
+                        <option value="Administrator">Administrator</option>
+                    </select>
+                </div>
+
+                <button class="login-btn" @onclick="CreateUserAsync" disabled="@isLoading">
+                    Opret bruger
+                </button>
+
+                @if (!string.IsNullOrWhiteSpace(message))
+                {
+                    <p class="@messageCssClass">@message</p>
+                }
+            </div>
+        </div>
+    </Authorized>
+        <NotAuthorized>
+        <p>Du har ikke adgang til denne side.</p>
+    </NotAuthorized>
+    
+</AuthorizeView>
+
+
+@code {
+    private UserViewModel newUser = new();
+    private int? departmentId;
+    private bool isLoading;
+    private string message = string.Empty;
+    private bool wasCreated;
+
+    private string messageCssClass => wasCreated ? "success-msg" : "error-msg";
+
+    private async Task CreateUserAsync()
+    {
+        message = string.Empty;
+        wasCreated = false;
+
+        if (string.IsNullOrWhiteSpace(newUser.UserName) ||
+            string.IsNullOrWhiteSpace(newUser.Password) ||
+            string.IsNullOrWhiteSpace(newUser.FirstName) ||
+            string.IsNullOrWhiteSpace(newUser.LastName) ||
+            string.IsNullOrWhiteSpace(newUser.Role) ||
+            departmentId is null)
+        {
+            message = "Udfyld alle felter.";
+            return;
+        }
+
+        try
+        {
+            isLoading = true;
+
+            newUser.DepartmentId = departmentId;
+            await userFacade.AddUser(newUser);
+
+            wasCreated = true;
+            message = "Brugeren er oprettet.";
+            newUser = new UserViewModel();
+            departmentId = null;
+        }
+        catch (Exception ex)
+        {
+            message = $"Kunne ikke oprette bruger: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

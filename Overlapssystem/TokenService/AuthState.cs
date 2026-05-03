@@ -37,6 +37,17 @@ namespace Overlapssystem.TokenService
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
         }
+        public async Task<string?> GetTokenAsync()
+        {
+            try
+            {
+                return await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         // Kaldes når brugeren logger ind med et JWT token
         public async Task MarkUserAsAuthenticated(string token)

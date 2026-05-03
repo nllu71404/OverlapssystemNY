@@ -16,14 +16,14 @@ namespace TestOverlapssystem.ApplicationTests
     public class MedicinServiceTest
     {
         private Mock<IMedicinRepository> _medicinRepoMock;
-        private Mock<ILogger> _loggerMock;
+        private Mock<ILogger<MedicinService>> _loggerMock;
         private MedicinService _service;
 
         [TestInitialize]
         public void Setup()
         {
             _medicinRepoMock = new Mock<IMedicinRepository>();
-            _loggerMock = new Mock<ILogger>();
+            _loggerMock = new Mock<ILogger<MedicinService>>();
 
             _service = new MedicinService(_medicinRepoMock.Object, _loggerMock.Object);
         }
