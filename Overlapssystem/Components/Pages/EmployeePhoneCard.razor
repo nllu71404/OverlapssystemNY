@@ -39,23 +39,22 @@
                     <td>
                         <AuthorizeView>
                             <Authorized>
-                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                                @if (context.User.IsInRole("Administrator"))
                                 {
-                                    <span>@phone.PhoneNumber</span>
-
-                                    @if (context.User.IsInRole("Administrator"))
-                                    {
                                         <input value="@phone.PhoneNumber"
                                                @onchange="async e =>
                                                {
                                                    phone.PhoneNumber = e.Value?.ToString();
                                                    await UpdateEmployeePhone(phone);
                                                }" />
-                                    }
+                                } 
+                                else if (context.User.IsInRole("Medarbejder"))
+                                {
+                                    <span>@phone.PhoneNumber</span>
                                 }
                                 else if (context.User.IsInRole("Simpel"))
                                 {
-                                    <input value="@employeePhoneViewModel.PhoneNumber" disabled />
+                                    <input value="@phone.PhoneNumber" disabled />
                                 }
                                 
                             </Authorized>
