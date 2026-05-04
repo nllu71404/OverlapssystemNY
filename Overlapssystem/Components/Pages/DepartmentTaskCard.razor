@@ -130,9 +130,13 @@
 
     public List<DepartmentTaskViewModel> Tasks { get; set; } = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Tasks = await departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId);
+        if (firstRender)
+        {
+            Tasks = await departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId);
+            StateHasChanged();
+        }
     }
 
     // Allow parent to ask this component to refresh its list after parent creates/updates.

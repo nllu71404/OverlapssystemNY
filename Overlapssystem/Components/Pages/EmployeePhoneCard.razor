@@ -140,10 +140,14 @@
 	
 	public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
 
-    protected override async Task OnParametersSetAsync() 
-	{
-		EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
-	}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
+            StateHasChanged();
+        }
+    }
 
     public async Task RefreshAsync() 
     {
