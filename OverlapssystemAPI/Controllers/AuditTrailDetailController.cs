@@ -18,7 +18,7 @@ namespace OverlapssystemAPI.Controllers
         {
             _auditTrailDetailService = auditTrailDetailService;
         }
-
+         
         // Hent audit trail details på DepartmentId
         [HttpGet("{departmentId:int}")]
         public async Task<IActionResult> GetAuditTrailDetailsByDepartmentId(int departmentId)

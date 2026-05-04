@@ -17,6 +17,6 @@ namespace OverlapssystemDomain.Entities
         public string? NewValue { get; set; }
         public string? Operation { get; set; }
         public string? ChangedBy { get; set; }
-        public string? ChangeDate { get; set; }
+        public string? ChangeDate { get; set; } 
     }
 }

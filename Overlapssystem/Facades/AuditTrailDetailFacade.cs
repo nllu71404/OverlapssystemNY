@@ -8,7 +8,7 @@ namespace Overlapssystem.Facades
 {
     public class AuditTrailDetailFacade : IAuditTrailDetailFacade
     {
-        private readonly AuditTrailDetailApiService _auditTrailDetailApi;
+        private readonly AuditTrailDetailApiService _auditTrailDetailApi; 
 
         public AuditTrailDetailFacade(AuditTrailDetailApiService auditTrailDetailApi)
         {

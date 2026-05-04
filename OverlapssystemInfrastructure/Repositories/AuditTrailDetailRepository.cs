@@ -20,7 +20,7 @@ namespace OverlapssystemInfrastructure.Repositories
                 ?? throw new InvalidOperationException("Connection string 'ProjektDB' not found.");
         }
 
-        public async Task<List<AuditTrailDetailModel>> GetAuditTrailDetailsByDepartmentIdAsync(int departmentId)
+        public async Task<List<AuditTrailDetailModel>> GetAuditTrailDetailsByDepartmentIdAsync(int departmentId) 
         {
             var auditTrailDetails = new List<AuditTrailDetailModel>();
 

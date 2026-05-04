@@ -12,7 +12,7 @@ namespace Overlapssystem.ViewModels
         public string? ColumnName { get; set; }
         public string? OldValue { get; set; }
         public string? NewValue { get; set; }
-        public string? Operation { get; set; }
+        public string? Operation { get; set; } 
         public string? ChangedBy { get; set; }
         public string? ChangeDate { get; set; }
     }

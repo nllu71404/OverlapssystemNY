@@ -5,6 +5,6 @@ namespace Overlapssystem.Interfaces
 {
     public interface IAuditTrailDetailFacade
     {
-        Task<List<AuditTrailDetailViewModel>> GetAuditTrailDetailsByDepartment(int departmentId);
+        Task<List<AuditTrailDetailViewModel>> GetAuditTrailDetailsByDepartment(int departmentId); 
     }
 }

@@ -9,6 +9,6 @@ namespace OverlapssystemDomain.Interfaces
 {
     public interface IAuditTrailDetailRepository
     {
-        Task<List<AuditTrailDetailModel>> GetAuditTrailDetailsByDepartmentIdAsync(int departmentId);
+        Task<List<AuditTrailDetailModel>> GetAuditTrailDetailsByDepartmentIdAsync(int departmentId); 
     }
 }

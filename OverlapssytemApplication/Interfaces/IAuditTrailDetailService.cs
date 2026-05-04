@@ -10,6 +10,6 @@ namespace OverlapssytemApplication.Interfaces
 {
     public interface IAuditTrailDetailService
     {
-        Task<Result<List<AuditTrailDetailModel>>> LoadAuditTrailDetailsByDepartmentAsync(int departmentId);
+        Task<Result<List<AuditTrailDetailModel>>> LoadAuditTrailDetailsByDepartmentAsync(int departmentId); 
     }
 }

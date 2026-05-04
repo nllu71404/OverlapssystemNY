@@ -28,7 +28,7 @@ namespace OverlapssytemApplication.Services
         // Hent på DepartmentId
         public async Task<Result<List<AuditTrailDetailModel>>> LoadAuditTrailDetailsByDepartmentAsync(int departmentId)
         {
-            if (departmentId <= 0)
+            if (departmentId <= 0) 
             {
                 return Error.Validation("Ugyldigt afdelingsID");
             }
