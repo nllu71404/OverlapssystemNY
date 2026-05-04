@@ -36,7 +36,7 @@ namespace OverlapssystemAPI.Controllers
         {
            var specialEventModel = MapToAddSpecialEventModel(addSpecialEventDTO);
 
-            var result = await _specialEventService.SaveNewSpecialEventAsync(specialEventModel);
+            var result = await _specialEventService.CreateSpecialEventAsync(specialEventModel);
             
          
             return Handle(result);

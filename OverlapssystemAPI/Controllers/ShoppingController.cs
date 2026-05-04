@@ -35,10 +35,10 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj
         [HttpPost("TilføjShopping")]
-        public async Task<IActionResult> SaveNewShopping([FromBody] AddShoppingDTO addShoppingDTO)
+        public async Task<IActionResult> AddShopping([FromBody] AddShoppingDTO addShoppingDTO)
         {
             var shoppingModel = MapToAddShoppingModel(addShoppingDTO);
-            var result = await _shoppingService.SaveNewShoppingAsync(shoppingModel);
+            var result = await _shoppingService.CreateShoppingAsync(shoppingModel);
 
             return Handle(result); 
 

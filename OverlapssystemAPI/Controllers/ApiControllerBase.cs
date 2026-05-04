@@ -2,10 +2,12 @@
 using OverlapssytemApplication.Common;
 using OverlapssytemApplication.Common.Errors;
 using OverlapssystemAPI.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
+    //[Authorize]
     public class ApiControllerBase : ControllerBase
     {
         protected IActionResult Handle(Result result)

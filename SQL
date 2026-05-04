@@ -108,9 +108,8 @@ CONSTRAINT FK_SpecialEvent_Resident
 );
 GO
 
--- Audit Trail
 -- Audit Table: Creates dbo.AuditLog
-CREATE TABLE dbo.AuditLog
+CREATE TABLE dbo.AuditLogSnapshot
 (
 AuditLogId       int IDENTITY(1,1) PRIMARY KEY,
 TableName        sysname,
@@ -123,6 +122,51 @@ ChangeDate       datetime2(7)
 );
 GO
 
+-- Audit Trail
+-- Audit Table: Creates dbo.AuditLogDetail
+CREATE TABLE dbo.AuditLogDetail
+(
+    AuditLogDetailId INT IDENTITY(1,1) PRIMARY KEY,
+    TableName        SYSNAME,
+    PrimaryKeyValue  NVARCHAR(200),
+    ColumnName       SYSNAME,
+    OldValue         NVARCHAR(MAX),
+    NewValue         NVARCHAR(MAX),
+    Operation        VARCHAR(10),
+    ChangedBy        NVARCHAR(200),
+    ChangeDate       DATETIME2(7),
+    DepartmentID     INT NULL,
+
+    CONSTRAINT FK_AuditLogDetail_Department FOREIGN KEY (DepartmentID) REFERENCES dbo.Department(DepartmentID)
+);
+GO
+
+
+
+-- Creates Stored Procedure
+-- Creates a AuditLogDetail to the table of AuditLogDetails.
+CREATE OR ALTER PROCEDURE dbo.uspGetAuditTrailDetailsByDepartmentId
+    @DepartmentId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        DepartmentID,
+        AuditLogDetailId,
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate
+    FROM dbo.AuditLogDetail
+    WHERE DepartmentID = @DepartmentId
+    ORDER BY ChangeDate DESC;
+END;
+GO
 
 -- Creates Stored Procedures
 -- Creates a Resident to the table of Residents.
@@ -1060,7 +1104,7 @@ BEGIN
 SET NOCOUNT ON;
 
 -- INSERT
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1084,7 +1128,7 @@ LEFT JOIN deleted d
 WHERE d.ResidentId IS NULL;
 
 -- DELETE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1108,7 +1152,7 @@ LEFT JOIN inserted i
 WHERE i.ResidentId IS NULL;
 
 -- UPDATE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1132,6 +1176,8 @@ INNER JOIN deleted d
 END;
 GO
 
+
+
 -- Audit Trigger for MedicinTime table
 CREATE TRIGGER trg_Audit_MedicinTime
 ON dbo.MedicinTime
@@ -1141,7 +1187,7 @@ BEGIN
 SET NOCOUNT ON;
 
 -- INSERT
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1165,7 +1211,7 @@ LEFT JOIN deleted d
 WHERE d.MedicinTimeId IS NULL;
 
 -- DELETE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1189,7 +1235,7 @@ LEFT JOIN inserted i
 WHERE i.MedicinTimeId IS NULL;
 
 -- UPDATE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1213,6 +1259,8 @@ INNER JOIN deleted d
 END;
 GO
 
+
+
 -- Audit Trigger for PNMedicin table
 CREATE TRIGGER trg_Audit_PNMedicin
 ON dbo.PNMedicin
@@ -1222,7 +1270,7 @@ BEGIN
 SET NOCOUNT ON;
 
 -- INSERT
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1246,7 +1294,7 @@ LEFT JOIN deleted d
 WHERE d.PNId IS NULL;
 
 -- DELETE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1270,7 +1318,7 @@ LEFT JOIN inserted i
 WHERE i.PNId IS NULL;
 
 -- UPDATE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1294,6 +1342,8 @@ INNER JOIN deleted d
 END;
 GO
 
+
+
 -- Audit Trigger for Shopping table
 CREATE TRIGGER trg_Audit_Shopping
 ON dbo.Shopping
@@ -1303,7 +1353,7 @@ BEGIN
 SET NOCOUNT ON;
 
 -- INSERT
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1327,7 +1377,7 @@ LEFT JOIN deleted d
 WHERE d.ShoppingId IS NULL;
 
 -- DELETE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1351,7 +1401,7 @@ LEFT JOIN inserted i
 WHERE i.ShoppingId IS NULL;
 
 -- UPDATE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1375,6 +1425,9 @@ INNER JOIN deleted d
 END;
 GO
 
+
+
+
 -- Audit Trigger for SpecialEvent table
 CREATE TRIGGER trg_Audit_SpecialEvent
 ON dbo.SpecialEvent
@@ -1384,7 +1437,7 @@ BEGIN
 SET NOCOUNT ON;
 
 -- INSERT
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1408,7 +1461,7 @@ LEFT JOIN deleted d
 WHERE d.SpecialEventId IS NULL;
 
 -- DELETE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1432,7 +1485,7 @@ LEFT JOIN inserted i
 WHERE i.SpecialEventId IS NULL;
 
 -- UPDATE
-INSERT INTO dbo.AuditLog
+INSERT INTO dbo.AuditLogSnapshot
 (
     TableName,
     Operation,
@@ -1453,6 +1506,651 @@ SELECT
 FROM inserted i
 INNER JOIN deleted d
     ON d.SpecialEventId = i.SpecialEventId;
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for Resident table
+CREATE OR ALTER TRIGGER dbo.trg_Audit_Resident_Details
+ON dbo.Resident
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------------------
+    -- INSERT: old values are NULL, new values exist --
+    ---------------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Resident',
+    CAST(i.ResidentID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    i.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('ResidentName',     CAST(i.ResidentName AS nvarchar(max))),
+    ('ResidentID',       CAST(i.ResidentID AS nvarchar(max))),
+    ('DepartmentID',     CAST(i.DepartmentID AS nvarchar(max))),
+    ('ResidentStatus',   CAST(i.ResidentStatus AS nvarchar(max))),
+    ('Risk',             CAST(i.Risk AS nvarchar(max))),
+    ('Mood',             CAST(i.Mood AS nvarchar(max))),
+    ('Activity',         CAST(i.Activity AS nvarchar(max))),
+    ('FamilyNote',       CAST(i.FamilyNote AS nvarchar(max))),
+    ('ResidentEmployee', CAST(i.ResidentEmployee AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.ResidentID IS NULL;
+
+    ----------------------------------------
+    -- UPDATE: compare old and new values --
+    ----------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+    (
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate,
+        DepartmentID
+    )
+    SELECT
+        'Resident',
+        CAST(i.ResidentID AS nvarchar(200)),
+        v.ColumnName,
+        v.OldValue,
+        v.NewValue,
+        'UPDATE',
+        SUSER_SNAME(),
+        SYSDATETIME(),
+        i.DepartmentID
+    FROM inserted i
+    INNER JOIN deleted d 
+        ON d.ResidentID = i.ResidentID
+    CROSS APPLY (VALUES
+        ('ResidentName',     CAST(d.ResidentName AS nvarchar(max)),     CAST(i.ResidentName AS nvarchar(max))),
+        ('ResidentID',       CAST(d.ResidentID AS nvarchar(max)),       CAST(i.ResidentID AS nvarchar(max))),
+        ('DepartmentID',     CAST(d.DepartmentID AS nvarchar(max)),     CAST(i.DepartmentID AS nvarchar(max))),
+        ('ResidentStatus',   CAST(d.ResidentStatus AS nvarchar(max)),   CAST(i.ResidentStatus AS nvarchar(max))),
+        ('Risk',             CAST(d.Risk AS nvarchar(max)),             CAST(i.Risk AS nvarchar(max))),
+        ('Mood',             CAST(d.Mood AS nvarchar(max)),             CAST(i.Mood AS nvarchar(max))),
+        ('Activity',         CAST(d.Activity AS nvarchar(max)),         CAST(i.Activity AS nvarchar(max))),
+        ('FamilyNote',       CAST(d.FamilyNote AS nvarchar(max)),       CAST(i.FamilyNote AS nvarchar(max))),
+        ('ResidentEmployee', CAST(d.ResidentEmployee AS nvarchar(max)), CAST(i.ResidentEmployee AS nvarchar(max)))
+    ) v(ColumnName, OldValue, NewValue)
+    WHERE
+        ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+
+   
+    ----------------------------------------
+    -- DELETE: compare old and new values --
+    ----------------------------------------
+
+   SELECT
+    'Resident',
+    CAST(d.ResidentID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    d.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('ResidentName',     CAST(d.ResidentName AS nvarchar(max))),
+    ('ResidentID',       CAST(d.ResidentID AS nvarchar(max))),
+    ('DepartmentID',     CAST(d.DepartmentID AS nvarchar(max))),
+    ('ResidentStatus',   CAST(d.ResidentStatus AS nvarchar(max))),
+    ('Risk',             CAST(d.Risk AS nvarchar(max))),
+    ('Mood',             CAST(d.Mood AS nvarchar(max))),
+    ('Activity',         CAST(d.Activity AS nvarchar(max))),
+    ('FamilyNote',       CAST(d.FamilyNote AS nvarchar(max))),
+    ('ResidentEmployee', CAST(d.ResidentEmployee AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.ResidentID IS NULL;
+END;
+GO
+
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for MedicinTime table
+CREATE OR ALTER TRIGGER trg_Audit_Medicin_Details
+ON dbo.MedicinTime
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'MedicinTime',
+    CAST(i.MedicinTimeID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+    FROM inserted i
+    LEFT JOIN deleted d 
+    ON d.MedicinTimeID = i.MedicinTimeID
+    LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+    CROSS APPLY (VALUES
+    ('MedicinTimeID', CAST(i.MedicinTimeID AS nvarchar(max))),
+    ('ResidentID', CAST(i.ResidentID AS nvarchar(max))),
+    ('MedicinTime', CAST(i.MedicinTime AS nvarchar(max))),
+    ('MedicinCheckTimeStamp', CAST(i.MedicinCheckTimeStamp AS nvarchar(max))),
+    ('IsChecked', CAST(i.IsChecked AS nvarchar(max)))
+    ) v(ColumnName, NewValue)
+    WHERE d.MedicinTimeID IS NULL;
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'MedicinTime',
+    CAST(d.MedicinTimeID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.MedicinTimeID = d.MedicinTimeID
+LEFT JOIN dbo.Resident r 
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('MedicinTimeID',           CAST(d.MedicinTimeID AS nvarchar(max))),
+    ('ResidentID',              CAST(d.ResidentID AS nvarchar(max))),
+    ('MedicinTime',             CAST(d.MedicinTime AS nvarchar(max))),
+    ('MedicinCheckTimeStamp',   CAST(d.MedicinCheckTimeStamp AS nvarchar(max))),
+    ('IsChecked',               CAST(d.IsChecked AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.MedicinTimeID IS NULL;
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'MedicinTime',
+    CAST(i.MedicinTimeID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    v.NewValue,
+    'UPDATE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+INNER JOIN deleted d 
+    ON d.MedicinTimeID = i.MedicinTimeID
+LEFT JOIN dbo.Resident r 
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('MedicinTimeID',         CAST(d.MedicinTimeID AS nvarchar(max)),       CAST(i.MedicinTimeID AS nvarchar(max))),
+    ('ResidentID',            CAST(d.ResidentID AS nvarchar(max)),          CAST(i.ResidentID AS nvarchar(max))),
+    ('MedicinTime',           CAST(d.MedicinTime AS nvarchar(max)),         CAST(i.MedicinTime AS nvarchar(max))),
+    ('MedicinCheckTimeStamp', CAST(d.MedicinCheckTimeStamp AS nvarchar(max)), CAST(i.MedicinCheckTimeStamp AS nvarchar(max))),
+    ('IsChecked',             CAST(d.IsChecked AS nvarchar(max)),           CAST(i.IsChecked AS nvarchar(max)))
+) v(ColumnName, OldValue, NewValue)
+WHERE
+    ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for PNMedicin table
+CREATE OR ALTER TRIGGER trg_Audit_PNMedicin_Details
+ON dbo.PNMedicin
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'PNMedicin',
+    CAST(i.PNID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.PNID = i.PNID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('PNID',        CAST(i.PNID AS nvarchar(max))),
+    ('ResidentID',  CAST(i.ResidentID AS nvarchar(max))),
+    ('PNTime',      CAST(i.PNTime AS nvarchar(max))),
+    ('Reason',      CAST(i.Reason AS nvarchar(max))),
+    ('PNTimeStamp', CAST(i.PNTimeStamp AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.PNID IS NULL;
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'PNMedicin',
+    CAST(d.PNID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.PNID = d.PNID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('PNID',        CAST(d.PNID AS nvarchar(max))),
+    ('ResidentID',  CAST(d.ResidentID AS nvarchar(max))),
+    ('PNTime',      CAST(d.PNTime AS nvarchar(max))),
+    ('Reason',      CAST(d.Reason AS nvarchar(max))),
+    ('PNTimeStamp', CAST(d.PNTimeStamp AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.PNID IS NULL;
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+    (
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate,
+        DepartmentID
+    )
+    SELECT
+        'PNMedicin',
+        CAST(i.PNID AS nvarchar(200)),
+        v.ColumnName,
+        v.OldValue,
+        v.NewValue,
+        'UPDATE',
+        SUSER_SNAME(),
+        SYSDATETIME(),
+        r.DepartmentID
+    FROM inserted i
+    INNER JOIN deleted d ON d.PNID = i.PNID
+    LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+    CROSS APPLY (VALUES
+        ('PNID', d.PNID, i.PNID),
+        ('ResidentID', d.ResidentID, i.ResidentID),
+        ('PNTime', d.PNTime, i.PNTime),
+        ('Reason', d.Reason, i.Reason),
+        ('PNTimeStamp', d.PNTimeStamp, i.PNTimeStamp)
+    ) v(ColumnName, OldValue, NewValue)
+    WHERE
+        (v.OldValue <> v.NewValue)
+        OR (v.OldValue IS NULL AND v.NewValue IS NOT NULL)
+        OR (v.OldValue IS NOT NULL AND v.NewValue IS NULL);
+
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for Shopping table
+CREATE OR ALTER TRIGGER trg_Audit_Shopping_Details
+ON dbo.Shopping
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Shopping',
+    CAST(i.ShoppingID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.ShoppingID = i.ShoppingID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('ShoppingID',    CAST(i.ShoppingID AS nvarchar(max))),
+    ('ResidentID',    CAST(i.ResidentID AS nvarchar(max))),
+    ('ShoppingDay',   CAST(i.ShoppingDay AS nvarchar(max))),
+    ('ShoppingTime',  CAST(i.ShoppingTime AS nvarchar(max))),
+    ('PaymentMethod', CAST(i.PaymentMethod AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.ShoppingID IS NULL;
+
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Shopping',
+    CAST(d.ShoppingID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.ShoppingID = d.ShoppingID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('ShoppingID',    CAST(d.ShoppingID AS nvarchar(max))),
+    ('ResidentID',    CAST(d.ResidentID AS nvarchar(max))),
+    ('ShoppingDay',   CAST(d.ShoppingDay AS nvarchar(max))),
+    ('ShoppingTime',  CAST(d.ShoppingTime AS nvarchar(max))),
+    ('PaymentMethod', CAST(d.PaymentMethod AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.ShoppingID IS NULL;
+
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Shopping',
+    CAST(i.ShoppingID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    v.NewValue,
+    'UPDATE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+INNER JOIN deleted d 
+    ON d.ShoppingID = i.ShoppingID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('ShoppingID',    CAST(d.ShoppingID AS nvarchar(max)),    CAST(i.ShoppingID AS nvarchar(max))),
+    ('ResidentID',    CAST(d.ResidentID AS nvarchar(max)),    CAST(i.ResidentID AS nvarchar(max))),
+    ('ShoppingDay',   CAST(d.ShoppingDay AS nvarchar(max)),   CAST(i.ShoppingDay AS nvarchar(max))),
+    ('ShoppingTime',  CAST(d.ShoppingTime AS nvarchar(max)),  CAST(i.ShoppingTime AS nvarchar(max))),
+    ('PaymentMethod', CAST(d.PaymentMethod AS nvarchar(max)), CAST(i.PaymentMethod AS nvarchar(max)))
+) v(ColumnName, OldValue, NewValue)
+WHERE
+    ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for SpecialEvent table
+CREATE OR ALTER TRIGGER trg_Audit_SpecialEvent_Details
+ON dbo.SpecialEvent
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'SpecialEvent',
+    CAST(i.SpecialEventID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.SpecialEventID = i.SpecialEventID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('SpecialEventID',       CAST(i.SpecialEventID AS nvarchar(max))),
+    ('ResidentID',           CAST(i.ResidentID AS nvarchar(max))),
+    ('SpecialEventNote',     CAST(i.SpecialEventNote AS nvarchar(max))),
+    ('SpecialEventDateTime', CAST(i.SpecialEventDateTime AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.SpecialEventID IS NULL;
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'SpecialEvent',
+    CAST(d.SpecialEventID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.SpecialEventID = d.SpecialEventID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('SpecialEventID',       CAST(d.SpecialEventID AS nvarchar(max))),
+    ('ResidentID',           CAST(d.ResidentID AS nvarchar(max))),
+    ('SpecialEventNote',     CAST(d.SpecialEventNote AS nvarchar(max))),
+    ('SpecialEventDateTime', CAST(d.SpecialEventDateTime AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.SpecialEventID IS NULL;
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'SpecialEvent',
+    CAST(i.SpecialEventID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    v.NewValue,
+    'UPDATE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+INNER JOIN deleted d 
+    ON d.SpecialEventID = i.SpecialEventID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('SpecialEventID',       CAST(d.SpecialEventID AS nvarchar(max)),       CAST(i.SpecialEventID AS nvarchar(max))),
+    ('ResidentID',           CAST(d.ResidentID AS nvarchar(max)),           CAST(i.ResidentID AS nvarchar(max))),
+    ('SpecialEventNote',     CAST(d.SpecialEventNote AS nvarchar(max)),     CAST(i.SpecialEventNote AS nvarchar(max))),
+    ('SpecialEventDateTime', CAST(d.SpecialEventDateTime AS nvarchar(max)), CAST(i.SpecialEventDateTime AS nvarchar(max)))
+) v(ColumnName, OldValue, NewValue)
+WHERE
+    ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+
 END;
 GO
 
@@ -1620,3 +2318,27 @@ VALUES
 (2, 'Nattmedicin runde',             '',     'Nat'),
 (2, 'Observation urolige beboere',   '',     'Nat'),
 (2, 'Morgenrapport klargøring',      '',     'Nat');
+
+-- Afdeling 1 - EmployeePhone
+INSERT INTO dbo.EmployeePhone (DepartmentID, PhoneNumber, EmployeeName, Test)
+VALUES
+(1, '30101001', 'Anna Jensen',     1),
+(1, '30101002', 'Mikkel Hansen',   1),
+(1, '30101003', 'Sara Nielsen',    1),
+(1, '30101004', 'Jonas Pedersen',  1),
+(1, '30101005', '',                0),
+(1, '30101006', '',                0),
+(1, '30101007', '',                0),
+(1, '30101008', '',                0);
+
+-- Afdeling 2 - EmployeePhone
+INSERT INTO dbo.EmployeePhone (DepartmentID, PhoneNumber, EmployeeName, Test)
+VALUES
+(2, '30202001', 'Maria Larsen',    1),
+(2, '30202002', 'Peter Madsen',    1),
+(2, '30202003', 'Camilla Holm',    1),
+(2, '30202004', 'Emil Andersen',   1),
+(2, '30202005', '',                0),
+(2, '30202006', '',                0),
+(2, '30202007', '',                0),
+(2, '30202008', '',                0);

@@ -12,7 +12,7 @@ namespace OverlapssytemApplication.Interfaces
     public interface IShoppingService
     {
         Task<Result<List<ShoppingModel>>> GetShoppingByResidentIdAsync(int residentId);
-        Task <Result<int>>SaveNewShoppingAsync(ShoppingModel shoppingModel);
+        Task <Result<int>>CreateShoppingAsync(ShoppingModel shoppingModel);
         Task <Result>UpdateShoppingAsync(ShoppingModel shopping);
         Task <Result>DeleteShoppingAsync(int shoppingId);
 

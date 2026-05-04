@@ -13,7 +13,7 @@ namespace OverlapssytemApplication.Interfaces
     public interface ISpecialEventService
     {
         Task<Result<List<SpecialEventModel>>> GetSpecialEventByResidentIdAsync(int residentId);
-        Task<Result<int>> SaveNewSpecialEventAsync(SpecialEventModel specialEvent);
+        Task<Result<int>> CreateSpecialEventAsync(SpecialEventModel specialEvent);
         Task<Result> UpdateSpecialEventAsync(SpecialEventModel specialEvent);
         Task<Result> DeleteSpecialEventAsync(int specialEventID);
 

@@ -4,13 +4,13 @@
 @using Overlapssystem.Interfaces
 @using Microsoft.AspNetCore.Components.Authorization
 
+
 @inject IEmployeePhoneFacade employeePhoneFacade
 @inject IJSRuntime JS
 
-<div name="employee-phone-card">
 
-    <div class="employee-phone-card-header">
-        <h2>Telefonliste</h2>
+<div class="phone-card">
+    <div class="phone-card-header">
 
         <AuthorizeView Roles="Administrator">
             <Authorized>
@@ -21,101 +21,99 @@
             </Authorized>
         </AuthorizeView>
     </div>
+
     <table class="phone-table">
         <thead>
             <tr>
                 <th>Telefonnummer</th>
                 <th>Navn</th>
                 <th>Test</th>
+                <th>Slet</th>
             </tr>
         </thead>
 
         <tbody>
-            @foreach (var phone in EmployeePhones)
+            @foreach (var employeePhone in EmployeePhones)
             {
                 <tr>
-
-                    <!-- Telefonnummer -->
                     <td>
                         <AuthorizeView>
                             <Authorized>
-                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                                @if (context.User.IsInRole("Administrator"))
                                 {
-                                    <span>@phone.PhoneNumber</span>
-
-                                    @if (context.User.IsInRole("Administrator"))
-                                    {
-                                        <input value="@phone.PhoneNumber"
-                                               @onchange="async e =>
-                                               {
-                                                   phone.PhoneNumber = e.Value?.ToString();
-                                                   await UpdateEmployeePhone(phone);
-                                               }" />
-                                    }
-                                }
-                                else if (context.User.IsInRole("Simpel"))
-                                {
-                                    <input value="@employeePhoneViewModel.PhoneNumber" disabled />
-                                }
-                                
-                            </Authorized>
-                        </AuthorizeView>
-                    </td>
-
-                    <!-- Medarbejder navn -->
-                    <td>
-                        <AuthorizeView>
-                            <Authorized>
-                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
-                                {
-                                    <input value="@phone.EmployeeName"
+                                    <input value="@employeePhone.PhoneNumber"
                                            @onchange="async e =>
-                                           {
-                                               phone.EmployeeName = e.Value?.ToString();
-                                               await UpdateEmployeePhone(phone);
-                                           }"
-                                             placeholder="Navn" />
+                                      {
+                                              employeePhone.PhoneNumber = e.Value?.ToString();
+                                             await UpdateEmployeePhone(employeePhone);
+                                       }" />
+                                }
+                                else if (context.User.IsInRole("Medarbejder"))
+                                {
+                                    <span>@employeePhone.PhoneNumber</span>
                                 }
                                 else if (context.User.IsInRole("Simpel"))
                                 {
-                                    <input value="@employeePhoneViewModel.EmployeeName" disabled" />
+                                    <input value="@employeePhone.PhoneNumber" disabled />
                                 }
                             </Authorized>
                         </AuthorizeView>
                     </td>
 
-                    <!-- Test -->
                     <td>
                         <AuthorizeView>
                             <Authorized>
                                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                                 {
+                                    <input value="@employeePhone.EmployeeName"
+                                           @onchange="async e =>
+                                    {
+                                         employeePhone.EmployeeName = e.Value?.ToString();
+                                        await UpdateEmployeePhone(employeePhone);
+                                     }"
+                                           placeholder="Navn" />
+                                }
+                                else if (context.User.IsInRole("Simpel"))
+                                {
+                                    <input value="@employeePhone.EmployeeName" disabled />
+                                }
+                            </Authorized>
+                        </AuthorizeView>
+                    </td>
+
+                    <td>
+                        <AuthorizeView>
+                            <Authorized>
+                                @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
+                                {
+                                   
                                     <input type="checkbox"
-                                            checked="@phone.Test"
-                                            @onchange="async e =>
-                                            {
-                                                phone.Test = (bool)e.Value;
-                                                await UpdateEmployeePhone(phone);
-                                            }" />
+                                           checked="@employeePhone.Test"
+                                           @onchange="async e =>
+                                      {
+                                         employeePhone.Test = (bool)e.Value;
+                                         await UpdateEmployeePhone(employeePhone);
+                                       }" />
 
                                 }
                                 else if (context.User.IsInRole("Simpel"))
                                 {
                                     <input value="@employeePhoneViewModel.Test" disabled" />
                                 }
-                              </Authorized>
-                          </AuthorizeView>
-                      </td>
-
-                    <!-- Slet knap kun Admin -->
-                    <AuthorizeView Roles="Administrator">
-                            <Authorized>
-                            <button class="btn-delete"
-                                    @onclick="() => OnDelete.InvokeAsync(phone)">
-                                Slet
-                            </button>
                             </Authorized>
-                    </AuthorizeView>
+                        </AuthorizeView>
+                    </td>
+
+                    <td>
+                        <AuthorizeView Roles="Administrator">
+                            <Authorized>
+                                <button class="btn-delete"
+                                        @onclick="() => OnDelete.InvokeAsync(employeePhone)">
+                                    Slet
+                                </button>
+                            </Authorized>
+                        </AuthorizeView>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -140,10 +138,14 @@
 	
 	public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
 
-    protected override async Task OnParametersSetAsync() 
-	{
-		EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
-	}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
+            StateHasChanged();
+        }
+    }
 
     public async Task RefreshAsync() 
     {
