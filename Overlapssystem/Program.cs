@@ -28,6 +28,7 @@ builder.Services.AddScoped(sp => new HttpClient
     BaseAddress = new Uri("https://localhost:7150")
 });
 
+builder.Services.AddScoped<AuditTrailDetailApiService>();
 builder.Services.AddScoped<ResidentApiService>();
 builder.Services.AddScoped<MedicinApiService>();
 builder.Services.AddScoped<DepartmentApiService>();
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IDepartmentTaskFacade, DepartmentTaskFacade>();
 builder.Services.AddScoped<IDepartmentFacade, DepartmentFacade>();
 builder.Services.AddScoped<IEmployeePhoneFacade, EmployeePhoneFacade>();
 builder.Services.AddScoped<UserApiService>();
+
 
 
 
