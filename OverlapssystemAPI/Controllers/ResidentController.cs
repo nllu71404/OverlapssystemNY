@@ -112,9 +112,9 @@ namespace OverlapssystemAPI.Controllers
             };
         }
 
-        private static UpdateResidentDTO MapToGetResidentDTO(ResidentModel model)
+        private static ResidentDTO MapToGetResidentDTO(ResidentModel model)
         {
-            return new UpdateResidentDTO
+            return new ResidentDTO
             {
                 ResidentId = model.ResidentId,
                 Name = model.Name,
@@ -124,7 +124,50 @@ namespace OverlapssystemAPI.Controllers
                 Family = model.Family,
                 ResidentEmployee = model.ResidentEmployee,
                 Risiko = model.Risiko,
-                Mood = model.Mood
+                Mood = model.Mood,
+
+                MedicinTimes = model.MedicinTimes
+            .Select(m => new MedicinTimeDTO
+            {
+                MedicinTimeID = m.MedicinTimeID,
+                ResidentID = m.ResidentID,
+                MedicinTime = m.MedicinTime,
+                IsChecked = m.IsChecked,
+                MedicinCheckTimeStamp = m.MedicinCheckTimeStamp
+            })
+            .ToList(),
+
+                PNMedicin = model.PNMedicin
+            .Select(p => new PNMedicinDTO
+            {
+                PNMedicinID = p.PNMedicinID,
+                ResidentID = p.ResidentID,
+                PNTime = p.PNTime,
+                //PNTime = p.PNTimeStamp,
+                Reason = p.Reason
+            })
+            .ToList(),
+
+                Shopping = model.Shopping
+            .Select(s => new UpdateShoppingDTO
+            {
+                ShoppingID = s.ShoppingID,
+                ResidentID = s.ResidentID,
+                Day = s.Day,
+                Time = s.Time,
+                PaymentMethod = s.PaymentMethod
+            })
+            .ToList(),
+
+                SpecialEvents = model.SpecialEvents
+            .Select(se => new UpdateSpecialEventDTO
+            {
+                SpecialEventID = se.SpecialEventID,
+                ResidentID = se.ResidentID,
+                SpecialEventNote = se.SpecialEventNote,
+                SpecialEventDateTime = se.SpecialEventDateTime
+            })
+            .ToList()
             };
 
         }
