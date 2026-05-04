@@ -109,13 +109,13 @@
 
     
           <!-- Opdater Activity + Family når man klikker væk -->
-    <div class="two-column">
+   
         <label class="resident-label">Aktivitet</label>
         <AuthorizeView>
             <Authorized>
                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                 {
-                    <textarea @onchange="OnActivityChanged" placeholder="Udfyld aktivitet">@Resident.Activity</textarea>
+                    <textarea class="form-control" @onchange="OnActivityChanged" placeholder="Udfyld aktivitet">@Resident.Activity</textarea>
                 }
                 else if (context.User.IsInRole("Simpel"))
                 {
@@ -129,7 +129,7 @@
             <Authorized>
                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                 {
-                    <textarea @onchange="OnFamilyChanged" placeholder="Udfyld familie kontakt">@Resident.Family</textarea>
+                    <textarea class="form-control" @onchange="OnFamilyChanged" placeholder="Udfyld familie kontakt">@Resident.Family</textarea>
                 }
                 else if (context.User.IsInRole("Simpel"))
                 {
@@ -137,7 +137,7 @@
                 }
             </Authorized>
         </AuthorizeView>
-    </div>
+    
     
           <!-- Opdater ResidentEmployee når man klikker væk -->
     <div class="two-column">
@@ -171,10 +171,11 @@
             
         </div>
 
-        <ul>
+        <table >   
+            <tr class="medicin-table">
             @foreach (var med in Resident.MedicinTimes)
             {
-                <li>
+                <td>
                     <AuthorizeView>
                         <Authorized>
                             @if(context.User.IsInRole("Administrator") || context.User.IsInRole("Medarbejder"))
@@ -210,10 +211,10 @@
                         </Authorized>
                 </AuthorizeView>
                 
-            </li>
-                        }
-                
-        </ul>
+            </td>
+             }
+                </tr>
+        </table>
     </div>
 
 
