@@ -34,6 +34,7 @@ builder.Services.AddHttpClient("Api", client =>
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
 
+builder.Services.AddScoped<AuditTrailDetailApiService>();
 builder.Services.AddScoped<ResidentApiService>();
 builder.Services.AddScoped<MedicinApiService>();
 builder.Services.AddScoped<DepartmentApiService>();
@@ -48,6 +49,7 @@ builder.Services.AddScoped<IDepartmentFacade, DepartmentFacade>();
 builder.Services.AddScoped<IEmployeePhoneFacade, EmployeePhoneFacade>();
 builder.Services.AddScoped<UserApiService>();
 builder.Services.AddScoped<IUserFacade, UserFacade>();
+
 
 
 
