@@ -1,0 +1,2155 @@
+USE master; 
+GO
+IF DB_ID('ProjektDB') IS NOT NULL BEGIN ALTER DATABASE ProjektDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE ProjektDB; 
+END 
+GO
+
+CREATE DATABASE ProjektDB; 
+GO
+USE ProjektDB; 
+GO
+
+-- Tables are created underneath
+CREATE TABLE dbo.Department (
+DepartmentName NVARCHAR(100) NOT NULL,
+DepartmentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY
+
+);
+GO
+
+CREATE TABLE dbo.Resident (
+ResidentName NVARCHAR(100),
+ResidentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
+ResidentStatus NVARCHAR(250),
+Risk NVARCHAR(100) NULL,
+Mood NVARCHAR(100) NULL,
+Activity NVARCHAR(250) NULL,
+FamilyNote NVARCHAR(250) NULL,
+ResidentEmployee NVARCHAR(250) NULL
+
+);
+GO
+
+CREATE TABLE dbo.MedicinTime (
+MedicinTimeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+MedicinTime TIME NULL,
+MedicinCheckTimeStamp DATETIME NULL,
+IsChecked BIT NOT NULL DEFAULT 0
+
+CONSTRAINT FK_MedicinTime_Resident
+        FOREIGN KEY (ResidentID)
+        REFERENCES Resident(ResidentID)
+        ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE dbo.PNMedicin (
+PNID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+PNTime DATETIME NULL,
+Reason NVARCHAR(250) NULL,
+PNTimeStamp DATETIME NULL
+
+CONSTRAINT FK_PNMedicin_Resident
+        FOREIGN KEY (ResidentID)
+        REFERENCES Resident(ResidentID)
+        ON DELETE CASCADE
+
+);
+GO
+
+CREATE TABLE dbo.Shopping (
+ShoppingID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+ShoppingDay NVARCHAR(100) NULL,
+ShoppingTime TIME NULL,
+PaymentMethod NVARCHAR(100) NULL
+
+CONSTRAINT FK_Shopping_Resident
+    FOREIGN KEY (ResidentID)
+    REFERENCES dbo.Resident(ResidentID)
+    ON DELETE CASCADE
+
+);
+GO
+
+CREATE TABLE dbo.DepartmentTask (
+DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
+DepartmentTaskID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+DepartmentTaskTopic NVARCHAR(250) NULL,
+EmployeeName NVARCHAR(100) NULL,
+ShiftType NVARCHAR(100)
+
+);
+GO
+
+CREATE TABLE dbo.EmployeePhone (
+DepartmentID INT FOREIGN KEY REFERENCES dbo.Department(DepartmentID),
+EmployeePhoneID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+PhoneNumber INT NULL,
+EmployeeName NVARCHAR(100) NULL,
+Test BIT NULL
+
+);
+GO
+
+CREATE TABLE dbo.SpecialEvent (
+SpecialEventID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+ResidentID INT FOREIGN KEY REFERENCES dbo.Resident(ResidentID),
+SpecialEventNote NVARCHAR(250),
+SpecialEventDateTime DATETIME NULL
+
+CONSTRAINT FK_SpecialEvent_Resident
+        FOREIGN KEY (ResidentID)
+        REFERENCES Resident(ResidentID)
+        ON DELETE CASCADE
+);
+GO
+
+-- Audit Table: Creates dbo.AuditLog
+CREATE TABLE dbo.AuditLogSnapshot
+(
+AuditLogId       int IDENTITY(1,1) PRIMARY KEY,
+TableName        sysname,
+Operation        varchar(10),
+PrimaryKeyValue  nvarchar(200),
+BeforeData       nvarchar(max),
+AfterData        nvarchar(max),
+ChangedBy        nvarchar(200),
+ChangeDate       datetime2(7)
+);
+GO
+
+-- Audit Trail
+-- Audit Table: Creates dbo.AuditLogDetail
+CREATE TABLE dbo.AuditLogDetail
+(
+    AuditLogDetailId INT IDENTITY(1,1) PRIMARY KEY,
+    TableName        SYSNAME,
+    PrimaryKeyValue  NVARCHAR(200),
+    ColumnName       SYSNAME,
+    OldValue         NVARCHAR(MAX),
+    NewValue         NVARCHAR(MAX),
+    Operation        VARCHAR(10),
+    ChangedBy        NVARCHAR(200),
+    ChangeDate       DATETIME2(7),
+    DepartmentID     INT NULL,
+
+    CONSTRAINT FK_AuditLogDetail_Department FOREIGN KEY (DepartmentID) REFERENCES dbo.Department(DepartmentID)
+);
+GO
+
+
+
+-- Creates Stored Procedure
+-- Creates a AuditLogDetail to the table of AuditLogDetails.
+CREATE OR ALTER PROCEDURE dbo.uspGetAuditTrailDetailsByDepartmentId
+    @DepartmentId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        DepartmentID,
+        AuditLogDetailId,
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate
+    FROM dbo.AuditLogDetail
+    WHERE DepartmentID = @DepartmentId
+    ORDER BY ChangeDate DESC;
+END;
+GO
+
+-- Creates Stored Procedures
+-- Creates a Resident to the table of Residents.
+CREATE OR ALTER PROCEDURE dbo.uspCreateResident
+@ResidentName NVARCHAR(100),
+@DepartmentID INT = NULL,
+@ResidentStatus NVARCHAR(100) = NULL,
+@Risk NVARCHAR(100) = NULL,
+@Mood NVARCHAR(100) = NULL,
+@Activity NVARCHAR(250) NULL,
+@FamilyNote NVARCHAR(250) NULL,
+@ResidentEmployee NVARCHAR(250) NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Resident
+(
+    ResidentName,
+    DepartmentID,
+    ResidentStatus,
+    Risk,
+    Mood,
+    Activity,
+    FamilyNote,
+    ResidentEmployee
+)
+VALUES
+(
+    @ResidentName,
+    @DepartmentID,
+    @ResidentStatus,
+    @Risk,
+    @Mood,
+    @Activity,
+    @FamilyNote,
+    @ResidentEmployee
+);
+
+SELECT SCOPE_IDENTITY() AS ResidentID;
+END;
+GO
+
+-- Gets all Residents from the resident table.
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetResidents]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT 
+    r.ResidentID,
+    r.ResidentName,
+    r.ResidentStatus,
+    r.DepartmentID,
+    r.Risk,
+    r.Mood,
+    r.Activity,
+    r.FamilyNote,
+    r.ResidentEmployee,
+
+    m.MedicinTimeID,
+    m.MedicinTime,
+    m.IsChecked,
+    m.MedicinCheckTimeStamp,
+
+    pn.PNID,
+        pn.PNTime,
+        pn.PNTimeStamp,
+        pn.Reason,
+
+    -- Shopping
+    s.ShoppingID,
+    s.ShoppingDay,
+    s.ShoppingTime,
+    s.PaymentMethod,
+
+    se.SpecialEventID,
+    se.SpecialEventNote,
+    se.SpecialEventDateTime
+
+FROM Resident r
+LEFT JOIN MedicinTime m ON r.ResidentID = m.ResidentID
+LEFT JOIN PNMedicin pn 
+        ON r.ResidentID = pn.ResidentID
+LEFT JOIN Shopping s
+    ON r.ResidentID = s.ResidentID
+LEFT JOIN SpecialEvent se
+    ON r.ResidentID = se.ResidentID
+END;
+GO
+
+-- Updates a resident by id in the resident table
+CREATE OR ALTER PROCEDURE dbo.uspUpdateResidentById
+@ResidentName NVARCHAR(100),
+@DepartmentID INT = NULL,
+@ResidentStatus NVARCHAR(100) = NULL,
+@Risk NVARCHAR(100) = NULL,
+@Mood NVARCHAR(100) = NULL,
+@ResidentId INT,
+@Activity NVARCHAR(250) NULL,
+@FamilyNote NVARCHAR(250) NULL,
+@ResidentEmployee NVARCHAR(250) NULL
+AS
+BEGIN
+    UPDATE dbo.Resident
+    SET ResidentName = @ResidentName, 
+    ResidentStatus = @ResidentStatus, 
+    Risk = @Risk,
+    Mood = @Mood,
+    Activity = @Activity,
+    FamilyNote = @FamilyNote,
+    ResidentEmployee = @ResidentEmployee,
+    DepartmentID = @DepartmentID
+    WHERE ResidentID = @ResidentId;
+END;
+GO
+
+-- Delete an entry in the resident table
+CREATE OR ALTER PROCEDURE dbo.uspDeleteResident
+@ResidentID INT
+AS
+BEGIN
+DELETE FROM dbo.Resident WHERE ResidentID = @ResidentID
+END;
+GO
+
+-- Get Residents by department ID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetResidentsByDepartmentID]
+@DepartmentID INT
+AS
+BEGIN
+SET NOCOUNT ON;
+
+    SELECT 
+        r.ResidentID,
+        r.ResidentName,
+        r.ResidentStatus,
+        r.DepartmentID,
+        r.Risk,
+        r.Mood,
+        r.Activity,
+        r.FamilyNote,
+        r.ResidentEmployee,
+
+        -- Medicin
+        m.MedicinTimeID,
+        m.MedicinTime,
+        m.IsChecked,
+        m.MedicinCheckTimeStamp,
+
+        -- PN Medicin
+        pn.PNID,
+        pn.PNTime,
+        pn.PNTimeStamp,
+        pn.Reason,
+
+        -- Shopping
+        s.ShoppingID,
+        s.ShoppingDay,
+        s.ShoppingTime,
+        s.PaymentMethod,
+
+        se.SpecialEventID,
+         se.SpecialEventNote,
+        se.SpecialEventDateTime
+
+    FROM Resident r
+
+    LEFT JOIN MedicinTime m 
+        ON r.ResidentID = m.ResidentID
+
+    LEFT JOIN PNMedicin pn 
+        ON r.ResidentID = pn.ResidentID
+
+    LEFT JOIN Shopping s
+    ON r.ResidentID = s.ResidentID
+
+    LEFT JOIN SpecialEvent se
+    ON r.ResidentID = se.ResidentID
+
+    WHERE r.DepartmentID = @DepartmentID
+END;
+GO
+
+-- Get all Medicin times from the MedicinTime table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetMedicinTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.MedicinTime
+END;
+GO
+
+-- Get Medicin Times by Resident ID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetMedicinTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.MedicinTime WHERE ResidentID = @ResidentID
+END;
+GO
+
+-- Get Medicin Times by Medicin ID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetMedicinTimesByMedicinTimeID]
+@MedicinTimeID INT
+AS
+BEGIN
+SELECT * FROM dbo.MedicinTime WHERE MedicinTimeID = @MedicinTimeID
+END;
+GO
+
+-- Creates a Medicin Time to the MedicinTime table.
+CREATE OR ALTER PROCEDURE [dbo].[uspCreateMedicinTime]
+@MedicinTime TIME,
+@ResidentID INT = NULL,
+@MedicinCheckTimeStamp DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.MedicinTime
+(
+    MedicinTime,
+    ResidentID,
+    MedicinCheckTimeStamp
+)
+VALUES
+(
+    @MedicinTime,
+    @ResidentID,
+    @MedicinCheckTimeStamp
+);
+
+SELECT SCOPE_IDENTITY() AS MedicinTimeID;
+END;
+GO
+
+-- Updates a medicin time by id in the MedicinTime table
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateMedicinTimeById]
+    @MedicinTime TIME,
+    @MedicinTimeID INT,
+    @IsChecked BIT,
+    @MedicinCheckTimeStamp DATETIME = NULL
+AS
+BEGIN
+    UPDATE dbo.MedicinTime
+    SET 
+    MedicinTime = @MedicinTime,
+    IsChecked = @IsChecked,
+    MedicinCheckTimeStamp = @MedicinCheckTimeStamp
+    WHERE MedicinTimeID = @MedicinTimeID;
+END;
+GO
+
+-- Delete an entry in the MedicinTime table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteMedicinTime]
+@MedicinTimeID INT
+AS
+BEGIN
+DELETE FROM dbo.MedicinTime WHERE MedicinTimeID = @MedicinTimeID
+END;
+GO
+
+-- Sets MedicinCheckTimeStamp and IsChecked
+CREATE OR ALTER PROCEDURE [dbo].[uspSetMedicinChecked]
+    @MedicinTimeID INT,
+    @IsChecked BIT
+AS
+BEGIN
+    UPDATE MedicinTime
+    SET 
+        IsChecked = @IsChecked,
+        MedicinCheckTimeStamp = CASE 
+            WHEN @IsChecked = 1 THEN GETDATE()
+            ELSE NULL
+        END
+    WHERE MedicinTimeID = @MedicinTimeID;
+END;
+GO
+
+-- Gets all PNMedicin times from the PNMedicin table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetPNMedicinTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.PNMedicin
+END;
+GO
+
+-- Get PNMedicin Times by Resident ID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetPNMedicinTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.PNMedicin WHERE ResidentID = @ResidentID
+END;
+GO
+
+--Creates an entry in the PNMedicin table
+CREATE OR ALTER  PROCEDURE [dbo].[uspCreatePNMedicinTime]
+@PNTime DATETIME,
+@ResidentID INT = NULL,
+@Reason NVARCHAR(255) = NULL,
+@PNTimeStamp DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.PNMedicin
+(
+    PNTime,
+    ResidentID,
+    Reason,
+    PNTimeStamp
+)
+VALUES
+(
+    @PNTime,
+    @ResidentID,
+    @Reason,
+    @PNTimeStamp
+);
+
+SELECT SCOPE_IDENTITY() AS PNMedicinID;
+END;
+GO
+
+-- Updates a PNmedicin time by id in the PNMedicin table
+CREATE OR ALTER  PROCEDURE [dbo].[uspUpdatePNMedicinTimeById]
+@PNTime DATETIME,
+@Reason NVARCHAR(250) = NULL,
+@PNTimeStamp DATETIME = NULL,
+@PNID INT
+AS
+BEGIN
+    UPDATE dbo.PNMedicin
+    SET PNTime = @PNTime, 
+    Reason = @Reason,
+    PNTimeStamp = @PNTimeStamp
+    WHERE PNID = @PNID;
+
+END;
+GO
+
+-- Delete an entry in the PNMedicin table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeletePNMedicinTime]
+@PNID INT
+AS
+BEGIN
+DELETE FROM dbo.PNMedicin WHERE PNID = @PNID
+END;
+GO
+
+-- Gets all shopping times from the Shopping table.
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetShoppingTimes]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.Shopping
+END;
+GO
+
+-- Get Shopping times by Resident ID
+CREATE OR ALTER   PROCEDURE [dbo].[uspGetShoppingTimesByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.Shopping WHERE ResidentID = @ResidentID
+END;
+GO
+
+--Creates an entry in the Shopping table
+CREATE OR ALTER    PROCEDURE [dbo].[uspCreateShoppingTime]
+@ResidentID INT = NULL,
+@ShoppingDay NVARCHAR(100) NULL,
+@ShoppingTime TIME = NULL,
+@PaymentMethod NVARCHAR(100) NULL
+
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Shopping
+(
+    ResidentID,
+    ShoppingDay,
+    ShoppingTime,
+    PaymentMethod
+)
+VALUES
+(
+    @ResidentID,
+    @ShoppingDay,
+    @ShoppingTime,
+    @PaymentMethod
+);
+
+SELECT SCOPE_IDENTITY() AS ShoppingID;
+END;
+GO
+
+-- Updates a Shopping time by id in the Shopping table
+CREATE OR ALTER    PROCEDURE [dbo].[uspUpdateShoppingTimeById]
+@ResidentID INT = NULL,
+@ShoppingDay NVARCHAR(100) NULL,
+@ShoppingTime TIME = NULL,
+@PaymentMethod NVARCHAR(100) NULL,
+@ShoppingID INT
+
+AS
+BEGIN
+    UPDATE dbo.Shopping
+    SET  
+    ResidentID = @ResidentID, 
+    ShoppingDay = @ShoppingDay,
+    ShoppingTime = @ShoppingTime,
+    PaymentMethod = @PaymentMethod
+    WHERE ShoppingID = @ShoppingID;
+
+END;
+GO
+
+-- Delete an entry in the Shopping table
+CREATE OR ALTER   PROCEDURE [dbo].[uspDeleteShoppingTime]
+@ShoppingID INT
+AS
+BEGIN
+DELETE FROM dbo.Shopping WHERE ShoppingID = @ShoppingID
+END;
+GO
+
+-- Gets all departments from the Department table.
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartments]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.Department
+END;
+GO
+
+-- Gets departments by departmentID
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartmentsByDepartmentID]
+@DepartmentID INT
+AS
+BEGIN
+SELECT * FROM dbo.Department WHERE DepartmentID = @DepartmentID
+END;
+GO
+
+-- Gets departments by departmentName
+CREATE OR ALTER     PROCEDURE [dbo].[uspGetDepartmentsByDepartmentName]
+@DepartmentName nvarchar(100)
+AS
+BEGIN
+SELECT * FROM dbo.Department WHERE DepartmentName = @DepartmentName
+END;
+GO
+
+-- Creates a Department to the Department table.
+CREATE OR ALTER   PROCEDURE [dbo].[uspCreateDepartment]
+@DepartmentName NVARCHAR(100)
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.Department
+(
+    DepartmentName
+)
+VALUES
+(
+    @DepartmentName
+);
+
+SELECT SCOPE_IDENTITY() AS DepartmentID;
+END;
+GO
+
+-- Updates a Department by id in the Department table
+CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentById]
+@DepartmentName NVARCHAR(100),
+@DepartmentID INT
+AS
+BEGIN
+    UPDATE dbo.Department
+    SET DepartmentName = @DepartmentName
+    WHERE DepartmentID = @DepartmentID;
+
+END;
+GO
+
+-- Delete an entry in the Department table
+CREATE OR ALTER     PROCEDURE [dbo].[uspDeleteDepartment]
+@DepartmentID INT
+AS
+BEGIN
+DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
+END;
+GO
+
+-- DepartmentTask stored procedures
+-- Creates a DepartmentTask to the table of DepartmentTasks.
+CREATE OR ALTER PROCEDURE dbo.uspCreateDepartmentTask
+@DepartmentID INT = NULL,
+@DepartmentTaskTopic NVARCHAR(250) = NULL,
+@EmployeeName NVARCHAR(100) = NULL, 
+@ShiftType NVARCHAR(100) = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.DepartmentTask
+(
+    DepartmentID,
+    DepartmentTaskTopic,
+    EmployeeName,
+    ShiftType
+)
+VALUES
+(
+    @DepartmentID,
+    @DepartmentTaskTopic,
+    @EmployeeName,
+    @ShiftType
+);
+
+SELECT SCOPE_IDENTITY() AS DepartmentTaskID;
+END;
+GO
+
+-- Gets all DepartmentTasks from the DepartmentTask table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTasks]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.DepartmentTask
+END;
+GO
+
+-- Gets DepartmentTask by DepartmentTaskID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByDepartmentID]
+@DepartmentID INT
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE DepartmentID = @DepartmentID
+END;
+GO
+
+-- Gets DepartmentTasks by EmployeeName
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
+@EmployeeName nvarchar(100)
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+-- Updates a DepartmentTask by id in the Department table
+CREATE OR ALTER   PROCEDURE [dbo].[uspUpdateDepartmentTaskById]
+@DepartmentTaskID INT,
+@DepartmentTaskTopic NVARCHAR(250),
+@EmployeeName NVARCHAR(100),
+@ShiftType NVARCHAR(100)
+AS
+BEGIN
+    UPDATE dbo.DepartmentTask
+    SET 
+    EmployeeName = @EmployeeName,  
+    DepartmentTaskTopic = @DepartmentTaskTopic,
+    ShiftType = @ShiftType
+    WHERE DepartmentTaskID = @DepartmentTaskID;
+
+END;
+GO
+
+-- Delete an DepartmentTaskTopic entry in the DepartmentTask table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentTaskTopic]
+@DepartmentTaskTopic NVARCHAR(250)
+AS
+BEGIN
+DELETE FROM dbo.DepartmentTask WHERE DepartmentTaskTopic = @DepartmentTaskTopic
+END;
+GO
+
+-- Delete an EmployeeName entry in the DepartmentTask table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentEmployeeName]
+@EmployeeName NVARCHAR(100)
+AS
+BEGIN
+DELETE FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+
+-- EmployeePhone stored procedures
+-- Creates a EmployeePhone to the table of EmployeePhones.
+CREATE OR ALTER PROCEDURE dbo.uspCreateEmployeePhone
+@DepartmentID INT = NULL,
+@PhoneNumber NVARCHAR(100) = NULL,
+@EmployeeName NVARCHAR(100) = NULL,
+@Test BIT = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.EmployeePhone
+(
+    DepartmentID,
+    PhoneNumber,
+    EmployeeName,
+    Test
+
+)
+VALUES
+(
+    @DepartmentID,
+    @PhoneNumber,
+    @EmployeeName,
+    @Test
+);
+
+SELECT SCOPE_IDENTITY() AS EmployeePhoneID;
+END;
+GO
+
+-- Gets all EmployeePhoneNumbers from the EmployeePhone table.
+CREATE OR ALTER PROCEDURE [dbo].[uspGetEmployeePhoneNumbers]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.EmployeePhone
+END;
+GO
+
+-- Gets EmployeePhone by EmployeePhoneID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetEmployeePhoneTaskByEmployeePhoneID]
+@EmployeePhoneID INT
+AS
+BEGIN
+SELECT * FROM dbo.EmployeePhone WHERE EmployeePhoneID = @EmployeePhoneID
+END;
+GO
+
+-- Get EmployeePhoneNumber by DepartmentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetEmployeePhoneNumberByDepartmentID]
+@DepartmentID INT
+AS
+BEGIN
+SELECT * FROM dbo.EmployeePhone WHERE DepartmentID = @DepartmentID
+END;
+GO
+
+-- Gets Employee by EmployeeName
+CREATE OR ALTER PROCEDURE [dbo].[uspGetDepartmentTaskByEmployeeName]
+@EmployeeName nvarchar(100)
+AS
+BEGIN
+SELECT * FROM dbo.DepartmentTask WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+-- Updates a EmployeePhone by id in the EmployeePhone table
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateEmployeePhoneById]
+
+@EmployeePhoneID INT,
+@DepartmentID INT,
+@PhoneNumber NVARCHAR(100),
+@EmployeeName NVARCHAR(100),
+@Test BIT
+
+AS
+BEGIN
+    UPDATE dbo.EmployeePhone
+    SET
+        DepartmentID = @DepartmentID,
+        PhoneNumber = @PhoneNumber,
+        EmployeeName = @EmployeeName,
+        Test = @Test
+    WHERE EmployeePhoneID = @EmployeePhoneID;
+END
+GO 
+
+-- Delete an EmployeePhone entry in the EmployeePhone table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteEmployeePhone]
+@EmployeePhoneID NVARCHAR(100)
+AS
+BEGIN
+DELETE FROM dbo.EmployeePhone WHERE EmployeePhoneID = @EmployeePhoneID
+END;
+GO
+
+-- Delete an Employee entry in the EmployeePhone table
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteEmployeePhoneEmployeeName]
+@EmployeeName NVARCHAR(100)
+AS
+BEGIN
+DELETE FROM dbo.EmployeePhone WHERE EmployeeName = @EmployeeName
+END;
+GO
+
+-- SpecialEvent stored procedures
+-- Creates a SpecialEvent to the table of SpecialEvents.
+CREATE OR ALTER PROCEDURE [dbo].[uspCreateSpecialEvent]
+@SpecialEventNote NVARCHAR(250),
+@ResidentID INT = NULL,
+@SpecialEventDateTime DATETIME = NULL
+AS
+BEGIN
+SET NOCOUNT ON;
+
+INSERT INTO dbo.SpecialEvent
+(
+    SpecialEventNote,
+    ResidentID,
+    SpecialEventDateTime
+)
+VALUES
+(
+    @SpecialEventNote,
+    @ResidentID,
+    @SpecialEventDateTime
+);
+
+SELECT SCOPE_IDENTITY() AS SpecialEventID;
+END;
+GO
+
+-- Update
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateSpecialEventById]
+    @SpecialEventID INT,
+    @SpecialEventNote NVARCHAR(250),
+    @SpecialEventDateTime DATETIME = NULL
+AS
+BEGIN
+    UPDATE dbo.SpecialEvent
+    SET 
+    SpecialEventNote = @SpecialEventNote,
+    SpecialEventDateTime = @SpecialEventDateTime
+    WHERE SpecialEventID = @SpecialEventID;
+END;
+GO
+
+-- Delete 
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteSpecialEvent]
+@SpecialEventID INT
+AS
+BEGIN
+DELETE FROM dbo.SpecialEvent WHERE SpecialEventID = @SpecialEventID
+END;
+GO
+ 
+-- Get SpecialEvent by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetSpecialEventByResidentID]
+@ResidentID INT
+AS
+BEGIN
+SELECT * FROM dbo.SpecialEvent WHERE ResidentID = @ResidentID
+END;
+GO
+ 
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllSpecialEvent]
+AS
+BEGIN
+SET NOCOUNT ON;
+SELECT * FROM dbo.SpecialEvent
+END;
+GO
+
+-- Activity stored procedures
+-- Creates a Activity to the table of Activities.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateActivityByResidentId]
+    @ResidentID INT,
+    @Activity NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET Activity = @Activity
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteActivity]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET Activity = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get Activity by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetActivityByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT Activity
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllActivities]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, Activity
+    FROM dbo.Resident
+    WHERE Activity IS NOT NULL;
+END;
+GO
+
+-- Family stored procedures
+-- Creates a Family to the table of Families.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateFamilyById]
+    @ResidentID INT,
+    @FamilyNote NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET FamilyNote = @FamilyNote
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteFamily]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET FamilyNote = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get Family by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetFamilyByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT FamilyNote
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllFamilies]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, FamilyNote
+    FROM dbo.Resident
+    WHERE FamilyNote IS NOT NULL;
+END;
+GO
+
+-- ResidentEmployee stored procedures
+-- Creates a ResidentEmployee to the table of ResidentEmployees.
+CREATE OR ALTER PROCEDURE [dbo].[uspUpdateResidentEmployee]
+    @ResidentID INT,
+    @ResidentEmployee NVARCHAR(250)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET ResidentEmployee = @ResidentEmployee
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Delete
+CREATE OR ALTER PROCEDURE [dbo].[uspDeleteResidentEmployee]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Resident
+    SET ResidentEmployee = NULL
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get ResidentEmployee by ResidentID
+CREATE OR ALTER PROCEDURE [dbo].[uspGetResidentEmployeeByResidentID]
+    @ResidentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentEmployee
+    FROM dbo.Resident
+    WHERE ResidentID = @ResidentID;
+END;
+GO
+
+-- Get all
+CREATE OR ALTER PROCEDURE [dbo].[uspGetAllResidentEmployees]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ResidentID, ResidentEmployee
+    FROM dbo.Resident
+    WHERE ResidentEmployee IS NOT NULL;
+END;
+GO
+
+-- Audit Trail Triggers
+-- Audit Trigger for Resident table
+CREATE TRIGGER trg_Audit_Resident
+ON dbo.Resident
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'Resident',
+    'INSERT',
+    CAST(i.ResidentId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.ResidentId = i.ResidentId
+WHERE d.ResidentId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'Resident',
+    'DELETE',
+    CAST(d.ResidentId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.ResidentId = d.ResidentId
+WHERE i.ResidentId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'Resident',
+    'UPDATE',
+    CAST(i.ResidentId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.ResidentId = i.ResidentId;
+END;
+GO
+
+
+
+-- Audit Trigger for MedicinTime table
+CREATE TRIGGER trg_Audit_MedicinTime
+ON dbo.MedicinTime
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'MedicinTime',
+    'INSERT',
+    CAST(i.MedicinTimeId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.MedicinTimeId = i.MedicinTimeId
+WHERE d.MedicinTimeId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'MedicinTime',
+    'DELETE',
+    CAST(d.MedicinTimeId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.MedicinTimeId = d.MedicinTimeId
+WHERE i.MedicinTimeId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'MedicinTime',
+    'UPDATE',
+    CAST(i.MedicinTimeId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.MedicinTimeId = i.MedicinTimeId;
+END;
+GO
+
+
+
+-- Audit Trigger for PNMedicin table
+CREATE TRIGGER trg_Audit_PNMedicin
+ON dbo.PNMedicin
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'PNMedicin',
+    'INSERT',
+    CAST(i.PNId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.PNId = i.PNId
+WHERE d.PNId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'PNId',
+    'DELETE',
+    CAST(d.PNId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.PNId = d.PNId
+WHERE i.PNId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'PNId',
+    'UPDATE',
+    CAST(i.PNId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.PNId = i.PNId;
+END;
+GO
+
+
+
+-- Audit Trigger for Shopping table
+CREATE TRIGGER trg_Audit_Shopping
+ON dbo.Shopping
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'ShoppingId',
+    'INSERT',
+    CAST(i.ShoppingId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.ShoppingId = i.ShoppingId
+WHERE d.ShoppingId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'ShoppingId',
+    'DELETE',
+    CAST(d.ShoppingId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.ShoppingId = d.ShoppingId
+WHERE i.ShoppingId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'ShoppingId',
+    'UPDATE',
+    CAST(i.ShoppingId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.ShoppingId = i.ShoppingId;
+END;
+GO
+
+
+
+
+-- Audit Trigger for SpecialEvent table
+CREATE TRIGGER trg_Audit_SpecialEvent
+ON dbo.SpecialEvent
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+SET NOCOUNT ON;
+
+-- INSERT
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'SpecialEventId',
+    'INSERT',
+    CAST(i.SpecialEventId AS nvarchar(200)),
+    NULL,
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+LEFT JOIN deleted d
+    ON d.SpecialEventId = i.SpecialEventId
+WHERE d.SpecialEventId IS NULL;
+
+-- DELETE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'SpecialEventId',
+    'DELETE',
+    CAST(d.SpecialEventId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    NULL,
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM deleted d
+LEFT JOIN inserted i
+    ON i.SpecialEventId = d.SpecialEventId
+WHERE i.SpecialEventId IS NULL;
+
+-- UPDATE
+INSERT INTO dbo.AuditLogSnapshot
+(
+    TableName,
+    Operation,
+    PrimaryKeyValue,
+    BeforeData,
+    AfterData,
+    ChangedBy,
+    ChangeDate
+)
+SELECT
+    'SpecialEventId',
+    'UPDATE',
+    CAST(i.SpecialEventId AS nvarchar(200)),
+    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+    SUSER_SNAME(),
+    SYSDATETIME()
+FROM inserted i
+INNER JOIN deleted d
+    ON d.SpecialEventId = i.SpecialEventId;
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for Resident table
+CREATE OR ALTER TRIGGER dbo.trg_Audit_Resident_Details
+ON dbo.Resident
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------------------
+    -- INSERT: old values are NULL, new values exist --
+    ---------------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Resident',
+    CAST(i.ResidentID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    i.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('ResidentName',     CAST(i.ResidentName AS nvarchar(max))),
+    ('ResidentID',       CAST(i.ResidentID AS nvarchar(max))),
+    ('DepartmentID',     CAST(i.DepartmentID AS nvarchar(max))),
+    ('ResidentStatus',   CAST(i.ResidentStatus AS nvarchar(max))),
+    ('Risk',             CAST(i.Risk AS nvarchar(max))),
+    ('Mood',             CAST(i.Mood AS nvarchar(max))),
+    ('Activity',         CAST(i.Activity AS nvarchar(max))),
+    ('FamilyNote',       CAST(i.FamilyNote AS nvarchar(max))),
+    ('ResidentEmployee', CAST(i.ResidentEmployee AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.ResidentID IS NULL;
+
+    ----------------------------------------
+    -- UPDATE: compare old and new values --
+    ----------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+    (
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate,
+        DepartmentID
+    )
+    SELECT
+        'Resident',
+        CAST(i.ResidentID AS nvarchar(200)),
+        v.ColumnName,
+        v.OldValue,
+        v.NewValue,
+        'UPDATE',
+        SUSER_SNAME(),
+        SYSDATETIME(),
+        i.DepartmentID
+    FROM inserted i
+    INNER JOIN deleted d 
+        ON d.ResidentID = i.ResidentID
+    CROSS APPLY (VALUES
+        ('ResidentName',     CAST(d.ResidentName AS nvarchar(max)),     CAST(i.ResidentName AS nvarchar(max))),
+        ('ResidentID',       CAST(d.ResidentID AS nvarchar(max)),       CAST(i.ResidentID AS nvarchar(max))),
+        ('DepartmentID',     CAST(d.DepartmentID AS nvarchar(max)),     CAST(i.DepartmentID AS nvarchar(max))),
+        ('ResidentStatus',   CAST(d.ResidentStatus AS nvarchar(max)),   CAST(i.ResidentStatus AS nvarchar(max))),
+        ('Risk',             CAST(d.Risk AS nvarchar(max)),             CAST(i.Risk AS nvarchar(max))),
+        ('Mood',             CAST(d.Mood AS nvarchar(max)),             CAST(i.Mood AS nvarchar(max))),
+        ('Activity',         CAST(d.Activity AS nvarchar(max)),         CAST(i.Activity AS nvarchar(max))),
+        ('FamilyNote',       CAST(d.FamilyNote AS nvarchar(max)),       CAST(i.FamilyNote AS nvarchar(max))),
+        ('ResidentEmployee', CAST(d.ResidentEmployee AS nvarchar(max)), CAST(i.ResidentEmployee AS nvarchar(max)))
+    ) v(ColumnName, OldValue, NewValue)
+    WHERE
+        ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+
+   
+    ----------------------------------------
+    -- DELETE: compare old and new values --
+    ----------------------------------------
+
+   SELECT
+    'Resident',
+    CAST(d.ResidentID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    d.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('ResidentName',     CAST(d.ResidentName AS nvarchar(max))),
+    ('ResidentID',       CAST(d.ResidentID AS nvarchar(max))),
+    ('DepartmentID',     CAST(d.DepartmentID AS nvarchar(max))),
+    ('ResidentStatus',   CAST(d.ResidentStatus AS nvarchar(max))),
+    ('Risk',             CAST(d.Risk AS nvarchar(max))),
+    ('Mood',             CAST(d.Mood AS nvarchar(max))),
+    ('Activity',         CAST(d.Activity AS nvarchar(max))),
+    ('FamilyNote',       CAST(d.FamilyNote AS nvarchar(max))),
+    ('ResidentEmployee', CAST(d.ResidentEmployee AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.ResidentID IS NULL;
+END;
+GO
+
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for MedicinTime table
+CREATE OR ALTER TRIGGER trg_Audit_Medicin_Details
+ON dbo.MedicinTime
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'MedicinTime',
+    CAST(i.MedicinTimeID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+    FROM inserted i
+    LEFT JOIN deleted d 
+    ON d.MedicinTimeID = i.MedicinTimeID
+    LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+    CROSS APPLY (VALUES
+    ('MedicinTimeID', CAST(i.MedicinTimeID AS nvarchar(max))),
+    ('ResidentID', CAST(i.ResidentID AS nvarchar(max))),
+    ('MedicinTime', CAST(i.MedicinTime AS nvarchar(max))),
+    ('MedicinCheckTimeStamp', CAST(i.MedicinCheckTimeStamp AS nvarchar(max))),
+    ('IsChecked', CAST(i.IsChecked AS nvarchar(max)))
+    ) v(ColumnName, NewValue)
+    WHERE d.MedicinTimeID IS NULL;
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'MedicinTime',
+    CAST(d.MedicinTimeID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.MedicinTimeID = d.MedicinTimeID
+LEFT JOIN dbo.Resident r 
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('MedicinTimeID',           CAST(d.MedicinTimeID AS nvarchar(max))),
+    ('ResidentID',              CAST(d.ResidentID AS nvarchar(max))),
+    ('MedicinTime',             CAST(d.MedicinTime AS nvarchar(max))),
+    ('MedicinCheckTimeStamp',   CAST(d.MedicinCheckTimeStamp AS nvarchar(max))),
+    ('IsChecked',               CAST(d.IsChecked AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.MedicinTimeID IS NULL;
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'MedicinTime',
+    CAST(i.MedicinTimeID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    v.NewValue,
+    'UPDATE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+INNER JOIN deleted d 
+    ON d.MedicinTimeID = i.MedicinTimeID
+LEFT JOIN dbo.Resident r 
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('MedicinTimeID',         CAST(d.MedicinTimeID AS nvarchar(max)),       CAST(i.MedicinTimeID AS nvarchar(max))),
+    ('ResidentID',            CAST(d.ResidentID AS nvarchar(max)),          CAST(i.ResidentID AS nvarchar(max))),
+    ('MedicinTime',           CAST(d.MedicinTime AS nvarchar(max)),         CAST(i.MedicinTime AS nvarchar(max))),
+    ('MedicinCheckTimeStamp', CAST(d.MedicinCheckTimeStamp AS nvarchar(max)), CAST(i.MedicinCheckTimeStamp AS nvarchar(max))),
+    ('IsChecked',             CAST(d.IsChecked AS nvarchar(max)),           CAST(i.IsChecked AS nvarchar(max)))
+) v(ColumnName, OldValue, NewValue)
+WHERE
+    ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for PNMedicin table
+CREATE OR ALTER TRIGGER trg_Audit_PNMedicin_Details
+ON dbo.PNMedicin
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'PNMedicin',
+    CAST(i.PNID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.PNID = i.PNID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('PNID',        CAST(i.PNID AS nvarchar(max))),
+    ('ResidentID',  CAST(i.ResidentID AS nvarchar(max))),
+    ('PNTime',      CAST(i.PNTime AS nvarchar(max))),
+    ('Reason',      CAST(i.Reason AS nvarchar(max))),
+    ('PNTimeStamp', CAST(i.PNTimeStamp AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.PNID IS NULL;
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'PNMedicin',
+    CAST(d.PNID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.PNID = d.PNID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('PNID',        CAST(d.PNID AS nvarchar(max))),
+    ('ResidentID',  CAST(d.ResidentID AS nvarchar(max))),
+    ('PNTime',      CAST(d.PNTime AS nvarchar(max))),
+    ('Reason',      CAST(d.Reason AS nvarchar(max))),
+    ('PNTimeStamp', CAST(d.PNTimeStamp AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.PNID IS NULL;
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+    (
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate,
+        DepartmentID
+    )
+    SELECT
+        'PNMedicin',
+        CAST(i.PNID AS nvarchar(200)),
+        v.ColumnName,
+        v.OldValue,
+        v.NewValue,
+        'UPDATE',
+        SUSER_SNAME(),
+        SYSDATETIME(),
+        r.DepartmentID
+    FROM inserted i
+    INNER JOIN deleted d ON d.PNID = i.PNID
+    LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+    CROSS APPLY (VALUES
+        ('PNID', d.PNID, i.PNID),
+        ('ResidentID', d.ResidentID, i.ResidentID),
+        ('PNTime', d.PNTime, i.PNTime),
+        ('Reason', d.Reason, i.Reason),
+        ('PNTimeStamp', d.PNTimeStamp, i.PNTimeStamp)
+    ) v(ColumnName, OldValue, NewValue)
+    WHERE
+        (v.OldValue <> v.NewValue)
+        OR (v.OldValue IS NULL AND v.NewValue IS NOT NULL)
+        OR (v.OldValue IS NOT NULL AND v.NewValue IS NULL);
+
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for Shopping table
+CREATE OR ALTER TRIGGER trg_Audit_Shopping_Details
+ON dbo.Shopping
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Shopping',
+    CAST(i.ShoppingID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.ShoppingID = i.ShoppingID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('ShoppingID',    CAST(i.ShoppingID AS nvarchar(max))),
+    ('ResidentID',    CAST(i.ResidentID AS nvarchar(max))),
+    ('ShoppingDay',   CAST(i.ShoppingDay AS nvarchar(max))),
+    ('ShoppingTime',  CAST(i.ShoppingTime AS nvarchar(max))),
+    ('PaymentMethod', CAST(i.PaymentMethod AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.ShoppingID IS NULL;
+
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Shopping',
+    CAST(d.ShoppingID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.ShoppingID = d.ShoppingID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('ShoppingID',    CAST(d.ShoppingID AS nvarchar(max))),
+    ('ResidentID',    CAST(d.ResidentID AS nvarchar(max))),
+    ('ShoppingDay',   CAST(d.ShoppingDay AS nvarchar(max))),
+    ('ShoppingTime',  CAST(d.ShoppingTime AS nvarchar(max))),
+    ('PaymentMethod', CAST(d.PaymentMethod AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.ShoppingID IS NULL;
+
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'Shopping',
+    CAST(i.ShoppingID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    v.NewValue,
+    'UPDATE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+INNER JOIN deleted d 
+    ON d.ShoppingID = i.ShoppingID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('ShoppingID',    CAST(d.ShoppingID AS nvarchar(max)),    CAST(i.ShoppingID AS nvarchar(max))),
+    ('ResidentID',    CAST(d.ResidentID AS nvarchar(max)),    CAST(i.ResidentID AS nvarchar(max))),
+    ('ShoppingDay',   CAST(d.ShoppingDay AS nvarchar(max)),   CAST(i.ShoppingDay AS nvarchar(max))),
+    ('ShoppingTime',  CAST(d.ShoppingTime AS nvarchar(max)),  CAST(i.ShoppingTime AS nvarchar(max))),
+    ('PaymentMethod', CAST(d.PaymentMethod AS nvarchar(max)), CAST(i.PaymentMethod AS nvarchar(max)))
+) v(ColumnName, OldValue, NewValue)
+WHERE
+    ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+END;
+GO
+
+-- Audit Trigger for AuditLogDetail
+-- Audit Trigger for SpecialEvent table
+CREATE OR ALTER TRIGGER trg_Audit_SpecialEvent_Details
+ON dbo.SpecialEvent
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'SpecialEvent',
+    CAST(i.SpecialEventID AS nvarchar(200)),
+    v.ColumnName,
+    NULL,
+    v.NewValue,
+    'INSERT',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+LEFT JOIN deleted d 
+    ON d.SpecialEventID = i.SpecialEventID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('SpecialEventID',       CAST(i.SpecialEventID AS nvarchar(max))),
+    ('ResidentID',           CAST(i.ResidentID AS nvarchar(max))),
+    ('SpecialEventNote',     CAST(i.SpecialEventNote AS nvarchar(max))),
+    ('SpecialEventDateTime', CAST(i.SpecialEventDateTime AS nvarchar(max)))
+) v(ColumnName, NewValue)
+WHERE d.SpecialEventID IS NULL;
+
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'SpecialEvent',
+    CAST(d.SpecialEventID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    NULL,
+    'DELETE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM deleted d
+LEFT JOIN inserted i 
+    ON i.SpecialEventID = d.SpecialEventID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = d.ResidentID
+CROSS APPLY (VALUES
+    ('SpecialEventID',       CAST(d.SpecialEventID AS nvarchar(max))),
+    ('ResidentID',           CAST(d.ResidentID AS nvarchar(max))),
+    ('SpecialEventNote',     CAST(d.SpecialEventNote AS nvarchar(max))),
+    ('SpecialEventDateTime', CAST(d.SpecialEventDateTime AS nvarchar(max)))
+) v(ColumnName, OldValue)
+WHERE i.SpecialEventID IS NULL;
+
+    --------------------------------------------
+    -- UPDATE (Old = deleted, New = inserted) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+(
+    TableName,
+    PrimaryKeyValue,
+    ColumnName,
+    OldValue,
+    NewValue,
+    Operation,
+    ChangedBy,
+    ChangeDate,
+    DepartmentID
+)
+SELECT
+    'SpecialEvent',
+    CAST(i.SpecialEventID AS nvarchar(200)),
+    v.ColumnName,
+    v.OldValue,
+    v.NewValue,
+    'UPDATE',
+    SUSER_SNAME(),
+    SYSDATETIME(),
+    r.DepartmentID
+FROM inserted i
+INNER JOIN deleted d 
+    ON d.SpecialEventID = i.SpecialEventID
+LEFT JOIN dbo.Resident r
+    ON r.ResidentID = i.ResidentID
+CROSS APPLY (VALUES
+    ('SpecialEventID',       CAST(d.SpecialEventID AS nvarchar(max)),       CAST(i.SpecialEventID AS nvarchar(max))),
+    ('ResidentID',           CAST(d.ResidentID AS nvarchar(max)),           CAST(i.ResidentID AS nvarchar(max))),
+    ('SpecialEventNote',     CAST(d.SpecialEventNote AS nvarchar(max)),     CAST(i.SpecialEventNote AS nvarchar(max))),
+    ('SpecialEventDateTime', CAST(d.SpecialEventDateTime AS nvarchar(max)), CAST(i.SpecialEventDateTime AS nvarchar(max)))
+) v(ColumnName, OldValue, NewValue)
+WHERE
+    ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+
+END;
+GO
