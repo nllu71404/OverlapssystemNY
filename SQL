@@ -2157,18 +2157,37 @@ GO
 
 --Fast data
 --Departments 
+BEGIN TRANSACTION
 INSERT INTO Department (DepartmentName)
 VALUES ('Skoven');
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
 GO
 
+BEGIN TRANSACTION
 INSERT INTO Department (DepartmentName)
 VALUES ('Slottet');
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
 GO
 
 -- MOCK DATA
 -- =============================================
 -- AFDELING 1 - Beboere (ResidentID 1-6)
 -- =============================================
+BEGIN TRANSACTION
 INSERT INTO dbo.Resident (ResidentName, DepartmentID, ResidentStatus, Risk, Mood, Activity, FamilyNote, ResidentEmployee)
 VALUES
 ('Kirsten Larsen',   1, 'Stabil tilstand',           'Green',  'Happy',   'Går en tur hver morgen',         'Datter besøger om søndagen',         'Anna Sørensen'),
@@ -2177,10 +2196,19 @@ VALUES
 ('Poul Hansen',      1, 'God form',                  'Green',  'Happy',   'Deltager i fællessang',          'Kone besøger dagligt',               'Anna Sørensen'),
 ('Grethe Nielsen',   1, 'Urolig om natten',          'Yellow', 'Neutral', 'Håndarbejde om eftermiddagen',   'Familie informeret om nattesituation','Lars Nielsen'),
 ('Svend Pedersen',   1, 'Stabil, god appetit',       'Green',  'Happy',   'Læser avisen om morgenen',       'Ingen ønsker om besøg på hverdage',  'Maria Jensen');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- =============================================
 -- AFDELING 2 - Beboere (ResidentID 7-12)
 -- =============================================
+BEGIN TRANSACTION
 INSERT INTO dbo.Resident (ResidentName, DepartmentID, ResidentStatus, Risk, Mood, Activity, FamilyNote, ResidentEmployee)
 VALUES
 ('Else Thomsen',     2, 'Stabil',                    'Green',  'Happy',   'Maler akvareller',               'Datter besøger om lørdagen',         'Hanne Kristiansen'),
@@ -2189,12 +2217,22 @@ VALUES
 ('Aage Andersen',    2, 'God form, aktiv',           'Green',  'Happy',   'Spiller kort med medbeboere',    'Ingen faste besøg',                  'Peter Rasmussen'),
 ('Ruth Møller',      2, 'Urolig, søger tryghed',     'Yellow', 'Neutral', 'Musik terapi om torsdagen',      'Familie informeret',                 'Hanne Kristiansen'),
 ('Harry Knudsen',    2, 'Stabil, god nattesøvn',     'Green',  'Happy',   'Motion med fysioterapeut',       'Kone besøger tirsdage og torsdage',  'Peter Rasmussen');
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 
 -- =============================================
 -- MEDICINTIDER (4 beboere pr afdeling)
 -- Afdeling 1: ResidentID 1-4
 -- Afdeling 2: ResidentID 7-10
 -- =============================================
+BEGIN TRANSACTION
 INSERT INTO dbo.MedicinTime (ResidentID, MedicinTime, IsChecked)
 VALUES
 -- Kirsten Larsen
@@ -2213,10 +2251,19 @@ VALUES
 (9, '08:00', 0), (9, '12:00', 0), (9, '18:00', 0), (9, '22:00', 0),
 -- Aage Andersen
 (10, '08:00', 0), (10, '20:00', 0);
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- =============================================
 -- PN MEDICIN (4 beboere pr afdeling)
 -- =============================================
+BEGIN TRANSACTION
 INSERT INTO dbo.PNMedicin (ResidentID, PNTime, Reason, PNTimeStamp)
 VALUES
 -- Kirsten Larsen
@@ -2237,10 +2284,19 @@ VALUES
 (9, '2025-04-19 14:00:00', 'Smerter fortsat',       '2025-04-19 14:05:00'),
 -- Aage Andersen
 (10,'2025-04-18 22:00:00', 'Søvnbesvær',            '2025-04-18 22:10:00');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- =============================================
 -- SHOPPING (3 beboere pr afdeling)
 -- =============================================
+BEGIN TRANSACTION
 INSERT INTO dbo.Shopping (ResidentID, ShoppingDay, ShoppingTime, PaymentMethod)
 VALUES
 -- Afdeling 1
@@ -2251,10 +2307,19 @@ VALUES
 (7, 'Tirsdag',  '10:00', 'Dankort'),
 (8, 'Torsdag',  '11:30', 'Kontant'),
 (9, 'Fredag',   '10:00', 'Dankort');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- =============================================
 -- SPECIAL EVENTS (3 beboere pr afdeling)
 -- =============================================
+BEGIN TRANSACTION
 INSERT INTO dbo.SpecialEvent (ResidentID, SpecialEventNote, SpecialEventDateTime)
 VALUES
 -- Afdeling 1
@@ -2265,12 +2330,20 @@ VALUES
 (7, 'Fysioterapi — ny behandlingsplan',      '2025-04-22 10:00:00'),
 (8, 'Tandlæge — husk transportbestilling',   '2025-04-24 11:00:00'),
 (10,'Familiesamtale med plejepersonale',     '2025-04-26 13:00:00');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- =============================================
 -- DEPARTMENT TASKS (4 pr vagt pr afdeling)
 -- ShiftType: Dag, Aften, Nat
 -- =============================================
-
+BEGIN TRANSACTION
 -- Afdeling 1 - Dag
 INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
 VALUES
@@ -2278,48 +2351,102 @@ VALUES
 (1, 'Medicingivning runde',          '',     'Dag'),
 (1, 'Ledsage til aktivitet',         '',     'Dag'),
 (1, 'Dokumentation i omsorgssystem', '',     'Dag');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- Afdeling 1 - Aften
+BEGIN TRANSACTION
 INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
 VALUES
 (1, 'Aftensmad og opvask',           '',     'Aften'),
 (1, 'Aftenmedicin runde',            '',     'Aften'),
 (1, 'Sengetid og aftenhygiejne',     '',     'Aften'),
 (1, 'Rapport til nattevagt',         '',     'Aften');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- Afdeling 1 - Nat
+BEGIN TRANSACTION
 INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
 VALUES
 (1, 'Nattetilsyn kl. 23 og 02',      '',     'Nat'),
 (1, 'Nattmedicin runde',             '',     'Nat'),
 (1, 'Observation af urolige beboere','',     'Nat'),
 (1, 'Rapport til dagvagt',           '',     'Nat');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- Afdeling 2 - Dag
+BEGIN TRANSACTION
 INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
 VALUES
 (2, 'Morgenmøde og briefing',        '',     'Dag'),
 (2, 'Medicingivning runde',          '',     'Dag'),
 (2, 'Ledsage til fysioterapi',       '',     'Dag'),
 (2, 'Dokumentation og journalføring','',     'Dag');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- Afdeling 2 - Aften
+BEGIN TRANSACTION
 INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
 VALUES
 (2, 'Aftensmad servering',           '',     'Aften'),
 (2, 'Aftenmedicin runde',            '',     'Aften'),
 (2, 'Aftenhygiejne og sengetid',     '',     'Aften'),
 (2, 'Overlevering til nattevagt',    '',     'Aften');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- Afdeling 2 - Nat
+BEGIN TRANSACTION
 INSERT INTO dbo.DepartmentTask (DepartmentID, DepartmentTaskTopic, EmployeeName, ShiftType)
 VALUES
 (2, 'Nattetilsyn kl. 23 og 02',      '',     'Nat'),
 (2, 'Nattmedicin runde',             '',     'Nat'),
 (2, 'Observation urolige beboere',   '',     'Nat'),
 (2, 'Morgenrapport klargøring',      '',     'Nat');
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- Afdeling 1 - EmployeePhone
+BEGIN TRANSACTION
 INSERT INTO dbo.EmployeePhone (DepartmentID, PhoneNumber, EmployeeName, Test)
 VALUES
 (1, '30101001', 'Anna Jensen',     1),
@@ -2330,8 +2457,17 @@ VALUES
 (1, '30101006', '',                0),
 (1, '30101007', '',                0),
 (1, '30101008', '',                0);
-
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
 -- Afdeling 2 - EmployeePhone
+BEGIN TRANSACTION
 INSERT INTO dbo.EmployeePhone (DepartmentID, PhoneNumber, EmployeeName, Test)
 VALUES
 (2, '30202001', 'Maria Larsen',    1),
@@ -2342,3 +2478,12 @@ VALUES
 (2, '30202006', '',                0),
 (2, '30202007', '',                0),
 (2, '30202008', '',                0);
+IF(@@ERROR > 0)
+BEGIN
+    ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+    COMMIT TRANSACTION
+END
+GO
