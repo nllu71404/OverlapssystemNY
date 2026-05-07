@@ -323,25 +323,32 @@ namespace OverlapssystemInfrastructure.Repositories
 
         public async Task<int> SaveNewResidentAsync(ResidentModel resident)
         {
-            using SqlConnection connection = new SqlConnection(_connectionString);
-            using SqlCommand command = new SqlCommand("dbo.uspCreateResident", connection);
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            await using SqlCommand command = new SqlCommand("dbo.uspCreateResident", connection);
 
             command.CommandType = CommandType.StoredProcedure;
+
+
+            // ResidentId er output parameter, da den bliver genereret i databasen og vi vil gerne have den tilbage efter indsættelse
+            SqlParameter residentIdParam = command.Parameters.Add("@ResidentId", SqlDbType.Int);
+            residentIdParam.Direction = ParameterDirection.Output;
 
             command.Parameters.Add("@ResidentName", SqlDbType.NVarChar, 100).Value = resident.Name;
             command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value =
                 resident.DepartmentId.HasValue ? resident.DepartmentId.Value : DBNull.Value;
             command.Parameters.Add("@ResidentStatus", SqlDbType.NVarChar, 250).Value = resident.Status;
-            command.Parameters.Add("@Activity", SqlDbType.NVarChar, 250).Value = resident.Activity; //Tjek her!!
-            command.Parameters.Add("@FamilyNote", SqlDbType.NVarChar, 250).Value = resident.Family; //Tjek her!!
-            command.Parameters.Add("@ResidentEmployee", SqlDbType.NVarChar, 250).Value = resident.ResidentEmployee; //Tjek her!!
+            command.Parameters.Add("@Activity", SqlDbType.NVarChar, 250).Value = resident.Activity ?? (object)DBNull.Value;
+            command.Parameters.Add("@FamilyNote", SqlDbType.NVarChar, 250).Value = resident.Family ?? (object)DBNull.Value;
+            command.Parameters.Add("@ResidentEmployee", SqlDbType.NVarChar, 250).Value = resident.ResidentEmployee ?? (object)DBNull.Value;
             command.Parameters.Add("@Risk", SqlDbType.NVarChar, 100).Value = resident.Risiko.ToString();
             command.Parameters.Add("@Mood", SqlDbType.NVarChar, 100).Value = resident.Mood.ToString();
 
             await connection.OpenAsync();
 
-            object? result = await command.ExecuteScalarAsync();
-            return Convert.ToInt32(result);
+            await command.ExecuteNonQueryAsync();
+
+            // Efter indsættelse kan vi hente den genererede ResidentId fra output parameteren
+            return Convert.ToInt32(residentIdParam.Value);
         }
     }
 }
