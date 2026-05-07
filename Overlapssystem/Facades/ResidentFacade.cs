@@ -27,9 +27,7 @@ namespace Overlapssystem.Facades
 
         public async Task UpdateResident(ResidentViewModel vm)
         {
-            Console.WriteLine($"Updating resident with ID: {vm.ResidentId}");
             var dto = MapUpdateResident(vm);
-            Console.WriteLine($"Mapped DTO: ResidentId={dto.ResidentId}, Name={dto.Name}, DepartmentId={dto.DepartmentId}, Status={dto.Status}, Activity={dto.Activity}, Family={dto.Family}, ResidentEmployee={dto.ResidentEmployee}, Risiko={dto.Risiko}, Mood={dto.Mood}");
             await _residentApi.UpdateResident(vm.ResidentId, dto);
         }
 
