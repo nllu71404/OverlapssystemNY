@@ -122,6 +122,9 @@ else
 
     private async Task ShowCreateResident()
     {
+        
+       
+        
         newResident = new ResidentViewModel
         {
             Risiko = Risiko.Green,
@@ -132,6 +135,8 @@ else
         newResident.ResidentId = newID;
         showCreateResident = true;
         StateHasChanged();
+
+        Console.WriteLine($"Residentid in ShowCreateResident: {newResident.ResidentId}");
     }
 
     private async Task SaveResidentAsync(ResidentViewModel vm)
@@ -150,6 +155,9 @@ else
         }
 
         StateHasChanged();
+
+        Console.WriteLine($"Residentid in SaveResidentAsync: {newResident.ResidentId}");
+
     }
 
     private async Task DeleteResidentAsync(ResidentViewModel vm)
