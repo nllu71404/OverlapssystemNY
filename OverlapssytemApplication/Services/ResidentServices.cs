@@ -83,6 +83,9 @@ namespace OverlapssytemApplication.Services
             if (resident.DepartmentId == null || resident.DepartmentId <= 0)
                 return Error.Validation("Afdelings ID er ikke sat");
 
+            if (resident.ResidentId <= 0)
+                return Error.Validation("Ugyldigt beboer ID");
+
             try
             {
                 var id = await _residentRepository.SaveNewResidentAsync(resident);
