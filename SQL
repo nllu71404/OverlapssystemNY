@@ -171,43 +171,44 @@ GO
 -- Creates Stored Procedures
 -- Creates a Resident to the table of Residents.
 CREATE OR ALTER PROCEDURE dbo.uspCreateResident
-@ResidentName NVARCHAR(100),
-@DepartmentID INT = NULL,
-@ResidentStatus NVARCHAR(100) = NULL,
-@Risk NVARCHAR(100) = NULL,
-@Mood NVARCHAR(100) = NULL,
-@Activity NVARCHAR(250) NULL,
-@FamilyNote NVARCHAR(250) NULL,
-@ResidentEmployee NVARCHAR(250) NULL
+    @ResidentId INT OUTPUT,
+    @ResidentName NVARCHAR(100),
+    @DepartmentID INT = NULL,
+    @ResidentStatus NVARCHAR(250),
+    @Activity NVARCHAR(250) = NULL,
+    @FamilyNote NVARCHAR(250) = NULL,
+    @ResidentEmployee NVARCHAR(250) = NULL,
+    @Risk NVARCHAR(100),
+    @Mood NVARCHAR(100)
 AS
 BEGIN
-SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-INSERT INTO dbo.Resident
-(
-    ResidentName,
-    DepartmentID,
-    ResidentStatus,
-    Risk,
-    Mood,
-    Activity,
-    FamilyNote,
-    ResidentEmployee
-)
-VALUES
-(
-    @ResidentName,
-    @DepartmentID,
-    @ResidentStatus,
-    @Risk,
-    @Mood,
-    @Activity,
-    @FamilyNote,
-    @ResidentEmployee
-);
+    INSERT INTO dbo.Resident
+    (
+        ResidentName,
+        DepartmentID,
+        ResidentStatus,
+        Activity,
+        FamilyNote,
+        ResidentEmployee,
+        Risk,
+        Mood
+    )
+    VALUES
+    (
+        @ResidentName,
+        @DepartmentID,
+        @ResidentStatus,
+        @Activity,
+        @FamilyNote,
+        @ResidentEmployee,
+        @Risk,
+        @Mood
+    );
 
-SELECT SCOPE_IDENTITY() AS ResidentID;
-END;
+    SET @ResidentId = CONVERT(INT, SCOPE_IDENTITY());
+END
 GO
 
 -- Gets all Residents from the resident table.
