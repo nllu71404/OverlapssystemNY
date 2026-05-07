@@ -183,7 +183,7 @@ CREATE OR ALTER PROCEDURE dbo.uspCreateResident
 AS
 BEGIN
     SET NOCOUNT ON;
-
+ 
     INSERT INTO dbo.Resident
     (
         ResidentName,
@@ -206,7 +206,7 @@ BEGIN
         @Risk,
         @Mood
     );
-
+ 
     SET @ResidentId = CONVERT(INT, SCOPE_IDENTITY());
 END
 GO
