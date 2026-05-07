@@ -147,7 +147,7 @@ namespace OverlapssystemInfrastructure.Repositories
                             SpecialEventDateTime = reader["SpecialEventDateTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["SpecialEventDateTime"])
                         });
                     }
-                }
+                } 
             }
         
 
