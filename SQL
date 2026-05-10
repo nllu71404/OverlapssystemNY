@@ -1263,83 +1263,140 @@ GO
 
 
 -- Audit Trigger for PNMedicin table
-CREATE TRIGGER trg_Audit_PNMedicin
+CREATE TRIGGER trg_Audit_PNMedicin_Details
 ON dbo.PNMedicin
 AFTER INSERT, UPDATE, DELETE
 AS
 BEGIN
-SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
--- INSERT
-INSERT INTO dbo.AuditLogSnapshot
-(
-    TableName,
-    Operation,
-    PrimaryKeyValue,
-    BeforeData,
-    AfterData,
-    ChangedBy,
-    ChangeDate
-)
-SELECT
-    'PNMedicin',
-    'INSERT',
-    CAST(i.PNId AS nvarchar(200)),
-    NULL,
-    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
-    SUSER_SNAME(),
-    SYSDATETIME()
-FROM inserted i
-LEFT JOIN deleted d
-    ON d.PNId = i.PNId
-WHERE d.PNId IS NULL;
+    ---------------------------------------
+    -- INSERT (Old = NULL, New = values) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+    (
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate,
+        DepartmentID
+    )
+    SELECT
+        'PNMedicin',
+        CAST(i.PNID AS nvarchar(200)),
+        v.ColumnName,
+        NULL,
+        v.NewValue,
+        'INSERT',
+        SUSER_SNAME(),
+        SYSDATETIME(),
+        r.DepartmentID
+    FROM inserted i
+    LEFT JOIN deleted d ON d.PNID = i.PNID
+    LEFT JOIN dbo.Resident r ON r.ResidentID = i.ResidentID
+    CROSS APPLY (VALUES
+        ('PNID',        CAST(i.PNID AS nvarchar(max))),
+        ('ResidentID',  CAST(i.ResidentID AS nvarchar(max))),
+        ('PNTime',      CAST(i.PNTime AS nvarchar(max))),
+        ('Reason',      CAST(i.Reason AS nvarchar(max))),
+        ('PNTimeStamp', CAST(i.PNTimeStamp AS nvarchar(max)))
+    ) v(ColumnName, NewValue)
+    WHERE d.PNID IS NULL;
 
--- DELETE
-INSERT INTO dbo.AuditLogSnapshot
-(
-    TableName,
-    Operation,
-    PrimaryKeyValue,
-    BeforeData,
-    AfterData,
-    ChangedBy,
-    ChangeDate
-)
-SELECT
-    'PNId',
-    'DELETE',
-    CAST(d.PNId AS nvarchar(200)),
-    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
-    NULL,
-    SUSER_SNAME(),
-    SYSDATETIME()
-FROM deleted d
-LEFT JOIN inserted i
-    ON i.PNId = d.PNId
-WHERE i.PNId IS NULL;
+    ---------------------------------------
+    -- DELETE (Old = values, New = NULL) --
+    ---------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+    (
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate,
+        DepartmentID
+    )
+    SELECT
+        'PNMedicin',
+        CAST(d.PNID AS nvarchar(200)),
+        v.ColumnName,
+        v.OldValue,
+        NULL,
+        'DELETE',
+        SUSER_SNAME(),
+        SYSDATETIME(),
+        r.DepartmentID
+    FROM deleted d
+    LEFT JOIN inserted i ON i.PNID = d.PNID
+    LEFT JOIN dbo.Resident r ON r.ResidentID = d.ResidentID
+    CROSS APPLY (VALUES
+        ('PNID',        CAST(d.PNID AS nvarchar(max))),
+        ('ResidentID',  CAST(d.ResidentID AS nvarchar(max))),
+        ('PNTime',      CAST(d.PNTime AS nvarchar(max))),
+        ('Reason',      CAST(d.Reason AS nvarchar(max))),
+        ('PNTimeStamp', CAST(d.PNTimeStamp AS nvarchar(max)))
+    ) v(ColumnName, OldValue)
+    WHERE i.PNID IS NULL;
 
--- UPDATE
-INSERT INTO dbo.AuditLogSnapshot
-(
-    TableName,
-    Operation,
-    PrimaryKeyValue,
-    BeforeData,
-    AfterData,
-    ChangedBy,
-    ChangeDate
-)
-SELECT
-    'PNId',
-    'UPDATE',
-    CAST(i.PNId AS nvarchar(200)),
-    (SELECT d.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
-    (SELECT i.* FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
-    SUSER_SNAME(),
-    SYSDATETIME()
-FROM inserted i
-INNER JOIN deleted d
-    ON d.PNId = i.PNId;
+    --------------------------------------------
+    -- UPDATE (FIXED - NO DATETIME COMPARISON) --
+    --------------------------------------------
+    INSERT INTO dbo.AuditLogDetail
+    (
+        TableName,
+        PrimaryKeyValue,
+        ColumnName,
+        OldValue,
+        NewValue,
+        Operation,
+        ChangedBy,
+        ChangeDate,
+        DepartmentID
+    )
+    SELECT
+        'PNMedicin',
+        CAST(i.PNID AS nvarchar(200)),
+        v.ColumnName,
+        v.OldValue,
+        v.NewValue,
+        'UPDATE',
+        SUSER_SNAME(),
+        SYSDATETIME(),
+        r.DepartmentID
+    FROM inserted i
+    INNER JOIN deleted d ON d.PNID = i.PNID
+    LEFT JOIN dbo.Resident r ON r.ResidentID = d.ResidentID
+    CROSS APPLY (VALUES
+        ('PNID',
+            CAST(d.PNID AS nvarchar(max)),
+            CAST(i.PNID AS nvarchar(max))
+        ),
+        ('ResidentID',
+            CAST(d.ResidentID AS nvarchar(max)),
+            CAST(i.ResidentID AS nvarchar(max))
+        ),
+        ('PNTime',
+            CAST(d.PNTime AS nvarchar(max)),
+            CAST(i.PNTime AS nvarchar(max))
+        ),
+        ('Reason',
+            CAST(d.Reason AS nvarchar(max)),
+            CAST(i.Reason AS nvarchar(max))
+        ),
+        ('PNTimeStamp',
+            CAST(d.PNTimeStamp AS nvarchar(max)),
+            CAST(i.PNTimeStamp AS nvarchar(max))
+        )
+    ) v(ColumnName, OldValue, NewValue)
+    WHERE
+        ISNULL(v.OldValue, N'<<NULL>>') <> ISNULL(v.NewValue, N'<<NULL>>');
+
 END;
 GO
 
