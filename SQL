@@ -495,19 +495,18 @@ END;
 GO
 
 -- Updates a PNmedicin time by id in the PNMedicin table
-CREATE OR ALTER  PROCEDURE [dbo].[uspUpdatePNMedicinTimeById]
-@PNTime DATETIME,
-@Reason NVARCHAR(250) = NULL,
-@PNTimeStamp DATETIME = NULL,
-@PNID INT
+ALTER PROCEDURE [dbo].[uspUpdatePNMedicinTimeById]
+    @PNTime DATETIME = NULL,
+    @Reason NVARCHAR(250) = NULL,
+    @PNID INT
 AS
 BEGIN
     UPDATE dbo.PNMedicin
-    SET PNTime = @PNTime, 
-    Reason = @Reason,
-    PNTimeStamp = @PNTimeStamp
+    SET 
+        PNTime = @PNTime,
+        Reason = @Reason,
+        PNTimeStamp = SYSDATETIME()
     WHERE PNID = @PNID;
-
 END;
 GO
 
