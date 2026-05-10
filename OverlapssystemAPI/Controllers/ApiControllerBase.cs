@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace OverlapssystemAPI.Controllers
 {
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ApiControllerBase : ControllerBase
     {
         protected IActionResult Handle(Result result)
