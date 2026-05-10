@@ -178,36 +178,61 @@
                 <td>
                     <AuthorizeView>
                         <Authorized>
-                            @if(context.User.IsInRole("Administrator") || context.User.IsInRole("Medarbejder"))
-                            {
-                                <input type="time"
-                                       value="@med.MedicinTimeText"
-                                       @onchange="async e => {
-                                       med.MedicinTimeText = e.Value?.ToString();
-                                       await UpdateMedicinTimeAsync(med);
-                                   }" />
-                              <input type="checkbox"
-                                     checked="@med.IsChecked"
-                                     @onchange="async e => {
-                                   await SetMedicinChecked(med, (bool)e.Value!);
-                                   med.IsChecked = (bool)e.Value!;
-                               }" />
-                                    @if (med.IsChecked && med.MedicinCheckTimeStampText != null)
-                                    {
-                                        <span>Krydset af kl. @med.MedicinCheckTimeStampText</span>
-                                    }
-                                    @if (context.User.IsInRole("Administrator"))
-                                    {
-                                        <button class="btn-grey"
-                                                @onclick="() => DeleteMedicinTimeAsync(med)">
-                                            Slet
-                                        </button>
-                                    }
-                            }  else if (context.User.IsInRole("Simpel"))
-                            {
-                            <span>@med.MedicinTimeText</span>
-                            <input type="checkbox" checked="@med.IsChecked" disabled />
-                            }
+                           @if (context.User.IsInRole("Administrator") || context.User.IsInRole("Medarbejder"))
+{
+    <div class="medicin-item">
+
+        <!-- ØVERSTE RÆKKE -->
+        <div class="medicin-row">
+
+            <input type="time"
+                   value="@med.MedicinTimeText"
+                   @onchange="async e => {
+                       med.MedicinTimeText = e.Value?.ToString();
+                       await UpdateMedicinTimeAsync(med);
+                   }" />
+
+            <input type="checkbox"
+                   checked="@med.IsChecked"
+                   @onchange="async e => {
+                       await SetMedicinChecked(med, (bool)e.Value!);
+                       med.IsChecked = (bool)e.Value!;
+                   }" />
+
+            @if (context.User.IsInRole("Administrator"))
+            {
+                <button class="btn-grey"
+                        @onclick="() => DeleteMedicinTimeAsync(med)">
+                    Slet
+                </button>
+            }
+
+        </div>
+
+        <!-- NEDERSTE RÆKKE -->
+        @if (med.IsChecked && med.MedicinCheckTimeStampText != null)
+        {
+            <div class="small-text">
+                @med.MedicinCheckTimeStampText
+            </div>
+        }
+
+    </div>
+}
+else if (context.User.IsInRole("Simpel"))
+{
+    <div class="medicin-item">
+        <span>@med.MedicinTimeText</span>
+        <input type="checkbox" checked="@med.IsChecked" disabled />
+
+        @if (med.IsChecked && med.MedicinCheckTimeStampText != null)
+        {
+            <div class="small-text">
+                @med.MedicinCheckTimeStampText
+            </div>
+        }
+    </div>
+}
                         </Authorized>
                 </AuthorizeView>
                 

@@ -50,3 +50,7 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
+
+.login-logout-btn:hover {
+    background-color: #dcdcdc;
+}

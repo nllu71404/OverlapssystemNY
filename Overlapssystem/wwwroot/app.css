@@ -163,6 +163,12 @@ h1:focus {
     margin-bottom: 0.5rem;
 }
 
+.small-text {
+    font-family: "Stack Sans Headline", sans-serif;
+    font-size: 10px;
+    margin-bottom: 0.5rem;
+}
+
 .table {
     width: 100%;
     border-collapse: collapse;
