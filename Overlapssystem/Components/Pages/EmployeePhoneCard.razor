@@ -22,13 +22,13 @@
         </AuthorizeView>
     </div>
 
-    <table class="phone-table">
+    <table class="table">
         <thead>
             <tr>
                 <th>Telefonnummer</th>
                 <th>Navn</th>
                 <th>Test</th>
-                <th>Slet</th>
+                <th></th>
             </tr>
         </thead>
 
@@ -107,7 +107,7 @@
                     <td>
                         <AuthorizeView Roles="Administrator">
                             <Authorized>
-                                <button class="btn-delete"
+                                <button class="btn-grey"
                                         @onclick="() => OnDelete.InvokeAsync(employeePhone)">
                                     Slet
                                 </button>

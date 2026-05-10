@@ -6,11 +6,24 @@
 
 @inject AuditTrailDetailApiService AuditTrailDetailApiService
 
+@if (DepartmentId == 1)
+{
+    DepartmentName = "Slottet";
+}
+else if (DepartmentId == 2)
+{
+    DepartmentName = "Skoven";
+}
+else
+{
+    DepartmentName = "Ukendt afdeling";
+})
+
 <div class="audit-page">
     <div class="audit-header">
         <div>
             <h3 class="audit-title">Audit trail</h3>
-            <p class="audit-subtitle">Viser ændringer for afdeling @DepartmentId</p>
+            <p class="audit-subtitle">Viser ændringer for afdeling @DepartmentName</p>
         </div>
 
         <button class="audit-refresh-button" @onclick="LoadAuditTrailDetails">
@@ -21,7 +34,7 @@
     @if (auditTrailDetails.Count == 0)
     {
         <div class="audit-state">
-            Ingen audit trail detaljer fundet for afdeling @DepartmentId.
+            Ingen audit trail detaljer fundet for afdeling @DepartmentName.
         </div>
     }
     else
@@ -68,12 +81,18 @@
     [Parameter]
     public int DepartmentId { get; set; }
 
+    public string DepartmentName { get; set; } = string.Empty;
+
     private List<AuditTrailDetailDTO> auditTrailDetails = new();
 
     // Automatically load audit trail details when the component parameters are set or updated
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadAuditTrailDetails();
+        if (firstRender)
+        {
+            await LoadAuditTrailDetails();
+            StateHasChanged();
+        }
     }
 
     // Method to load audit trail details from the API service based on the current DepartmentId

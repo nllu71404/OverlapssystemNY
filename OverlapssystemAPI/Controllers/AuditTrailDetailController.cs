@@ -39,7 +39,7 @@ namespace OverlapssystemAPI.Controllers
         }
 
         // Mapping metode
-        private AuditTrailDetailDTO MapToGetAuditTrailDetailDTO(OverlapssystemDomain.Entities.AuditTrailDetailModel model)
+        private AuditTrailDetailDTO MapToGetAuditTrailDetailDTO(AuditTrailDetailModel model)
         {
             return new AuditTrailDetailDTO
             {

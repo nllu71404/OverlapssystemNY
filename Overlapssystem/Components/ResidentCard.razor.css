@@ -3,6 +3,7 @@
     border-radius: 8px;
     margin: 10px;
     width: 350px;
+   
 }
 
 .top-row {
@@ -10,6 +11,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
+   
 }
 
 .mood-buttons {
@@ -23,6 +25,7 @@
     font-size: 1.5rem;
     opacity: 0.4;
     cursor: pointer;
+    
 }
 
 .mood-selected {
@@ -36,12 +39,16 @@
 .resident-card input.form-control {
     width: 100%;
     margin-bottom: 8px;
+    font-family: "Stack Sans Headline", sans-serif;
+    
 }
 
 .resident-label {
     display: flex;
     align-items: center;
     font-weight: bold;
+    font-family: "Stack Sans Headline", sans-serif;
+    ;
 }
 
 /* Status og andre textareas */
@@ -49,6 +56,8 @@
     width: 100%;
     margin-bottom: 8px;
     resize: vertical;
+    font-family: "Stack Sans Headline", sans-serif;
+    
 }
 
 /* To-kolonne layout til Aktivitet og Familie kontakt */
@@ -57,6 +66,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-bottom: 8px;
+    font-family: "Stack Sans Headline", sans-serif;
 }
 
 /* Sektioner med header og indhold */
@@ -71,27 +81,17 @@
     align-items: center;
     font-weight: bold;
     margin-bottom: 6px;
+    font-family: "Stack Sans Headline", sans-serif;
 }
 
-/* Plus knap */
-.btn-plus {
-    background: none;
-    border: 1px solid #ccc;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+
 
 /* Footer */
 .footer {
     display: flex;
     justify-content: flex-end;
     margin-top: 10px;
+   
 }
 
 .medicin-table {
@@ -100,3 +100,6 @@
     gap: 5px;
     margin-bottom: 3px;
 }
+
+
+

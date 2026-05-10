@@ -17,30 +17,43 @@
 @inject AuthState authState
 
 
+@if (departmentId == 1)
+{
+    <h2 class="h2-style">Overlapsseddel - Slottet</h2>
+}
+else if (departmentId == 2)
+{
+   <h2 class="h2-style">Overlapsseddel - Skoven</h2>
+}
+else 
+{
+    <h2 class="h2-style">Overlapsseddel - ukendt afdeling</h2>
+}
 
-<h3>Overlapsseddel</h3>
-<h5>Beboere</h5>
 
 <AuthorizeView>
     <Authorized>
-        <p>Logget ind som: @context.User.Identity?.Name</p>
-        <p>Rolle: @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
+        <p class="standard-text">Logget ind som: @context.User.Identity?.Name</p>
+        <p class="standard-text">Rolle: @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
 
     </Authorized>
     <NotAuthorized>
-        <p>Ikke logget ind</p>
+        <p class="standard-text">Ikke logget ind</p>
     </NotAuthorized>
 </AuthorizeView>
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
         <div class="admin-action-bar">
-            <button @onclick="ShowCreateResident">
+            <button class="btn-grey" @onclick="ShowCreateResident">
                 Opret beboer
             </button>
-            <button @onclick="GoToCreateUser">
+            <button class="btn-grey" @onclick="GoToCreateUser">
                 Opret bruger
             </button>
+            <button class="btn-grey" @onclick="GoToAuditTrail">
+                Audit log
+                </button>
         </div>
     </Authorized>
 </AuthorizeView>
@@ -80,8 +93,8 @@ else
 
 <!-- Log ind knap nederst -->
 <div class="login-bar">
-    <button @onclick="LogIn">Log ind</button>
-    <button @onclick="LogOut">Log ud </button>
+    <button class="login-logout-btn" @onclick="LogIn">Log ind</button>
+    <button class="login-logout-btn" @onclick="LogOut">Log ud </button>
 </div>
 
 @code {
@@ -118,6 +131,11 @@ else
     private void GoToCreateUser()
     {
         Navigation.NavigateTo("/OpretBruger");
+    }
+
+    private void GoToAuditTrail()
+    {
+        Navigation.NavigateTo($"/audittrail/{departmentId}");
     }
 
     private async Task ShowCreateResident()

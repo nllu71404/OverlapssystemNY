@@ -20,14 +20,14 @@
             <Authorized>
                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                 {
-                    <select @bind="Resident.Risiko" class="form-select">
+                    <select @bind="Resident.Risiko" class="drop-down-box">
                         <option value="@Risiko.Green">Grøn</option>
                         <option value="@Risiko.Yellow">Gul</option>
                         <option value="@Risiko.Red">Rød</option>
                     </select>
                 } else if (context.User.IsInRole("Simpel"))
                 {
-                    <select disabled class="form-select">
+                    <select disabled class="drop-down-box">
                         <option value="@Risiko.Green" selected="@(Resident.Risiko == Risiko.Green)">Grøn</option>
                         <option value="@Risiko.Yellow" selected="@(Resident.Risiko == Risiko.Yellow)">Gul</option>
                         <option value="@Risiko.Red" selected="@(Resident.Risiko == Risiko.Red)">Rød</option>
@@ -198,7 +198,7 @@
                                     }
                                     @if (context.User.IsInRole("Administrator"))
                                     {
-                                        <button class="btn btn-danger btn-sm"
+                                        <button class="btn-grey"
                                                 @onclick="() => DeleteMedicinTimeAsync(med)">
                                             Slet
                                         </button>
@@ -247,7 +247,7 @@
                                           @bind="pn.Reason"
                                           @bind:after="() => UpdatePNMedicinTimeAsync(pn)"
                                           placeholder="Årsag"></textarea>
-                                <button class="btn btn-danger btn-sm" @onclick="() => DeletePNMedicin(pn)">Slet</button>
+                                <button class="btn-grey" @onclick="() => DeletePNMedicin(pn)">Slet</button>
 
                             } else if (context.User.IsInRole("Simpel"))
                             {
@@ -282,7 +282,7 @@
                         <Authorized>
                             @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                             {
-                                <select @bind="shopping.Day" @bind:after="() => UpdateShopping(shopping)">
+                                <select class="drop-down-box" @bind="shopping.Day" @bind:after="() => UpdateShopping(shopping)">
                                     @foreach (var day in Enum.GetValues<Day>())
                                     {
                                         <option value="@day">@day</option>
@@ -303,7 +303,7 @@
                                 
                                 @if (context.User.IsInRole("Administrator"))
                                 {
-                                <button class="btn btn-danger btn-sm"
+                                <button class="btn-grey"
                                         @onclick="() => DeleteShopping(shopping)">
                                     Slet
                                 </button>
@@ -351,6 +351,7 @@
                                   @bind="specialEvent.SpecialEventNote"
                                   @bind:after="() => UpdateSpecialEvent(specialEvent)"
                                   placeholder="Udfyld forløb for særlig hændelse"></textarea>
+                    <button class="btn-grey" @onclick="() => DeleteSpecialEvent(specialEvent)">Slet</button>
                         }
                         else if (context.User.IsInRole("Simpel"))
                         {
@@ -367,8 +368,8 @@
         <Authorized>
             <!-- FOOTER -->
             <div class="footer">
-                <!-- Får tilføjet brugeradgang senere, så se bort fra knappen for nu -->
-                <button class="btn-delete" @onclick="() => ConfirmDeleteAsync()">
+               
+                <button class="btn-grey" @onclick="() => ConfirmDeleteAsync()">
                     Slet beboer
                 </button>
             </div>
