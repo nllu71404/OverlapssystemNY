@@ -1,3 +1,5 @@
+
+
 h1:focus {
     outline: none;
 }
@@ -153,8 +155,11 @@ h1:focus {
 
 .h2-style {
     font-family: "Stack Sans Headline", sans-serif;
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-bottom: 0.5rem;
+    text-align: left;
+    color: #2c3e50;
+    
 }
 
 .standard-text {

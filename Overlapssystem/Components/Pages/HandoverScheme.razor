@@ -17,17 +17,18 @@
 @inject AuthState authState
 
 
+
 @if (departmentId == 1)
 {
-    <h2 class="h2-style">Overlapsseddel - Slottet</h2>
+    <h2 class="h2-style">Slottet</h2>
 }
 else if (departmentId == 2)
 {
-   <h2 class="h2-style">Overlapsseddel - Skoven</h2>
+   <h2 class="h2-style">Skoven</h2>
 }
 else 
 {
-    <h2 class="h2-style">Overlapsseddel - ukendt afdeling</h2>
+    <h2 class="h2-style">Ukendt afdeling</h2>
 }
 
 
@@ -96,6 +97,8 @@ else
     <button class="login-logout-btn" @onclick="LogIn">Log ind</button>
     <button class="login-logout-btn" @onclick="LogOut">Log ud </button>
 </div>
+
+
 
 @code {
 

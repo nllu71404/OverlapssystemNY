@@ -13,10 +13,17 @@
 @inject HttpClient Http
 @inject AuthState authstate 
 
+
+
 <div class="login-wrapper">
+    <div>
+        <h2 class="h2-style">Overlapssystem</h2>
+    </div>
+
     <div class="login-card">
         <h2>Log ind</h2>
 
+        <div class="input-group">
         <input list="brugere"
                placeholder="Vælg eller indtast brugernavn"
                @bind="userName" />
@@ -24,6 +31,7 @@
             <option value="Slot" />
             <option value="Skov" />
         </datalist>
+        </div>
 
         <div class="input-group">
             <input type="password" placeholder="Indtast password" @bind="password" />
