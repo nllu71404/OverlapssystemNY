@@ -132,6 +132,58 @@ h1:focus {
         border-color: #a8a7a7;
     }
 
+.btn-return {
+    position: absolute;
+    top: 16px;
+    right: 40px;
+    background: #e9e8e8;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    color: #000000;
+    cursor: pointer;
+    font-family: "Stack Sans Headline", sans-serif;
+    font-size: 1rem;
+}
+
+    .btn-return:hover {
+        background-color: #d4d4d4;
+    }
+
+.btn-navigate-1 {
+    position: absolute;
+    top: 16px;
+    right: 40px;
+    background: #e9e8e8;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    color: #000000;
+    cursor: pointer;
+    font-family: "Stack Sans Headline", sans-serif;
+    font-size: 1rem;
+}
+    .btn-navigate-1:hover {
+        background-color: #d4d4d4;
+    }
+
+.btn-navigate-2 {
+    position: absolute;
+    top: 16px;
+    right: 140px;
+    background: #e9e8e8;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    color: #000000;
+    cursor: pointer;
+    font-family: "Stack Sans Headline", sans-serif;
+    font-size: 1rem;
+}
+    .btn-navigate-2:hover {
+        background-color: #d4d4d4;
+    }
+
 .drop-down-box {
     font-family: "Stack Sans Headline", sans-serif;
     padding: 2px 6px;

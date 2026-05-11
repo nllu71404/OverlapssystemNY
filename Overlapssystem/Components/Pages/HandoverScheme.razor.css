@@ -40,6 +40,7 @@
 
 .login-logout-btn {
     padding: 8px 8px;
+    margin-left: 10px;
     font-size: 1rem;
     font-family: "Stack Sans Headline", sans-serif;
     border-color: #4CAF50;

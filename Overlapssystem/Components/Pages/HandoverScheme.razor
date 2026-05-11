@@ -49,10 +49,10 @@ else
             <button class="btn-grey" @onclick="ShowCreateResident">
                 Opret beboer
             </button>
-            <button class="btn-grey" @onclick="GoToCreateUser">
+            <button class="btn-navigate-2" @onclick="GoToCreateUser">
                 Opret bruger
             </button>
-            <button class="btn-grey" @onclick="GoToAuditTrail">
+            <button class="btn-navigate-1" @onclick="GoToAuditTrail">
                 Audit log
                 </button>
         </div>
@@ -133,7 +133,7 @@ else
 
     private void GoToCreateUser()
     {
-        Navigation.NavigateTo("/OpretBruger");
+        Navigation.NavigateTo($"/OpretBruger/{departmentId}");
     }
 
     private void GoToAuditTrail()

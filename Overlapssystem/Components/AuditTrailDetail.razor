@@ -1,10 +1,12 @@
 ﻿@page "/audittrail/{DepartmentId:int}"
 @rendermode InteractiveServer
 
+
 @using Overlapssystem.Services
 @using OverlapssystemShared
 
 @inject AuditTrailDetailApiService AuditTrailDetailApiService
+@inject NavigationManager Navigation
 
 @if (DepartmentId == 1)
 {
@@ -17,32 +19,36 @@ else if (DepartmentId == 2)
 else
 {
     DepartmentName = "Ukendt afdeling";
-})
+}
 
 <div class="audit-page">
     <div class="audit-header">
         <div>
-            <h3 class="audit-title">Audit trail</h3>
-            <p class="audit-subtitle">Viser ændringer for afdeling @DepartmentName</p>
+            <h3 class="h2-style">Audit log</h3>
+            <p class="standard-text">Viser ændringer for afdeling @DepartmentName</p>
         </div>
 
-        <button class="audit-refresh-button" @onclick="LoadAuditTrailDetails">
+        <button class="btn-grey" @onclick="LoadAuditTrailDetails">
             Opdater
+        </button>
+
+        <button class="btn-return" @onclick="GoToHandoverScheme">
+            Tilbage 
         </button>
     </div>
      
     @if (auditTrailDetails.Count == 0)
     {
-        <div class="audit-state">
+        <div class="standard-text">
             Ingen audit trail detaljer fundet for afdeling @DepartmentName.
         </div>
     }
     else
     {
-        <div class="audit-card">
+       
             <div class="audit-table-wrapper">
-                <table class="audit-table">
-                    <thead>
+                <table class="table">
+                    <thead class="standard-text">
                         <tr>
                             <th>Dato</th>
                             <th>Afdeling</th>
@@ -54,7 +60,7 @@ else
                             <th>Ændret af</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="standard-text">
                         @foreach (var item in auditTrailDetails)
                         {
                             <tr>
@@ -71,7 +77,7 @@ else
                     </tbody>
                 </table>
             </div>
-        </div>
+       
     }
 </div>
 
@@ -106,4 +112,10 @@ else
     {
         return string.IsNullOrWhiteSpace(value) ? "-" : value;
     }
+
+    private void GoToHandoverScheme()
+    {
+        Navigation.NavigateTo($"/HandoverScheme/{DepartmentId}");
+    }
+    
 }
