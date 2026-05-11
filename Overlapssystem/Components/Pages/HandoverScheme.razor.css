@@ -55,3 +55,9 @@
 .login-logout-btn:hover {
     background-color: #dcdcdc;
 }
+
+.card-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
