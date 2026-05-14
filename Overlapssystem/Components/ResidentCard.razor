@@ -6,13 +6,32 @@
 @using Overlapssystem.Interfaces
 @using Overlapssystem.TokenService
 @using Microsoft.AspNetCore.Components.Authorization
+@using OverlapssytemApplication.Common.Result
+@using OverlapssytemApplication.Common.Errors
 
+@inherits AppComponentBase
 @inject IJSRuntime JS
 @inject IResidentFacade residentFacade
 
 
+<!--- Viser tekniske fejl --->
+@if (CurrentError?.Type == ErrorType.Technical || CurrentError?.Type == ErrorType.NotFound)
+{
+    <div class="technical-error-msg">
+        <ErrorDisplay Message="@CurrentError?.Message" />
+    </div>
+}
+
+<!--- Viser valideringsfejl --->
+@if (CurrentError?.Type == ErrorType.Validation)
+{
+    <div class="error-msg">
+        <ErrorDisplay Message="@CurrentError?.Message" />
+    </div>
+}
 
 <div class="resident-card @GetRiskClass()">
+    
     <!-- Viser UI/design for en beboer-->
     <!-- TOP 1 -->
     <div class="top-row">
@@ -424,13 +443,12 @@ else if (context.User.IsInRole("Simpel"))
         _ => ""
     };
 
-   
 
     // Resident 
 
     private async Task SaveResident()
     {
-        await residentFacade.UpdateResident(Resident);
+        await ExecuteAsync(() => residentFacade.UpdateResident(Resident));
 
         // Opdater beboerlisten i parent component
         await OnSave.InvokeAsync(Resident);
@@ -450,7 +468,7 @@ else if (context.User.IsInRole("Simpel"))
     private async Task UpdateMedicinTimeAsync(MedicinViewModel vm)
     {
       
-        await residentFacade.UpdateMedicin(vm);
+        await ExecuteAsync(() => residentFacade.UpdateMedicin(vm));
     }
     private async Task AddMedicinTimeAsync()
     {
@@ -470,7 +488,7 @@ else if (context.User.IsInRole("Simpel"))
             ResidentID = Resident.ResidentId
         };
 
-        var id = await residentFacade.AddMedicinTime(vm);
+        var id = await ExecuteAsyncT(() => residentFacade.AddMedicinTime(vm));
         vm.MedicinTimeID = id;
 
         Resident.MedicinTimes.Add(vm);
@@ -484,7 +502,7 @@ else if (context.User.IsInRole("Simpel"))
         if (!ok) return;
 
 
-        await residentFacade.DeleteMedicinTime(vm);
+        await ExecuteAsync(() => residentFacade.DeleteMedicinTime(vm));
 
         Resident.MedicinTimes.Remove(vm);
     }
@@ -492,7 +510,7 @@ else if (context.User.IsInRole("Simpel"))
     private async Task SetMedicinChecked(MedicinViewModel vm, bool isChecked)
     {
         
-        await residentFacade.SetMedicinChecked(vm, isChecked);
+        await ExecuteAsync(() => residentFacade.SetMedicinChecked(vm, isChecked));
         vm.IsChecked = isChecked;
         if (isChecked)
         {
@@ -514,7 +532,7 @@ else if (context.User.IsInRole("Simpel"))
             ResidentID = Resident.ResidentId,
         };
        
-        var id = await residentFacade.AddPNMedicinTime(vm);
+        var id = await ExecuteAsyncT(() => residentFacade.AddPNMedicinTime(vm));
         vm.PNMedicinID = id;
 
         Resident.PNMedicin.Add(vm);
@@ -531,14 +549,14 @@ else if (context.User.IsInRole("Simpel"))
 
      
 
-        await residentFacade.DeletePNMedicinTime(vm);
+        await ExecuteAsync(() => residentFacade.DeletePNMedicinTime(vm));
         Resident.PNMedicin.Remove(vm);
     }
 
     private async Task UpdatePNMedicinTimeAsync(PNMedicinViewModel vm)
     {
        
-        await residentFacade.UpdatePNMedicin(vm);
+        await ExecuteAsync(() => residentFacade.UpdatePNMedicin(vm));
     }
 
     // Shopping 
@@ -550,7 +568,7 @@ else if (context.User.IsInRole("Simpel"))
             ResidentID = Resident.ResidentId,
         };
        
-        var id = await residentFacade.AddShopping(vm);
+        var id = await ExecuteAsyncT(() => residentFacade.AddShopping(vm));
         vm.ShoppingID = id;
 
         Resident.Shopping.Add(vm);
@@ -563,7 +581,7 @@ else if (context.User.IsInRole("Simpel"))
         if (!ok) return;
         
 
-        await residentFacade.DeleteShopping(vm);
+        await ExecuteAsync(() => residentFacade.DeleteShopping(vm));
         
         Resident.Shopping.Remove(vm);
     }
@@ -571,7 +589,7 @@ else if (context.User.IsInRole("Simpel"))
     private async Task UpdateShopping(ShoppingViewModel vm)
     {
        
-        await residentFacade.UpdateShopping(vm);
+        await ExecuteAsync(() => residentFacade.UpdateShopping(vm));
     }
     // Special Event
     private async Task AddSpecialEvent()
@@ -581,20 +599,20 @@ else if (context.User.IsInRole("Simpel"))
             ResidentID = Resident.ResidentId,
         };
 
-        var id = await residentFacade.AddSpecialEvent(vm);
+        var id = await ExecuteAsyncT(() => residentFacade.AddSpecialEvent(vm));
         vm.SpecialEventID = id;
         Resident.SpecialEvents.Add(vm);
     }
     private async Task UpdateSpecialEvent(SpecialEventViewModel vm)
     {
 
-        await residentFacade.UpdateSpecialEvent(vm);
+        await ExecuteAsync(() => residentFacade.UpdateSpecialEvent(vm));
     }
     private async Task DeleteSpecialEvent(SpecialEventViewModel vm)
     {
         var ok = await JS.InvokeAsync<bool>("confirm", "Vil du slette denne særlige hændelse?");
         if (!ok) return;
-        await residentFacade.DeleteSpecialEvent(vm);
+        await ExecuteAsync(() => residentFacade.DeleteSpecialEvent(vm));
         Resident.SpecialEvents.Remove(vm);
     }
 

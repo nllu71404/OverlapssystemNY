@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using OverlapssystemAPI.Common;
 using OverlapssystemDomain.Entities;
-using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
-using Microsoft.AspNetCore.Authorization;
+using OverlapssytemApplication.Common.Result;
+using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -80,12 +82,20 @@ namespace OverlapssystemAPI.Controllers
         public async Task<IActionResult> ValidateUser([FromBody] AddUserDTO userDTO)
         {
             var result = await _authService.LoginAsync(userDTO.UserName, userDTO.Password);
+
             if (!result.Success)
             {
-                return Unauthorized(new { message = result.Error.Message ?? "Ingen adgang" });
+                return Handle(result); 
             }
 
-            return Ok(new { token = result.Value});
+            return Ok(new ApiResponse<TokenResponseDTO>
+            {
+                Success = true,
+                Data = new TokenResponseDTO
+                {
+                    Token = result.Value
+                }
+            });
         }
 
         //// ----- Mapping ---- //

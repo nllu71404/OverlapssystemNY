@@ -9,14 +9,31 @@
 @using Overlapssystem.Interfaces
 @using Overlapssystem.TokenService
 @using Microsoft.AspNetCore.Components.Authorization
+@using OverlapssytemApplication.Common.Result
+@using OverlapssytemApplication.Common.Errors
 
+@inherits AppComponentBase
 @inject IResidentFacade residentFacade
 @inject IDepartmentTaskFacade departmentTaskFacade
 @inject IEmployeePhoneFacade employeePhoneFacade
 @inject NavigationManager Navigation
 @inject AuthState authState
 
+<!--- Viser tekniske fejl --->
+@if (CurrentError?.Type == ErrorType.Technical || CurrentError?.Type == ErrorType.NotFound)
+{
+    <div class="technical-error-msg">
+        <ErrorDisplay Message="@CurrentError?.Message" />
+    </div>
+}
 
+<!--- Viser valideringsfejl --->
+@if (CurrentError?.Type == ErrorType.Validation)
+{
+    <div class="error-msg">
+        <ErrorDisplay Message="@CurrentError?.Message" />
+    </div>
+}
 
 @if (departmentId == 1)
 {
@@ -107,28 +124,14 @@ else
     public int departmentId { get; set; }
 
     private bool showCreateResident = false;
-    private bool isLoading = true;
     private DepartmentTaskCard? departmentTaskCard;
     private EmployeePhoneCard? employeePhoneCard;
 
     ResidentViewModel newResident = new ResidentViewModel { Risiko = Risiko.Green };
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            try
-            {
-                Console.WriteLine($"DepartmentId: {departmentId}");
-                residents = await residentFacade.GetResidentByDepartment(departmentId);
-                Console.WriteLine($"Residents count; {residents?.Count}");
-            }
-            finally
-            {
-                isLoading = false;
-                StateHasChanged();
-            }
-        }
+        await RefreshResidentsAsync();
     }
 
     private void GoToCreateUser()
@@ -143,47 +146,46 @@ else
 
     private async Task ShowCreateResident()
     {
-        
-       
-        
         newResident = new ResidentViewModel
         {
             Risiko = Risiko.Green,
             DepartmentId = departmentId,
-            Name = "Ny beboer" // Placeholder navn
+            Name = "Ny beboer"
         };
-        var newID = await residentFacade.AddResident(newResident);
-        newResident.ResidentId = newID;
-        showCreateResident = true;
-        StateHasChanged();
 
-        Console.WriteLine($"Residentid in ShowCreateResident: {newResident.ResidentId}");
+        var newId = await ExecuteAsyncT(() =>
+            residentFacade.AddResident(newResident));
+
+        if (newId <= 0)
+            return;
+
+        newResident.ResidentId = newId;
+
+        showCreateResident = true;
     }
 
     private async Task SaveResidentAsync(ResidentViewModel vm)
     {
-        await residentFacade.UpdateResident(vm);
+        await ExecuteAsync(() => residentFacade.UpdateResident(vm));
 
         if (vm == newResident)
         {
             showCreateResident = false;
-            residents = await residentFacade.GetResidentByDepartment(departmentId);
+            await RefreshResidentsAsync();
             newResident = new ResidentViewModel { Risiko = Risiko.Green };
         }
         else
         {
-            residents = await residentFacade.GetResidentByDepartment(departmentId);
+            await RefreshResidentsAsync();
         }
 
         StateHasChanged();
-
-        Console.WriteLine($"Residentid in SaveResidentAsync: {newResident.ResidentId}");
 
     }
 
     private async Task DeleteResidentAsync(ResidentViewModel vm)
     {
-        await residentFacade.DeleteResident(vm.ResidentId);
+        await ExecuteAsync(() => residentFacade.DeleteResident(vm.ResidentId));
 
         if (vm == newResident)
         {
@@ -191,8 +193,16 @@ else
             newResident = new ResidentViewModel { Risiko = Risiko.Green };
         }
 
-        residents = await residentFacade.GetResidentByDepartment(departmentId);
+        await RefreshResidentsAsync();
         StateHasChanged();
+    }
+
+    //hjælpe metode til at opdatere beboer listen efter ændringer
+    private async Task RefreshResidentsAsync()
+    {
+        residents = await ExecuteAsyncT(() =>
+            residentFacade.GetResidentByDepartment(departmentId))
+            ?? new();
     }
 
     //Tilføj og slet DepartmentTask
@@ -206,14 +216,14 @@ else
             ShiftType = ShiftType.Dag
         };
 
-        await departmentTaskFacade.AddDepartmentTask(newTask);
+        await ExecuteAsync(() => departmentTaskFacade.AddDepartmentTask(newTask));
 
         if (departmentTaskCard is not null) await departmentTaskCard.RefreshAsync();
     }
 
     private async Task DeleteDepartmentTaskAsync(DepartmentTaskViewModel vm)
     {
-        await departmentTaskFacade.DeleteDepartmentTask(vm.DepartmentTaskID);
+        await ExecuteAsync(() => departmentTaskFacade.DeleteDepartmentTask(vm.DepartmentTaskID));
 
         if (departmentTaskCard is not null)
             await departmentTaskCard.RefreshAsync();
@@ -229,14 +239,14 @@ else
                 Test = false
             };
 
-        await employeePhoneFacade.AddEmployeePhone(empPhone);
+        await ExecuteAsync(() => employeePhoneFacade.AddEmployeePhone(empPhone));
 
         if (employeePhoneCard is not null) await employeePhoneCard.RefreshAsync();
     }
 
     private async Task DeleteEmployeePhoneAsync(EmployeePhoneViewModel vm)
     {
-        await employeePhoneFacade.DeleteEmployeePhone(vm.EmployeePhoneID);
+        await ExecuteAsync(() => employeePhoneFacade.DeleteEmployeePhone(vm.EmployeePhoneID));
 
         if (employeePhoneCard is not null)
             await employeePhoneCard.RefreshAsync();

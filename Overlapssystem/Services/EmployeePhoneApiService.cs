@@ -2,6 +2,8 @@
 using Overlapssystem.ViewModels;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
+using OverlapssytemApplication.Common.Result;
+using OverlapssytemApplication.Common.Errors;
 using System.Net.Http.Json;
 using System.Reflection;
 
@@ -10,68 +12,136 @@ namespace Overlapssystem.Services
     public class EmployeePhoneApiService
     {
         private readonly HttpClient _http;
-        public EmployeePhoneApiService(HttpClient http)
+        private readonly ILogger<EmployeePhoneApiService> _logger;
+
+        public EmployeePhoneApiService(HttpClient http, ILogger<EmployeePhoneApiService> logger)
         {
             _http = http;
+            _logger = logger;
         }
 
-        //Hent Alle
-        public async Task<List<EmployeePhoneDTO>> GetAllEmployeePhoneNumbers()
+        // GET ALL
+        public async Task<Result<List<EmployeePhoneDTO>>> GetAllEmployeePhoneNumbers()
         {
-            var response = await _http.GetAsync(
-            "api/EmployeePhone/HentAlleEmployeePhones");
+            try
+            {
+                var response = await _http.GetAsync(
+                    "api/EmployeePhone/HentAlleEmployeePhones"
+                );
 
-            var list = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
+                var result = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
 
-            return list ?? new List<EmployeePhoneDTO>();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllEmployeePhoneNumbers fejlede");
+                return Error.Technical("Kunne ikke hente telefonnumre");
+            }
         }
 
-        //Hent på Id
-        public async Task<EmployeePhoneDTO> GetEmployeePhoneById(int employeePhoneId)
+        // GET BY ID
+        public async Task<Result<EmployeePhoneDTO>> GetEmployeePhoneById(int employeePhoneId)
         {
-            var response = await _http.GetAsync(
-            $"api/EmployeePhone/HentEmployeePhoneById/{employeePhoneId}");
+            if (employeePhoneId <= 0)
+                return Error.Validation("Ugyldigt id");
 
-            return await response.ReadApiResponse<EmployeePhoneDTO>();
+            try
+            {
+                var response = await _http.GetAsync(
+                    $"api/EmployeePhone/HentEmployeePhoneById/{employeePhoneId}"
+                );
+
+                return await response.ReadApiResponse<EmployeePhoneDTO>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetEmployeePhoneById fejlede for Id {Id}", employeePhoneId);
+                return Error.Technical("Kunne ikke hente telefonnummer");
+            }
         }
 
-        public async Task<List<EmployeePhoneDTO>> GetEmployeePhonesByDepartmentId(int departmentId)
+        // GET BY DEPARTMENT
+        public async Task<Result<List<EmployeePhoneDTO>>> GetEmployeePhonesByDepartmentId(int departmentId)
         {
-            var response = await _http.GetAsync(
-            $"api/EmployeePhone/HentEmployeePhonesByDepartmentId/{departmentId}");
+            if (departmentId <= 0)
+                return Error.Validation("Ugyldigt departmentId");
 
-            var list = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
+            try
+            {
+                var response = await _http.GetAsync(
+                    $"api/EmployeePhone/HentEmployeePhonesByDepartmentId/{departmentId}"
+                );
 
-            return list ?? new List<EmployeePhoneDTO>();
+                var result = await response.ReadApiResponse<List<EmployeePhoneDTO>>();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetEmployeePhonesByDepartmentId fejlede for DepartmentId {DepartmentId}", departmentId);
+                return Error.Technical("Kunne ikke hente telefonnumre");
+            }
         }
 
-        //Tilføj
-        public async Task<int> AddEmployeePhone(AddEmployeePhoneDTO employeePhoneDTO)
+        // ADD
+        public async Task<Result<int>> AddEmployeePhone(AddEmployeePhoneDTO dto)
         {
-            var response = await _http.PostAsJsonAsync(
-             "api/EmployeePhone/TilføjEmployeePhone",
-             employeePhoneDTO);
-            var result = await response.ReadApiResponse<int>();
-            return result;
+            try
+            {
+                var response = await _http.PostAsJsonAsync(
+                    "api/EmployeePhone/TilføjEmployeePhone",
+                    dto
+                );
+
+                return await response.ReadApiResponse<int>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AddEmployeePhone fejlede");
+                return Error.Technical("Kunne ikke oprette telefonnummer");
+            }
         }
 
-        //Update
-        public async Task UpdateEmployeePhone(int employeePhoneId, EmployeePhoneDTO employeePhoneDTO)
+        // UPDATE
+        public async Task<Result> UpdateEmployeePhone(int id, EmployeePhoneDTO dto)
         {
-            var response = await _http.PutAsJsonAsync(
-            $"api/EmployeePhone/OpdaterEmployeePhone/{employeePhoneId}",
-            employeePhoneDTO);
-            await response.ReadApiResponse<object>();
+            try
+            {
+                var response = await _http.PutAsJsonAsync(
+                    $"api/EmployeePhone/OpdaterEmployeePhone/{id}",
+                    dto
+                );
+
+                await response.ReadApiResponse<object>();
+
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateEmployeePhone fejlede for Id {Id}", id);
+                return Error.Technical("Kunne ikke opdatere telefonnummer");
+            }
         }
 
-        //Delete
-        public async Task DeleteEmployeePhone(int employeePhoneId)
+        // DELETE
+        public async Task<Result> DeleteEmployeePhone(int id)
         {
-            var response = await _http.DeleteAsync(
-            $"api/EmployeePhone/SletEmployeePhone/{employeePhoneId}");
+            try
+            {
+                var response = await _http.DeleteAsync(
+                    $"api/EmployeePhone/SletEmployeePhone/{id}"
+                );
 
-            await response.ReadApiResponse<object>();
+                await response.ReadApiResponse<object>();
+
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteEmployeePhone fejlede for Id {Id}", id);
+                return Error.Technical("Kunne ikke slette telefonnummer");
+            }
         }
-
     }
 }

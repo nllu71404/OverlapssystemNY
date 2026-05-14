@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
-using OverlapssytemApplication.Common;
 using OverlapssytemApplication.Common.Errors;
+using OverlapssytemApplication.Common.Result;
 using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssytemApplication.Services
@@ -92,8 +92,7 @@ namespace OverlapssytemApplication.Services
         public async Task<Result> CreateNewUserAsync(UserModel userModel, string password, string role)
         {
             if (userModel == null) return Error.Validation("Brugermodellen er påkrævet");
-            if (string.IsNullOrWhiteSpace(userModel.UserName))
-                return Error.Validation("Brugernavnet er påkrævet");
+           
 
             try
             {

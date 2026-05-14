@@ -2,74 +2,120 @@
 using Overlapssystem.Services.Extensions;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
+using OverlapssytemApplication.Common.Result;
+using OverlapssytemApplication.Common.Errors;
 namespace Overlapssystem.Services
 
 {
     public class UserApiService
     {
         private readonly HttpClient _http;
-        public UserApiService(HttpClient http)
+        private readonly ILogger<UserApiService> _logger;
+
+        public UserApiService(HttpClient http, ILogger<UserApiService> logger)
         {
             _http = http;
+            _logger = logger;
         }
 
-        //Hent alle
-        public async Task<List<UserModel>> GetAllUsers()
+        // GET ALL
+        public async Task<Result<List<UserModel>>> GetAllUsers()
         {
-            var response = await _http.GetAsync("api/User/HenterBrugere");
-            var users = await response.ReadApiResponse<List<UserModel>>();
-            return users?.ToList() ?? new List<UserModel>();
-        }
-        //Hent på ID
-        public async Task<UserModel> GetUserByID(string userID)
-        {
-            var response = await _http.GetAsync($"api/User/HenterBrugere/{userID}");
-            return await response.ReadApiResponse<UserModel>();
-        }
-
-        //Hent på brugernavn
-        public async Task<UserModel> GetUserByUsername(string username)
-        {
-            var response = await _http.GetAsync($"api/User/HenterBrugere/Brugernavn/{username}");
-            return await response.ReadApiResponse<UserModel>();
-        }
-
-        //Tilføj
-        public async Task CreateUser(AddUserDTO userDTO)
-        {
-            var response = await _http.PostAsJsonAsync("api/User/OpretBruger", userDTO);
-            await response.ReadApiResponse<object>();
-        }
-        //Delete
-        public async Task DeleteUser(string userID)
-        {
-            var response = await _http.DeleteAsync($"api/User/{userID}");
-            await response.ReadApiResponse<object>();
-        }
-        ////Update
-        //public async Task UpdateUser(string userID, AddUserDTO userDTO)
-        //{
-        //    var response = await _http.PutAsJsonAsync($"api/User/{userID}", userDTO);
-        //    await response.ReadApiResponse<object>();
-        //}
-        // Validering - returnerer JWT token ved succes, null ved fejl
-        public async Task<string?> ValidateUser(string username, string password)
-        {
-            var dto = new { UserName = username, Password = password };
-            var response = await _http.PostAsJsonAsync("api/User/ValiderBruger", dto);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var result = await response.Content.ReadFromJsonAsync<TokenResponseDTO>();
-                var token = result?.Token;
-
-                // Log the token for debugging purposes (remove in production)
-                Console.WriteLine($"Generated Token: {token}");
-
-                return token;
+                var response = await _http.GetAsync("api/User/HenterBrugere");
+                return await response.ReadApiResponse<List<UserModel>>();
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllUsers failed");
+                return Error.Technical("Kunne ikke hente brugere");
+            }
+        }
 
-            return null;
+        // GET BY ID
+        public async Task<Result<UserModel>> GetUserByID(string userID)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/User/HenterBrugere/{userID}");
+                return await response.ReadApiResponse<UserModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetUserByID failed for {UserID}", userID);
+                return Error.Technical("Kunne ikke hente bruger");
+            }
+        }
+
+        // GET BY USERNAME
+        public async Task<Result<UserModel>> GetUserByUsername(string username)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/User/HenterBrugere/Brugernavn/{username}");
+                return await response.ReadApiResponse<UserModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetUserByUsername failed for {Username}", username);
+                return Error.Technical("Kunne ikke hente bruger");
+            }
+        }
+
+        // CREATE
+        public async Task<Result<int>> CreateUser(AddUserDTO userDTO)
+        {
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/User/OpretBruger", userDTO);
+                 return await response.ReadApiResponse<int>();
+                
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CreateUser failed");
+                return Error.Technical("Kunne ikke oprette bruger");
+            }
+        }
+
+        // DELETE
+        public async Task<Result> DeleteUser(string userID)
+        {
+            try
+            {
+                var response = await _http.DeleteAsync($"api/User/{userID}");
+                await response.ReadApiResponse<object>();
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteUser failed for {UserID}", userID);
+                return Error.Technical("Kunne ikke slette bruger");
+            }
+        }
+
+        // VALIDATE USER (JWT)
+        public async Task<Result<string>> ValidateUser(string username, string password)
+        {
+            try
+            {
+                var dto = new { UserName = username, Password = password };
+
+                var response = await _http.PostAsJsonAsync("api/User/ValiderBruger", dto);
+
+                var result = await response.ReadApiResponse<TokenResponseDTO>();
+
+                if (!result.Success)
+                    return result.Error;
+
+                return result.Map(x => x.Token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ValidateUser failed for {Username}", username);
+                return Error.Technical("Login fejlede");
+            }
         }
     }
 }

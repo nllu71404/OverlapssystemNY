@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Interfaces;
-using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Common.Result;
 
 namespace OverlapssytemApplication.Interfaces
 {

@@ -1,8 +1,10 @@
-﻿using System.Net.Http.Json;
-using System;
+﻿using Overlapssystem.Services.Extensions;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
-using Overlapssystem.Services.Extensions;
+using OverlapssytemApplication.Common.Errors;
+using OverlapssytemApplication.Common.Result;
+using System;
+using System.Net.Http.Json;
 
 
 namespace Overlapssystem.Services
@@ -12,47 +14,99 @@ namespace Overlapssystem.Services
     public class ResidentApiService
     {
         private readonly HttpClient _http;
+        private readonly ILogger<ResidentApiService> _logger;
 
-        public ResidentApiService(HttpClient http)
+        public ResidentApiService(HttpClient http, ILogger<ResidentApiService> logger)
         {
             _http = http;
+            _logger = logger;
         }
 
-        public async Task<List<ResidentDTO>> GetAllResidents()
+        // GET ALL
+        public async Task<Result<List<ResidentDTO>>> GetAllResidents()
         {
-            var response = await _http.GetAsync("api/Resident/HenterResident");
-            var residentList = await response.ReadApiResponse<List<ResidentDTO>>();
-            return residentList?.ToList() ?? new List<ResidentDTO>();
+            try
+            {
+                var response = await _http.GetAsync("api/Resident/HenterResident");
+
+                return await response.ReadApiResponse<List<ResidentDTO>>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllResidents fejlede");
+                return Error.Technical("Kunne ikke hente beboere");
+            }
         }
 
-        public async Task<int> AddResident(AddResidentDTO resident)
+        // GET BY DEPARTMENT
+        public async Task<Result<List<ResidentDTO>>> GetByDepartment(int? id)
         {
-            var response = await _http.PostAsJsonAsync("api/Resident/OpretResident", resident);
+            if (id is null || id <= 0)
+                return Error.Validation("Ugyldigt afdeling id");
 
-            var residentId = await response.ReadApiResponse<int>();
-            return residentId;
+            try
+            {
+                var response = await _http.GetAsync($"api/Resident/Department/{id}");
+
+                return await response.ReadApiResponse<List<ResidentDTO>>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetByDepartment fejlede for DepartmentId {DepartmentId}", id);
+                return Error.Technical("Kunne ikke hente beboere");
+            }
         }
 
-        public async Task UpdateResident(int id, UpdateResidentDTO resident)
+        // ADD
+        public async Task<Result<int>> AddResident(AddResidentDTO resident)
         {
-            var response = await _http.PutAsJsonAsync($"api/Resident/{id}", resident);
-            await response.ReadApiResponse<object>();
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/Resident/OpretResident", resident);
+
+                return await response.ReadApiResponse<int>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AddResident fejlede");
+                return Error.Technical("Kunne ikke oprette beboer");
+            }
         }
 
-        public async Task DeleteResident(int id)
+        // UPDATE
+        public async Task<Result> UpdateResident(int id, UpdateResidentDTO resident)
         {
-            var response = await _http.DeleteAsync($"api/Resident/{id}");
-            await response.ReadApiResponse<object>();
+            try
+            {
+                var response = await _http.PutAsJsonAsync($"api/Resident/{id}", resident);
+
+                await response.ReadApiResponse<object>();
+
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateResident fejlede for Id {ResidentId}", id);
+                return Error.Technical("Kunne ikke opdatere beboer");
+            }
         }
 
-        public async Task<List<ResidentDTO>> GetByDepartment(int? id)
+        // DELETE
+        public async Task<Result> DeleteResident(int id)
         {
-            var response = await _http.GetAsync($"api/Resident/Department/{id}");
-            var residentList = await response.ReadApiResponse<List<ResidentDTO>>();
-            return residentList?.ToList() ?? new List<ResidentDTO>();
+            try
+            {
+                var response = await _http.DeleteAsync($"api/Resident/{id}");
+
+                await response.ReadApiResponse<object>();
+
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteResident fejlede for Id {ResidentId}", id);
+                return Error.Technical("Kunne ikke slette beboer");
+            }
         }
-
-       
-
     }
 }

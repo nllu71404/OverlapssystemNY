@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssystemDomain.Interfaces;
-using OverlapssytemApplication.Common;
 using OverlapssytemApplication.Common.Errors;
+using OverlapssytemApplication.Common.Result;
 
 namespace OverlapssytemApplication.Services
 {

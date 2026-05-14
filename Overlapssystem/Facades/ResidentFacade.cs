@@ -2,6 +2,7 @@
 using Overlapssystem.ViewModels;
 using OverlapssystemShared;
 using Overlapssystem.Interfaces;
+using OverlapssytemApplication.Common.Result;
 
 namespace Overlapssystem.Facades
 {
@@ -25,121 +26,137 @@ namespace Overlapssystem.Facades
 
         // Resident
 
-        public async Task UpdateResident(ResidentViewModel vm)
+        public async Task<Result> UpdateResident(ResidentViewModel vm)
         {
             var dto = MapUpdateResident(vm);
             await _residentApi.UpdateResident(vm.ResidentId, dto);
+            return Result.Ok();
         }
 
-        public async Task DeleteResident(int residentId)
+        public async Task<Result> DeleteResident(int residentId)
         {
            
             await _residentApi.DeleteResident(residentId);
+            return Result.Ok();
         }
 
-        public async Task<int> AddResident(ResidentViewModel vm)
+        public async Task<Result<int>> AddResident(ResidentViewModel vm)
         {
             var dto = MapAddResident(vm);
             var residentId = await _residentApi.AddResident(dto);
             return residentId;
         }
 
-        public async Task<List<ResidentViewModel>> GetAllResidents()
+        public async Task<Result<List<ResidentViewModel>>> GetAllResidents()
         {
-            var dtos = await _residentApi.GetAllResidents();
-            var residents = dtos.Select(MapResident).ToList();
-            return residents;
+            var result = await _residentApi.GetAllResidents();
+
+            return result.Map(dtos =>
+                dtos.Select(MapResident).ToList()
+            );
         }
 
-        public async Task<List<ResidentViewModel>> GetResidentByDepartment(int departmentId)
+        public async Task<Result<List<ResidentViewModel>>> GetResidentByDepartment(int departmentId)
         {
-            var dtos = await _residentApi.GetByDepartment(departmentId);
-            var residents = dtos.Select(MapResident).ToList();
-            return residents;
+            var result = await _residentApi.GetByDepartment(departmentId);
+
+            return result.Map(dtos =>
+                dtos.Select(MapResident).ToList()
+            );
         }
 
         // Medicin
 
 
-        public async Task UpdateMedicin(MedicinViewModel vm)
+        public async Task<Result> UpdateMedicin(MedicinViewModel vm)
         {
             var dto = MapUpdateMedicin(vm);
             await _medicinApi.UpdateMedicin(vm.MedicinTimeID, dto);
+            return Result.Ok();
         }
 
-        public async Task<int> AddMedicinTime(MedicinViewModel vm)
+        public async Task<Result<int>> AddMedicinTime(MedicinViewModel vm)
         {
             var dto = MapAddMedicin(vm);
             var medicinTimeId = await _medicinApi.AddMedicinTime(dto);
             return medicinTimeId;
         }
 
-        public async Task DeleteMedicinTime(MedicinViewModel vm) // evt ændre til kun at tage id som parameter
+        public async Task<Result> DeleteMedicinTime(MedicinViewModel vm) // evt ændre til kun at tage id som parameter
         {
             await _medicinApi.DeleteMedicin(vm.MedicinTimeID);
+            return Result.Ok();
         }
 
-        public async Task SetMedicinChecked(MedicinViewModel vm, bool isChecked)
+        public async Task<Result> SetMedicinChecked(MedicinViewModel vm, bool isChecked)
         {
             await _medicinApi.SetMedicinChecked(vm.MedicinTimeID, isChecked);
+            return Result.Ok();
         }
 
         // PNMedicin
 
-        public async Task UpdatePNMedicin(PNMedicinViewModel vm)
+        public async Task<Result> UpdatePNMedicin(PNMedicinViewModel vm)
         {
             var dto = MapUpdatePNMedicin(vm);
             await _pnMedicinApi.UpdatePNMedicin(vm.PNMedicinID, dto);
+            return Result.Ok();
         }
 
-        public async Task<int> AddPNMedicinTime(PNMedicinViewModel vm)
+        public async Task<Result<int>> AddPNMedicinTime(PNMedicinViewModel vm)
         {
             var dto = MapAddPNMedicin(vm);
             var pnMedicinTimeId = await _pnMedicinApi.AddPNMedicinTime(dto);
             return pnMedicinTimeId;
         }
 
-        public async Task DeletePNMedicinTime(PNMedicinViewModel vm) // evt ændre til kun at tage id som parameter
+        public async Task<Result> DeletePNMedicinTime(PNMedicinViewModel vm) // evt ændre til kun at tage id som parameter
         {
             await _pnMedicinApi.DeletePNMedicin(vm.PNMedicinID);
+            return Result.Ok();
         }
+        
 
         // Shopping
 
-        public async Task UpdateShopping(ShoppingViewModel vm)
+        public async Task<Result> UpdateShopping(ShoppingViewModel vm)
         {
             var dto = MapUpdateShopping(vm);
             await _shoppingApi.UpdateShopping(vm.ShoppingID, dto);
+            return Result.Ok();
         }
 
-        public async Task<int> AddShopping(ShoppingViewModel vm)
+        public async Task<Result<int>> AddShopping(ShoppingViewModel vm)
         {
             var dto = MapAddShopping(vm);
             var shoppingId = await _shoppingApi.AddShopping(dto);
             return shoppingId;
         }
-        public async Task DeleteShopping(ShoppingViewModel vm) // evt ændre til kun at tage id som parameter
+        public async Task<Result> DeleteShopping(ShoppingViewModel vm) // evt ændre til kun at tage id som parameter
         {
             await _shoppingApi.DeleteShopping(vm.ShoppingID);
+            return Result.Ok();
         }
 
         // SpecialEvent
 
-        public async Task UpdateSpecialEvent(SpecialEventViewModel vm)
+        public async Task<Result> UpdateSpecialEvent(SpecialEventViewModel vm)
         {
             var dto = MapUpdateSpecialEvent(vm);
             await _specialEventApi.UpdateSpecialEvent(vm.SpecialEventID, dto);
+            return Result.Ok();
         }
 
-        public async Task<int> AddSpecialEvent(SpecialEventViewModel vm)
+        public async Task<Result<int>> AddSpecialEvent(SpecialEventViewModel vm)
         {
             var dto = MapAddSpecialEvent(vm);
             var specialEventId = await _specialEventApi.AddSpecialEvent(dto);
             return specialEventId;
         }
-        public async Task DeleteSpecialEvent(SpecialEventViewModel vm) // evt ændre til kun at tage id som parameter
+        public async Task<Result> DeleteSpecialEvent(SpecialEventViewModel vm) // evt ændre til kun at tage id som parameter
         {
             await _specialEventApi.DeleteSpecialEvent(vm.SpecialEventID);
+            return Result.Ok();
         }
 
 

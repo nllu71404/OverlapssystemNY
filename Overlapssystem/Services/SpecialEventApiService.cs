@@ -1,44 +1,101 @@
-﻿using OverlapssystemDomain.Entities;
+﻿using Overlapssystem.Services.Extensions;
+using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
-using Overlapssystem.Services.Extensions;
+using OverlapssytemApplication.Common.Result;
+using OverlapssytemApplication.Common.Errors;
 
 namespace Overlapssystem.Services
 {
     public class SpecialEventApiService
     {
         private readonly HttpClient _http;
-        public SpecialEventApiService(HttpClient http)
+        private readonly ILogger<SpecialEventApiService> _logger;
+
+        public SpecialEventApiService(HttpClient http, ILogger<SpecialEventApiService> logger)
         {
             _http = http;
+            _logger = logger;
         }
 
-        //Hent
-        public async Task<List<UpdateSpecialEventDTO>> GetSpecialEventByResidentID(int residentId)
+        // GET
+        public async Task<Result<List<UpdateSpecialEventDTO>>> GetSpecialEventByResidentID(int residentId)
         {
-            var response = await _http.GetAsync($"api/SpecialEvent/HentSpecialEventForBorger/{residentId}");
-            var dtoList = await response.ReadApiResponse<List<UpdateSpecialEventDTO>>();
-            return dtoList?.ToList() ?? new List<UpdateSpecialEventDTO>();
+            if (residentId <= 0)
+                return Error.Validation("Ugyldigt resident id");
+
+            try
+            {
+                var response = await _http.GetAsync(
+                    $"api/SpecialEvent/HentSpecialEventForBorger/{residentId}"
+                );
+
+                return await response.ReadApiResponse<List<UpdateSpecialEventDTO>>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetSpecialEventByResidentID fejlede for ResidentId {ResidentId}", residentId);
+                return Error.Technical("Kunne ikke hente special events");
+            }
         }
 
-        //Tilføj
-        public async Task<int> AddSpecialEvent(AddSpecialEventDTO addSpecialEventDTO)
+        // ADD
+        public async Task<Result<int>> AddSpecialEvent(AddSpecialEventDTO dto)
         {
-            var response = await _http.PostAsJsonAsync("api/SpecialEvent/TilføjSpecialEvent", addSpecialEventDTO);
-            return await response.ReadApiResponse<int>();
+            try
+            {
+                var response = await _http.PostAsJsonAsync(
+                    "api/SpecialEvent/TilføjSpecialEvent",
+                    dto
+                );
+
+                return await response.ReadApiResponse<int>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AddSpecialEvent fejlede");
+                return Error.Technical("Kunne ikke oprette special event");
+            }
         }
 
-        //Update
-        public async Task UpdateSpecialEvent(int specialEventID, UpdateSpecialEventDTO specialEventDto)
+        // UPDATE
+        public async Task<Result> UpdateSpecialEvent(int specialEventID, UpdateSpecialEventDTO dto)
         {
-            var response = await _http.PutAsJsonAsync($"api/SpecialEvent/{specialEventID}", specialEventDto);
-            await response.ReadApiResponse<object>();
+            try
+            {
+                var response = await _http.PutAsJsonAsync(
+                    $"api/SpecialEvent/{specialEventID}",
+                    dto
+                );
+
+                await response.ReadApiResponse<object>();
+
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateSpecialEvent fejlede for Id {SpecialEventID}", specialEventID);
+                return Error.Technical("Kunne ikke opdatere special event");
+            }
         }
 
-        //Delete
-        public async Task DeleteSpecialEvent(int specialEventID)
+        // DELETE
+        public async Task<Result> DeleteSpecialEvent(int specialEventID)
         {
-            var response = await _http.DeleteAsync($"api/SpecialEvent/{specialEventID}");
-            await response.ReadApiResponse<object>();
+            try
+            {
+                var response = await _http.DeleteAsync(
+                    $"api/SpecialEvent/{specialEventID}"
+                );
+
+                await response.ReadApiResponse<object>();
+
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteSpecialEvent fejlede for Id {SpecialEventID}", specialEventID);
+                return Error.Technical("Kunne ikke slette special event");
+            }
         }
     }
 }

@@ -1,19 +1,19 @@
 ﻿using Overlapssystem.ViewModels;
+using OverlapssytemApplication.Common.Result;
 
 namespace Overlapssystem.Interfaces
 {
     public interface IDepartmentFacade
     {
-        Task<int> AddDepartment(DepartmentViewModel vm);
+        Task<Result<int>> AddDepartment(DepartmentViewModel vm);
 
-        Task UpdateDepartment(DepartmentViewModel vm);
+        Task<Result> UpdateDepartment(DepartmentViewModel vm);
 
-        Task DeleteDepartment(int departmentId);
+        Task<Result> DeleteDepartment(int departmentId);
 
-        Task<List<DepartmentViewModel>> GetDepartments();
+        Task<Result<List<DepartmentViewModel>>> GetDepartments();
+        Task<Result<DepartmentViewModel>> GetDepartmentById(int departmentId);
 
-        Task<DepartmentViewModel> GetDepartmentById(int departmentId);
-
-        Task<DepartmentViewModel> GetDepartmentByName(string departmentName);
+        Task<Result<DepartmentViewModel>> GetDepartmentByName(string departmentName);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Overlapssystem.Interfaces;
 using Overlapssystem.ViewModels;
 using Overlapssystem.Services;
+using OverlapssytemApplication.Common.Result;
 using OverlapssystemShared;
 
 namespace Overlapssystem.Facades
@@ -14,43 +15,48 @@ namespace Overlapssystem.Facades
             _departmentApiService = departmentApiService;
         }
 
-        public async Task<int> AddDepartment(DepartmentViewModel vm)
+        public async Task<Result<int>> AddDepartment(DepartmentViewModel vm)
         {
             var dto = MapAddDepartment(vm);
             var departmentId = await _departmentApiService.AddDepartment(dto);
             return departmentId;
         }
 
-        public async Task DeleteDepartment(int departmentId)
+        public async Task<Result> DeleteDepartment(int departmentId)
         {
-            await _departmentApiService.DeleteDepartment(departmentId);
+            var result = await _departmentApiService.DeleteDepartment(departmentId);
+            return result;
         }
 
-        public async Task<List<DepartmentViewModel>> GetDepartments()
+        public async Task<Result<List<DepartmentViewModel>>> GetDepartments()
         {
             var departments = await _departmentApiService.GetAllDepartments();
-            return departments.Select(MapGetDepartment).ToList();
+
+            return departments.Map(dtos =>
+            dtos.Select(MapGetDepartment).ToList()
+            );
+
         }
 
-        public async Task UpdateDepartment(DepartmentViewModel vm)
+        public async Task<Result> UpdateDepartment(DepartmentViewModel vm)
         {
             var dto = MapUpdateDepartment(vm);
-            await _departmentApiService.UpdateDepartment(vm.DepartmentID, dto);
+            var result = await _departmentApiService.UpdateDepartment(vm.DepartmentID, dto);
+            return result;
         }
         
 
-        public async Task<DepartmentViewModel> GetDepartmentById(int departmentId)
+        public async Task<Result<DepartmentViewModel>> GetDepartmentById(int departmentId)
         {
-            var dto = await _departmentApiService.GetDepartmentById(departmentId);
-            var department = MapGetDepartment(dto);
-            return department;
+            var department = await _departmentApiService.GetDepartmentById(departmentId);
+
+            return department.Map(MapGetDepartment);
         }
 
-        public async Task<DepartmentViewModel> GetDepartmentByName(string name)
+        public async Task<Result<DepartmentViewModel>> GetDepartmentByName(string name)
         {
-            var dto = await _departmentApiService.GetDepartmentByName(name);
-            var department = MapGetDepartment(dto);
-            return department;
+            var department = await _departmentApiService.GetDepartmentByName(name);
+            return department.Map(MapGetDepartment);
         }
 
         // ----- Mapping -------

@@ -2,6 +2,7 @@
 using Overlapssystem.ViewModels;
 using OverlapssystemShared;
 using Overlapssystem.Services;
+using OverlapssytemApplication.Common.Result;
 
 namespace Overlapssystem.Facades
 {
@@ -16,30 +17,38 @@ namespace Overlapssystem.Facades
         }
 
 
-        public async Task<int> AddDepartmentTask(DepartmentTaskViewModel vm)
+        public async Task<Result<int>> AddDepartmentTask(DepartmentTaskViewModel vm)
         {
             var dto = MapAddDepartmentTask(vm);
             var departmentTaskId = await _departmentTaskApiService.CreateDepartmentTask(dto);
             return departmentTaskId;
         }
 
-        public async Task DeleteDepartmentTask(int departmentTaskId)
+        public async Task<Result> DeleteDepartmentTask(int departmentTaskId)
         {
-            await _departmentTaskApiService.DeleteDepartmentTask(departmentTaskId);
+            var result = await _departmentTaskApiService.DeleteDepartmentTask(departmentTaskId);
+            return result;
         }
 
-        public async Task UpdateDepartmentTask(DepartmentTaskViewModel vm)
+        public async Task<Result> UpdateDepartmentTask(DepartmentTaskViewModel vm)
         {
             var dto = MapUpdateDepartmentTask(vm);
-            await _departmentTaskApiService.UpdateDepartmentTask(vm.DepartmentTaskID, dto);
+            var result = await _departmentTaskApiService.UpdateDepartmentTask(vm.DepartmentTaskID, dto);
+            return result;
         }
 
 
-        public async Task<List<DepartmentTaskViewModel>> GetDepartmentTasksByDepartment(int departmentId)
+        public async Task<Result<List<DepartmentTaskViewModel>>> GetDepartmentTasksByDepartment(int departmentId)
         {
-            var dtos = await _departmentTaskApiService.GetDepartmentTasksByDepartmentId(departmentId);
-            var departmentTasks = dtos.Select(dto => MapDepartmentTask(dto)).ToList();
-            return departmentTasks;
+            var departmentTasks = await _departmentTaskApiService.GetDepartmentTasksByDepartmentId(departmentId);
+            
+            
+            return departmentTasks.Map(dtos =>
+             {
+                 var vms = dtos.Select(dto => MapDepartmentTask(dto)).ToList();
+                 return vms;
+             });
+
         }
 
 

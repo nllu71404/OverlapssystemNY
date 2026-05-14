@@ -2,7 +2,7 @@
 using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
-using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Common.Result;
 
 namespace OverlapssystemAPI.Controllers
 {

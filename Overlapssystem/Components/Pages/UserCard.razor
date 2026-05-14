@@ -5,17 +5,29 @@
 @using Overlapssystem.Interfaces
 @using Overlapssystem.ViewModels
 @using Microsoft.AspNetCore.Components.Authorization
+@using OverlapssytemApplication.Common.Result
+@using OverlapssytemApplication.Common.Errors
 
+@inherits AppComponentBase
 @inject IUserFacade userFacade
 @inject NavigationManager Navigation
-
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
         <div class="login-wrapper">
+
+            <!--- Viser tekniske fejl --->
+            @if (CurrentError?.Type == ErrorType.Technical || CurrentError?.Type == ErrorType.NotFound)
+            {
+                <div class="technical-error-msg">
+                    <ErrorDisplay Message="@CurrentError?.Message" />
+                </div>
+            }
+
             <button class="btn-return" @onclick="GoToHandoverScheme">
                 Tilbage
             </button>
+
             <div class="login-card">
                 <h2>Opret bruger</h2>
 
@@ -48,21 +60,34 @@
                     </select>
                 </div>
 
-                <button class="login-btn" @onclick="CreateUserAsync" disabled="@isLoading">
+                <button class="login-btn"
+                        @onclick="CreateUserAsync"
+                        disabled="@IsLoading">
+
                     Opret bruger
                 </button>
 
-                @if (!string.IsNullOrWhiteSpace(message))
+                <!--- Viser valideringsfejl --->
+                @if (CurrentError?.Type == ErrorType.Validation)
                 {
-                    <p class="@messageCssClass">@message</p>
+                    <div class="error-msg">
+                        <ErrorDisplay Message="@CurrentError?.Message" />
+                    </div>
+                }
+
+                @if (IsLoading)
+                {
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                    </div>
                 }
             </div>
         </div>
     </Authorized>
-        <NotAuthorized>
+
+    <NotAuthorized>
         <p>Du har ikke adgang til denne side.</p>
     </NotAuthorized>
-    
 </AuthorizeView>
 
 
@@ -72,52 +97,35 @@
 
     private UserViewModel newUser = new();
     private int? newUserDepartmentId;
-    private bool isLoading;
-    private string message = string.Empty;
-    private bool wasCreated;
-
-    
-
-
-    private string messageCssClass => wasCreated ? "success-msg" : "error-msg";
-
 
     private async Task CreateUserAsync()
     {
-        message = string.Empty;
-        wasCreated = false;
-
-        if (string.IsNullOrWhiteSpace(newUser.UserName) ||
-            string.IsNullOrWhiteSpace(newUser.Password) ||
-            string.IsNullOrWhiteSpace(newUser.FirstName) ||
-            string.IsNullOrWhiteSpace(newUser.LastName) ||
-            string.IsNullOrWhiteSpace(newUser.Role) ||
-            newUserDepartmentId is null)
+        await ExecuteAsync(async () =>
         {
-            message = "Udfyld alle felter.";
-            return;
-        }
-
-        try
-        {
-            isLoading = true;
+            if (string.IsNullOrWhiteSpace(newUser.UserName) ||
+                string.IsNullOrWhiteSpace(newUser.Password) ||
+                string.IsNullOrWhiteSpace(newUser.FirstName) ||
+                string.IsNullOrWhiteSpace(newUser.LastName) ||
+                string.IsNullOrWhiteSpace(newUser.Role) ||
+                newUserDepartmentId is null)
+            {
+                return Error.Validation("Udfyld alle felter.");
+            }
 
             newUser.DepartmentId = newUserDepartmentId;
-            await userFacade.AddUser(newUser);
 
-            wasCreated = true;
-            message = "Brugeren er oprettet.";
+            var result = await userFacade.AddUser(newUser);
+
+            if (!result.Success)
+            {
+                return result.Error;
+            }
+
             newUser = new UserViewModel();
             newUserDepartmentId = null;
-        }
-        catch (Exception ex)
-        {
-            message = $"Kunne ikke oprette bruger: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
+
+            return Result.Ok();
+        });
     }
 
     private void GoToHandoverScheme()

@@ -9,15 +9,27 @@
 @using Overlapssystem.TokenService
 @using Overlapssystem.ViewModels
 @using Overlapssystem.Interfaces
+@using OverlapssytemApplication.Common.Result
+@using OverlapssytemApplication.Common.Errors
 
+@inherits AppComponentBase
 @inject UserApiService apiService
 @inject NavigationManager navigation
 @inject HttpClient Http
 @inject AuthState authstate 
 
 
+<!--- Viser tekniske fejl --->
+@if (CurrentError?.Type == ErrorType.Technical || CurrentError?.Type == ErrorType.NotFound)
+{
+    <div class="technical-error-msg">
+        <ErrorDisplay Message="@CurrentError?.Message" />
+    </div>
+}
 
 <div class="login-wrapper">
+
+   
     <div>
         <h2 class="h2-style">Overlapssystem</h2>
     </div>
@@ -41,9 +53,20 @@
 
         <button class="login-btn" @onclick="HandleLogin">Login</button>
 
-        @if (!string.IsNullOrEmpty(errorMessage))
+        <!--- Viser valideringsfejl --->
+        @if (CurrentError?.Type == ErrorType.Validation)
         {
-            <p class="error-msg">@errorMessage</p>
+            <div class="error-msg">
+                <ErrorDisplay Message="@CurrentError?.Message" />
+            </div>
+        }
+
+        @if (IsLoading)
+        {
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+           
         }
     </div>
 </div>
@@ -54,56 +77,48 @@
 
     private string userName = string.Empty;
     private string password = string.Empty;
-    private string errorMessage = string.Empty;
-    private bool isLoading = false;
+  
 
     private async Task HandleLogin()
     {
-        errorMessage = string.Empty;
+       
 
-        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+        //Wrapper login logikken i ExecuteAsync fra AppComponentBase for at håndtere loading state og fejl
+        await ExecuteAsync(async () =>
         {
-            errorMessage = "Brugernavn og password må ikke være tomme.";
-            return;
-        }
-        try
-        {
-            isLoading = true;
-            // ValidateUser returnerer nu JWT token ved succes, null ved fejl
-            var token = await apiService.ValidateUser(userName, password);
-            if (token != null)
+            
+            if (string.IsNullOrWhiteSpace(userName) ||
+           string.IsNullOrWhiteSpace(password))
             {
-                // Gem tokenet i Authorization-headeren
-                Http.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-                // Fortæl Blazor at brugeren er logget ind
-                await authstate.MarkUserAsAuthenticated(token);
-
-                // Decode JWT og naviger til korrekt HandoverScheme
-                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadJwtToken(token);
-                var departmentId = jwtToken.Claims
-                    .FirstOrDefault(c => c.Type == "DepartmentId")?.Value;
-
-                if (!string.IsNullOrEmpty(departmentId))
-                    navigation.NavigateTo($"/HandoverScheme/{departmentId}");
-                else
-                    navigation.NavigateTo("/HandoverScheme");
+                return Error.Validation("Brugernavn og password må ikke være tomme.");
             }
+            
+            var result = await apiService.ValidateUser(userName, password);
+
+            if (!result.Success)
+            {
+                return Error.Validation("Ugyldigt brugernavn eller password.");
+            }
+
+            var token = result.Value;
+
+            Http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            await authstate.MarkUserAsAuthenticated(token);
+
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var departmentId = jwtToken.Claims
+                .FirstOrDefault(c => c.Type == "DepartmentId")?.Value;
+
+            if (!string.IsNullOrEmpty(departmentId))
+                navigation.NavigateTo($"/HandoverScheme/{departmentId}");
             else
-            {
-                errorMessage = "Ugyldigt brugernavn eller password.";
-            }
+                navigation.NavigateTo("/HandoverScheme");
 
-        } catch (Exception ex)
-        {
-            errorMessage = $"Der opstod en fejl: {ex.Message}";
-        }
-        finally
-        {
-			isLoading = false;
-        }
-
-	}
+            return Result.Ok();
+        });
+    }
 }

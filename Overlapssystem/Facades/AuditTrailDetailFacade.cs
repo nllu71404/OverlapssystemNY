@@ -2,6 +2,7 @@
 using Overlapssystem.ViewModels;
 using OverlapssystemShared;
 using Overlapssystem.Interfaces;
+using OverlapssytemApplication.Common.Result;
 using System.Linq;
 
 namespace Overlapssystem.Facades
@@ -15,13 +16,14 @@ namespace Overlapssystem.Facades
             _auditTrailDetailApi = auditTrailDetailApi;
         }
 
-        public async Task<List<AuditTrailDetailViewModel>> GetAuditTrailDetailsByDepartment(int departmentId)
+        public async Task<Result<List<AuditTrailDetailViewModel>>> GetAuditTrailDetailsByDepartment(int departmentId)
         {
-            var dtos = await _auditTrailDetailApi.GetAuditTrailDetailsByDepartmentId(departmentId);
+            var result = await _auditTrailDetailApi.GetAuditTrailDetailsByDepartmentId(departmentId);
 
-            var auditTrailDetails = dtos.Select(MapAuditTrailDetail).ToList();
-
-            return auditTrailDetails;
+            return result.Map(dtos =>
+                 dtos.Select(MapAuditTrailDetail).ToList()
+            );
+            
         }
 
         private AuditTrailDetailViewModel MapAuditTrailDetail(AuditTrailDetailDTO dto)

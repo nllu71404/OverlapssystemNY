@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OverlapssytemApplication.Common
+namespace OverlapssytemApplication.Common.Result
 {
     public class Result
     {
@@ -29,7 +29,17 @@ namespace OverlapssytemApplication.Common
         // Helper 
         public static Result<T> Ok<T>(T value) => Result<T>.Ok(value);
         public static Result<T> Fail<T>(Error error) => Result<T>.Fail(error);
+
+        public TResult Match<TResult>(
+        Func<TResult> onSuccess,
+        Func<Error, TResult> onFailure)
+        {
+            return Success
+                ? onSuccess()
+                : onFailure(Error);
+        }
     }
+
 
     public class Result<T> : Result
     {
@@ -53,6 +63,20 @@ namespace OverlapssytemApplication.Common
 
         public static implicit operator Result<T>(Error error)
             => Fail(error);
+
+
+        //Bruges til at håndtere både success og failure - reducerer if-else statements (mindre boilerplate code)
+        //Bruges i controllers via ApiControllerBase 
+
+        public TResult Match<TResult>(
+        Func<T, TResult> onSuccess,
+        Func<Error, TResult> onFailure)
+        {
+            return Success
+                ? onSuccess(Value)
+                : onFailure(Error);
+        }
+
     }
 }
 

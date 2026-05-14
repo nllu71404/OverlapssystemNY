@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using OverlapssystemDomain.Entities;
-using OverlapssytemApplication.Common;
 using OverlapssytemApplication.Common.Errors;
+using OverlapssytemApplication.Common.Result;
 using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssystemInfrastructure.Service

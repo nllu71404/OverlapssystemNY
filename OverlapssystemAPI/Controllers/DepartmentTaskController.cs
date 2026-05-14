@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
-using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Common.Result;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
 

@@ -3,13 +3,33 @@
 @using Overlapssystem.ViewModels
 @using Overlapssystem.Interfaces
 @using Microsoft.AspNetCore.Components.Authorization
+@using OverlapssytemApplication.Common.Result
+@using OverlapssytemApplication.Common.Errors
 
-
+@inherits AppComponentBase
 @inject IEmployeePhoneFacade employeePhoneFacade
 @inject IJSRuntime JS
 
 
+<!--- Viser tekniske fejl --->
+@if (CurrentError?.Type == ErrorType.Technical || CurrentError?.Type == ErrorType.NotFound)
+{
+    <div class="technical-error-msg">
+        <ErrorDisplay Message="@CurrentError?.Message" />
+    </div>
+}
+
+
 <div class="phone-card">
+
+    <!--- Viser valideringsfejl --->
+    @if (CurrentError?.Type == ErrorType.Validation)
+    {
+        <div class="error-msg">
+            <ErrorDisplay Message="@CurrentError?.Message" />
+        </div>
+    }
+
     <div class="phone-card-header">
 
         <AuthorizeView Roles="Administrator">
@@ -142,20 +162,20 @@
     {
         if (firstRender)
         {
-            EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
+            EmployeePhones = await ExecuteAsyncT(() => employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId));
             StateHasChanged();
         }
     }
 
     public async Task RefreshAsync() 
     {
-        EmployeePhones = await employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId);
+        EmployeePhones = await ExecuteAsyncT(() => employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId));
         StateHasChanged();
 	}
 
     public async Task UpdateEmployeePhone(EmployeePhoneViewModel phone) 
     {
-        await employeePhoneFacade.UpdateEmployeePhone(phone);
+        await ExecuteAsync(() => employeePhoneFacade.UpdateEmployeePhone(phone));
       
 	}
 

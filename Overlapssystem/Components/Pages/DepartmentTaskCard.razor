@@ -5,11 +5,32 @@
 @using Overlapssystem.ViewModels;
 @using Overlapssystem.Interfaces;
 @using Microsoft.AspNetCore.Components.Authorization
+@using OverlapssytemApplication.Common.Result
+@using OverlapssytemApplication.Common.Errors
 
+@inherits AppComponentBase
 @inject IDepartmentTaskFacade departmentTaskFacade
 @inject IJSRuntime JS
 
+<!--- Viser tekniske fejl --->
+@if (CurrentError?.Type == ErrorType.Technical || CurrentError?.Type == ErrorType.NotFound)
+{
+    <div class="technical-error-msg">
+        <ErrorDisplay Message="@CurrentError?.Message" />
+    </div>
+}
+
 <div class="department-task-card">
+
+   
+    <!--- Viser valideringsfejl --->
+    @if (CurrentError?.Type == ErrorType.Validation)
+    {
+        <div class="error-msg">
+            <ErrorDisplay Message="@CurrentError?.Message" />
+        </div>
+    }
+
     <div class="task-card-header">
         <AuthorizeView>
             <Authorized>
@@ -134,7 +155,7 @@
     {
         if (firstRender)
         {
-            Tasks = await departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId);
+            Tasks = await ExecuteAsyncT(() => departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId));
             StateHasChanged();
         }
     }
@@ -142,12 +163,12 @@
     // Allow parent to ask this component to refresh its list after parent creates/updates.
     public async Task RefreshAsync()
     {
-        Tasks = await departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId);
+        Tasks = await ExecuteAsyncT(() => departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId));
         StateHasChanged();
     }
 
     private async Task UpdateDepartmentTask(DepartmentTaskViewModel task)
     {
-        await departmentTaskFacade.UpdateDepartmentTask(task);
+        await ExecuteAsync(() => departmentTaskFacade.UpdateDepartmentTask(task));
     }
 }

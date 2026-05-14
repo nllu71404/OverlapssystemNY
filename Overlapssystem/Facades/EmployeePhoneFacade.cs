@@ -2,6 +2,7 @@
 using Overlapssystem.ViewModels;
 using Overlapssystem.Services;
 using OverlapssystemShared;
+using OverlapssytemApplication.Common.Result;
 
 
 namespace Overlapssystem.Facades
@@ -15,29 +16,32 @@ namespace Overlapssystem.Facades
             _employeePhoneApiService = employeePhoneApiService;
         }
 
-        public async Task<int> AddEmployeePhone(EmployeePhoneViewModel vm)
+        public async Task<Result<int>> AddEmployeePhone(EmployeePhoneViewModel vm)
         {
             var dto = MapAddEmployeePhone(vm);
             var employeePhoneId = await _employeePhoneApiService.AddEmployeePhone(dto);
             return employeePhoneId;
         }
 
-        public async Task DeleteEmployeePhone(int employeePhoneId)
+        public async Task<Result> DeleteEmployeePhone(int employeePhoneId)
         {
-            await _employeePhoneApiService.DeleteEmployeePhone(employeePhoneId);
+            var result = await _employeePhoneApiService.DeleteEmployeePhone(employeePhoneId);
+            return result;
         }
 
-        public async Task<List<EmployeePhoneViewModel>> GetEmployeePhonesByDepartment(int departmentId)
+        public async Task<Result<List<EmployeePhoneViewModel>>> GetEmployeePhonesByDepartment(int departmentId)
         {
-            var dtos = await _employeePhoneApiService.GetEmployeePhonesByDepartmentId(departmentId);
-            var employeePhones = dtos.Select(MapGetEmployeePhone).ToList();
-            return employeePhones;
+            var employeePhones = await _employeePhoneApiService.GetEmployeePhonesByDepartmentId(departmentId);
+           
+            return employeePhones.Map(dtos => dtos.Select(MapGetEmployeePhone).ToList());
+
         }
 
-        public async Task UpdateEmployeePhone(EmployeePhoneViewModel vm)
+        public async Task<Result> UpdateEmployeePhone(EmployeePhoneViewModel vm)
         {
             var dto = MapUpdateEmployeePhone(vm);
-            await _employeePhoneApiService.UpdateEmployeePhone(vm.EmployeePhoneID, dto);
+            var result = await _employeePhoneApiService.UpdateEmployeePhone(vm.EmployeePhoneID, dto);
+            return result;
         }
 
 

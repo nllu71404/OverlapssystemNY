@@ -1,43 +1,39 @@
 ﻿using Overlapssystem.ViewModels;
+using OverlapssytemApplication.Common.Result;
 
 namespace Overlapssystem.Interfaces
 {
     public interface IResidentFacade
     {
-        Task UpdateResident(ResidentViewModel vm);
+        Task<Result> UpdateResident(ResidentViewModel vm);
 
-        Task<int> AddResident(ResidentViewModel vm);
+        Task<Result<int>> AddResident(ResidentViewModel vm);
 
-        Task DeleteResident(int residentId);
+        Task<Result> DeleteResident(int residentId);
+        Task<Result<List<ResidentViewModel>>> GetAllResidents();
 
-        Task<List<ResidentViewModel>> GetAllResidents();
+        Task<Result<List<ResidentViewModel>>> GetResidentByDepartment(int departmentId);
 
-        Task<List<ResidentViewModel>> GetResidentByDepartment(int departmentId);
+        Task<Result> UpdateMedicin(MedicinViewModel vm);
 
-        Task UpdateMedicin(MedicinViewModel vm);
+        Task<Result<int>> AddMedicinTime(MedicinViewModel vm);
 
-        Task<int> AddMedicinTime(MedicinViewModel vm);
+        Task<Result> DeleteMedicinTime(MedicinViewModel vm);    
+        Task<Result> SetMedicinChecked(MedicinViewModel vm, bool isChecked);
 
-        Task DeleteMedicinTime(MedicinViewModel vm);
+        Task<Result> UpdatePNMedicin(PNMedicinViewModel vm);
 
-        Task SetMedicinChecked(MedicinViewModel vm, bool isChecked);
+        Task<Result<int>> AddPNMedicinTime(PNMedicinViewModel vm);
+        Task<Result> DeletePNMedicinTime(PNMedicinViewModel vm);
 
-        Task UpdatePNMedicin(PNMedicinViewModel vm);
+        Task<Result> UpdateShopping(ShoppingViewModel vm);
 
-        Task<int> AddPNMedicinTime(PNMedicinViewModel vm);
+        Task<Result<int>> AddShopping(ShoppingViewModel vm);
+        Task<Result> DeleteShopping(ShoppingViewModel vm);
 
-        Task DeletePNMedicinTime(PNMedicinViewModel vm);
+        Task<Result> UpdateSpecialEvent(SpecialEventViewModel vm);
 
-        Task UpdateShopping(ShoppingViewModel vm);
-
-        Task<int> AddShopping(ShoppingViewModel vm);
-
-        Task DeleteShopping(ShoppingViewModel vm);
-
-        Task UpdateSpecialEvent(SpecialEventViewModel vm);
-
-        Task<int> AddSpecialEvent(SpecialEventViewModel vm);
-
-        Task DeleteSpecialEvent(SpecialEventViewModel vm);
+        Task<Result<int>> AddSpecialEvent(SpecialEventViewModel vm);
+        Task<Result> DeleteSpecialEvent(SpecialEventViewModel vm);
     }
 }
