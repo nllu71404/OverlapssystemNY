@@ -173,7 +173,7 @@ namespace TestOverlapssystem.ApplicationTests
 
             Assert.IsFalse(result.Success);
             Assert.AreEqual(ErrorType.Validation, result.Error.Type);
-            Assert.AreEqual("Fejl ved oprettelse af medarbejder telefon!", result.Error.Message);
+            Assert.AreEqual("Telefonnummer må ikke være tomt", result.Error.Message);
         }
 
         [TestMethod]
