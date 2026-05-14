@@ -57,7 +57,7 @@ namespace OverlapssytemApplication.Services
             var result = await _employeePhoneRepository.GetEmployeePhoneByIdAsync(employeePhoneId);
             
             if (result == null)
-                return Error.Validation("Medarbejder telefon blev ikke fundet");
+                return Error.Validation("Kunne ikke hente medarbejdertelefon");
             
             return result;
 
