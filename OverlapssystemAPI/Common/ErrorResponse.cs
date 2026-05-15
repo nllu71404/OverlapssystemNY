@@ -2,12 +2,10 @@
 
 namespace OverlapssystemAPI.Common
 {
-    public class ApiResponse<T>
+    public class ErrorResponse
     {
         public bool Success { get; set; }
-        public T? Data { get; set; }
 
-
+        public Error Error { get; set; } = default!;
     }
 }
-

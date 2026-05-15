@@ -37,13 +37,13 @@ namespace OverlapssystemAPI.Controllers
 
         private IActionResult HandleFailure<T>(Error error)
         {
-            var response = new ApiResponse<T>
+            var response = new ErrorResponse
             {
                 Success = false,
-                Error = error?.Message ?? "En ukendt fejl opstod"
+                Error = error 
             };
 
-            return error?.Type switch
+            return error.Type switch
             {
                 ErrorType.NotFound => NotFound(response),
                 ErrorType.Validation => BadRequest(response),

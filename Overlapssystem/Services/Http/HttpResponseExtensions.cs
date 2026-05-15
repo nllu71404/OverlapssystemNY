@@ -2,6 +2,7 @@
 using OverlapssytemApplication.Common.Errors;
 using OverlapssytemApplication.Common.Result;
 using System;
+using System.Net;
 using System.Text.Json;
 
 
@@ -13,43 +14,49 @@ namespace Overlapssystem.Services.Extensions
         {
             var content = await response.Content.ReadAsStringAsync();
 
-            ApiResponse<T>? result;
-
             try
             {
-                result = JsonSerializer.Deserialize<ApiResponse<T>>(
-                    content,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                // FEJLRESPONSES
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorResponse =
+                        JsonSerializer.Deserialize<ErrorResponse>(
+                            content,
+                            new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            });
+
+                    return errorResponse?.Error
+                        ?? Error.Technical("Ukendt serverfejl");
+                }
+
+                // SUCCESSRESPONSES
+                var result =
+                    JsonSerializer.Deserialize<ApiResponse<T>>(
+                        content,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                if (result is null)
+                    return Error.Technical("Serveren returnerede et ugyldigt svar");
+
+                if (result.Data is null)
+                {
+                    return Error.Technical("Manglende data fra serveren");
+                }
+
+                return result.Data;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(content);
+                Console.WriteLine(ex);
+
                 return Error.Technical("Ugyldigt svar fra serveren");
             }
-
-            if (result is null)
-                return Error.Technical("Tomt svar fra serveren");
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return Error.Technical(
-                    "Serverfejl - prøv igen senere");
-            }
-
-            if (!result.Success)
-            {
-                return Error.Validation(
-                    result.Error ?? "Ukendt API fejl");
-            }
-
-            if (result.Data is null)
-            {
-                return Error.Technical("Manglende data fra serveren");
-            }
-
-            return result.Data;
         }
     }
 }

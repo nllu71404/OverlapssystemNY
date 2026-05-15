@@ -22,13 +22,7 @@
     </div>
 }
 
-<!--- Viser valideringsfejl --->
-@if (CurrentError?.Type == ErrorType.Validation)
-{
-    <div class="error-msg">
-        <ErrorDisplay Message="@CurrentError?.Message" />
-    </div>
-}
+
 
 <div class="resident-card @GetRiskClass()">
     
@@ -93,10 +87,20 @@
         <Authorized>
             @if (context.User.IsInRole("Administrator"))
             {
+                <div class="field-group">
                 <!-- Admin kan tilføje/fjerne/redigere -->
-                <input class="form-control"
+                <input class="form-control @(HasError("Name") ? "input-error" : "")"
                        value="@Resident.Name"
                        @onchange="OnNameChanged" />
+
+                    <!-- Viser valideringsfejl for Navn -->
+                @if (HasError("Name"))
+                {
+                    <div class="field-error-msg">
+                            @GetError("Name")
+                    </div>
+                }
+                </div>
             }
             else if (context.User.IsInRole("Medarbejder"))
             {
@@ -111,18 +115,32 @@
         </Authorized>
     </AuthorizeView>
     
+
            <!-- Opdater status når man klikker væk -->
+   
     <label class="resident-label">Status</label>
     <AuthorizeView>
         <Authorized>
             @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
             {
-                <textarea class="form-control"
+                 <div class="field-group">
+                <textarea class="form-control @(HasError("Status") ? "input-error" : "")"
                 @onchange="OnStatusChanged" placeholder="Udfyld status for beboer">@Resident.Status</textarea>
+
+                    <!-- Viser valideringsfejl for Status -->
+
+                @if (HasError("Status"))
+                {
+                    <div class="field-error-msg">
+                            @GetError("Status")
+                    </div>
+                }
+                </div>
             } else if (context.User.IsInRole("Simpel"))
             {
                 <textarea class="form-control" disabled>@Resident.Status</textarea>
             }
+           
             </Authorized>
     </AuthorizeView>
 
@@ -134,7 +152,18 @@
             <Authorized>
                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                 {
-                    <textarea class="form-control" @onchange="OnActivityChanged" placeholder="Udfyld aktivitet">@Resident.Activity</textarea>
+                    <div class="field-group">
+                    <textarea class="form-control @(HasError("Activity") ? "input-error" : "")" 
+                    @onchange="OnActivityChanged" placeholder="Udfyld aktivitet">@Resident.Activity</textarea>
+
+                    <!-- Viser valideringsfejl for Activity -->
+                    @if (HasError("Activity"))
+                    {
+                        <div class="field-error-msg">
+                                @GetError("Activity")
+                        </div>
+                    }
+                    </div>
                 }
                 else if (context.User.IsInRole("Simpel"))
                 {
@@ -148,7 +177,17 @@
             <Authorized>
                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                 {
-                    <textarea class="form-control" @onchange="OnFamilyChanged" placeholder="Udfyld familie kontakt">@Resident.Family</textarea>
+                    <div class="field-group">
+                    <textarea class="form-control @(HasError("Family") ? "input-error" : "")" @onchange="OnFamilyChanged" placeholder="Udfyld familie kontakt">@Resident.Family</textarea>
+
+                    <!-- Viser valideringsfejl for Family -->
+                    @if (HasError("Family"))
+                    {
+                        <div class="field-error-msg">
+                                @GetError("Family")
+                        </div>
+                    }
+                    </div>
                 }
                 else if (context.User.IsInRole("Simpel"))
                 {
@@ -443,16 +482,38 @@ else if (context.User.IsInRole("Simpel"))
         _ => ""
     };
 
+    // Dictionary til at holde styr på valideringsfejl for hvert felt
+    private Dictionary<string, string> _fieldErrors = new();
+
+    // Hjælpefunktioner til validering og visning af fejl
+    private bool HasError(string field) => _fieldErrors.ContainsKey(field);
+
+    private string? GetError(string field) => _fieldErrors.TryGetValue(field, out var error) ? error : null;
+
+   
+
 
     // Resident 
 
     private async Task SaveResident()
     {
-        await ExecuteAsync(() => residentFacade.UpdateResident(Resident));
 
-        // Opdater beboerlisten i parent component
-        await OnSave.InvokeAsync(Resident);
+        if (!ValidateResident())
+            return;
 
+        await ExecuteAsync(async () =>
+        {
+            var result = await residentFacade.UpdateResident(Resident);
+
+            if (!result.Success)
+                return result.Error!;
+
+            _fieldErrors.Clear();
+
+            await OnSave.InvokeAsync(Resident);
+
+            return Result.Ok();
+        });
     }
 
     private async Task ConfirmDeleteAsync()
@@ -618,6 +679,8 @@ else if (context.User.IsInRole("Simpel"))
 
     private async Task OnNameChanged(ChangeEventArgs e)
     {
+        
+        
         Resident.Name = e.Value?.ToString() ?? "";
         await SaveResident();
     }
@@ -643,5 +706,25 @@ else if (context.User.IsInRole("Simpel"))
     {
         Resident.ResidentEmployee = e.Value?.ToString() ?? "";
         await SaveResident();
+    }
+
+    // Validering af Resident data
+    private bool ValidateResident()
+    {
+        _fieldErrors.Clear();
+
+        if (string.IsNullOrWhiteSpace(Resident.Name))
+            _fieldErrors["Name"] = "Navn er påkrævet";
+
+        if (Resident.Name?.Length > 100)
+            _fieldErrors["Name"] = "Navn er for langt";
+
+        if (Resident.Status?.Length > 1000)
+            _fieldErrors["Status"] = "Status er for lang";
+
+        if (Resident.Activity?.Length > 1000)
+            _fieldErrors["Activity"] = "Activity er for lang";
+
+        return _fieldErrors.Count == 0;
     }
 }

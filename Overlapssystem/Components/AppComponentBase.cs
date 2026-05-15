@@ -11,7 +11,7 @@ public abstract class AppComponentBase : ComponentBase
     protected bool IsLoading { get; private set; }
 
 
-    protected Error? CurrentError { get; private set; }
+    protected Error? CurrentError { get; set; }
 
     protected async Task ExecuteAsync(Func<Task<Result>> action)
     {

@@ -1,4 +1,5 @@
 ﻿using OverlapssystemAPI.Common;
+using OverlapssytemApplication.Common.Errors;
 
 namespace OverlapssystemAPI.Middleware
 {
@@ -38,10 +39,10 @@ namespace OverlapssystemAPI.Middleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-            var response = new ApiResponse<object>
+            var response = new ErrorResponse
             {
                 Success = false,
-                Error = "Der opstod en uventet fejl. Prøv igen senere."
+                Error = Error.Technical("Der opstod en uventet fejl. Prøv igen senere.")
             };
 
             return context.Response.WriteAsJsonAsync(response);
