@@ -13,6 +13,26 @@ public abstract class AppComponentBase : ComponentBase
 
     protected Error? CurrentError { get; set; }
 
+    // Dictionary til at holde styr på valideringsfejl for hvert felt
+    protected Dictionary<string, string> _fieldErrors = new();
+
+    // Hjælpefunktion til at generere unikke nøgler for inputfelter baseret på en ID og et felt navn
+    protected string GetKey(int id, string field)
+    {
+        return $"{id}_{field}";
+    }
+
+    // Hjælpefunktioner til validering og visning af fejl
+    protected bool HasError(string field) => _fieldErrors.ContainsKey(field);
+    protected string? GetError(string field) => _fieldErrors.TryGetValue(field, out var error) ? error : null;
+
+    // Overloads for at håndtere fejl baseret på ID og felt navn
+    protected bool HasErrorForId(int id, string field) => _fieldErrors.ContainsKey(GetKey(id, field));
+    protected string? GetErrorForId(int id, string field) => _fieldErrors.TryGetValue(GetKey(id, field), out var error) ? error : null;
+
+
+
+    // Metode til at udføre en asynkron handling med indbygget håndtering af loading state og fejl
     protected async Task ExecuteAsync(Func<Task<Result>> action)
     {
         try

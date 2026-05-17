@@ -16,4 +16,8 @@
     font-family: "Stack Sans Headline", sans-serif;
 }
 
+.department-task-card input.form-control.input-error {
+    border: 2px solid #ff6b6b !important;
+    background-color: #fff5f5 !important;
+    border-radius: 4px;
 

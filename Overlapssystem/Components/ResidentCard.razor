@@ -481,15 +481,6 @@ else if (context.User.IsInRole("Simpel"))
         Risiko.Red => "red",
         _ => ""
     };
-
-    // Dictionary til at holde styr på valideringsfejl for hvert felt
-    private Dictionary<string, string> _fieldErrors = new();
-
-    // Hjælpefunktioner til validering og visning af fejl
-    private bool HasError(string field) => _fieldErrors.ContainsKey(field);
-
-    private string? GetError(string field) => _fieldErrors.TryGetValue(field, out var error) ? error : null;
-
    
 
 
@@ -708,7 +699,7 @@ else if (context.User.IsInRole("Simpel"))
         await SaveResident();
     }
 
-    // Validering af Resident data
+    // Validering af Resident data 
     private bool ValidateResident()
     {
         _fieldErrors.Clear();

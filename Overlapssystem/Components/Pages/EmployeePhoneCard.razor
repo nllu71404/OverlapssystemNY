@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using OverlapssytemApplication.Common.Result
 @using OverlapssytemApplication.Common.Errors
+@using System.Text.RegularExpressions
 
 @inherits AppComponentBase
 @inject IEmployeePhoneFacade employeePhoneFacade
@@ -21,14 +22,6 @@
 
 
 <div class="phone-card">
-
-    <!--- Viser valideringsfejl --->
-    @if (CurrentError?.Type == ErrorType.Validation)
-    {
-        <div class="error-msg">
-            <ErrorDisplay Message="@CurrentError?.Message" />
-        </div>
-    }
 
     <div class="phone-card-header">
 
@@ -59,14 +52,26 @@
                     <td>
                         <AuthorizeView>
                             <Authorized>
+                                
                                 @if (context.User.IsInRole("Administrator"))
                                 {
-                                    <input value="@employeePhone.PhoneNumber"
+                                    <div class="field-group">
+                                    <input class="form-control @(HasErrorForId(employeePhone.EmployeePhoneID, "PhoneNumber") ? "input-error" : "")" value="@employeePhone.PhoneNumber"
                                            @onchange="async e =>
                                       {
                                               employeePhone.PhoneNumber = e.Value?.ToString();
+
+
                                              await UpdateEmployeePhone(employeePhone);
-                                       }" />
+                                       }"  />
+
+                                        @if (HasErrorForId(employeePhone.EmployeePhoneID, "PhoneNumber"))
+                                        {
+                                            <div class="field-error-msg">
+                                                @GetErrorForId(employeePhone.EmployeePhoneID, "PhoneNumber")
+                                            </div>
+                                        }
+                                       </div>
                                 }
                                 else if (context.User.IsInRole("Medarbejder"))
                                 {
@@ -128,7 +133,7 @@
                         <AuthorizeView Roles="Administrator">
                             <Authorized>
                                 <button class="btn-grey"
-                                        @onclick="() => OnDelete.InvokeAsync(employeePhone)">
+                                        @onclick="() => ConfirmDeleteAsync(employeePhone)">
                                     Slet
                                 </button>
                             </Authorized>
@@ -146,17 +151,17 @@
     public EmployeePhoneViewModel employeePhoneViewModel { get; set; } = new();
 
     [Parameter]
-	public int DepartmentId { get; set; }
-	[Parameter]
-	public bool IsReadOnly { get; set; } = false;
+    public int DepartmentId { get; set; }
+    [Parameter]
+    public bool IsReadOnly { get; set; } = false;
 
-	[Parameter]
-	public EventCallback<int> OnAdd { get; set; }
-	[Parameter]
-	public EventCallback<EmployeePhoneViewModel> OnDelete { get; set; }
+    [Parameter]
+    public EventCallback<int> OnAdd { get; set; }
+    [Parameter]
+    public EventCallback<EmployeePhoneViewModel> OnDelete { get; set; }
 
-	
-	public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
+
+    public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -171,15 +176,105 @@
     {
         EmployeePhones = await ExecuteAsyncT(() => employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId));
         StateHasChanged();
-	}
+    }
 
     public async Task UpdateEmployeePhone(EmployeePhoneViewModel phone) 
     {
-        await ExecuteAsync(() => employeePhoneFacade.UpdateEmployeePhone(phone));
+
+        if (!ValidateEmployeePhone(phone))
+        {
+            StateHasChanged();
+            return;
+        }
+
+        await ExecuteAsync(async () => 
+        {
+            var result = await employeePhoneFacade.UpdateEmployeePhone(phone);
+
+            if (!result.Success)
+                return result.Error!;
+
+            _fieldErrors.Remove(GetKey(phone.EmployeePhoneID, "PhoneNumber"));
+
+            StateHasChanged();
+
+            return Result.Ok();
+        });
+
+    }
+
+    private async Task ConfirmDeleteAsync(EmployeePhoneViewModel employeePhone)
+    {
+        var ok = await JS.InvokeAsync<bool>("confirm", "Er du sikker på, at du vil slette dette telefonnummer?");
+
+        if (!ok) return;
+
+        await OnDelete.InvokeAsync(employeePhone);
+    }
+
+    // Validering af EmployeePhone data
+    private bool ValidateEmployeePhone(EmployeePhoneViewModel employeePhone)
+    {
+        _fieldErrors.Remove(GetKey(employeePhone.EmployeePhoneID, "PhoneNumber"));
+        _fieldErrors.Remove(GetKey(employeePhone.EmployeePhoneID, "Name"));
+
+        employeePhone.PhoneNumber =
+            employeePhone.PhoneNumber?.Trim();
+
+        employeePhone.EmployeeName =
+            employeePhone.EmployeeName?.Trim();
+
       
-	}
+        if (!string.IsNullOrWhiteSpace(employeePhone.PhoneNumber))
+        {
+            // Maks længde
+            if (employeePhone.PhoneNumber.Length > 20)
+            {
+                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
+                    "Telefonnummer er for langt";
+            }
 
+            // Gyldige tegn
+            var regex = new Regex(@"^[\d\s\+\-\(\)]+$");
 
+            if (!regex.IsMatch(employeePhone.PhoneNumber))
+            {
+                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
+                    "Telefonnummer indeholder ugyldige tegn";
+            }
 
+            // Minimum antal cifre
+            var digitsOnly = new string(
+                employeePhone.PhoneNumber
+                    .Where(char.IsDigit)
+                    .ToArray());
+
+            if (digitsOnly.Length < 8)
+            {
+                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
+                    "Telefonnummer er for kort";
+            }
+
+            // Dublet-check
+            bool exists = EmployeePhones.Any(x =>
+                x.EmployeePhoneID != employeePhone.EmployeePhoneID &&
+                x.PhoneNumber == employeePhone.PhoneNumber);
+
+            if (exists)
+            {
+                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
+                    "Telefonnummer findes allerede";
+            }
+        }
+
+        // Navn valgfrit
+        if (!string.IsNullOrWhiteSpace(employeePhone.EmployeeName) &&
+            employeePhone.EmployeeName.Length > 100)
+        {
+            _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "Name")] = "Navn er for langt";
+        }
+
+        return _fieldErrors.Count == 0;
+    }
 
 }
