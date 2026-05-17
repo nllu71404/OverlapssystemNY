@@ -4,8 +4,10 @@
 
 @using Overlapssystem.Services
 @using OverlapssystemShared
+@using Overlapssystem.Interfaces
+@using Overlapssystem.ViewModels
 
-@inject AuditTrailDetailApiService AuditTrailDetailApiService
+@inject IAuditTrailDetailFacade AuditTrailDetailFacade
 @inject NavigationManager Navigation
 
 @if (DepartmentId == 1)
@@ -89,7 +91,7 @@ else
 
     public string DepartmentName { get; set; } = string.Empty;
 
-    private List<AuditTrailDetailDTO> auditTrailDetails = new();
+    private List<AuditTrailDetailViewModel> auditTrailDetails = new();
 
     // Automatically load audit trail details when the component parameters are set or updated
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -104,7 +106,7 @@ else
     // Method to load audit trail details from the API service based on the current DepartmentId
     private async Task LoadAuditTrailDetails()
     {
-        auditTrailDetails = await AuditTrailDetailApiService.GetAuditTrailDetailsByDepartmentId(DepartmentId);
+        auditTrailDetails = await AuditTrailDetailFacade.GetAuditTrailDetailsByDepartment(DepartmentId);
     }
 
     // Helper method to display values, showing a dash if the value is null or whitespace

@@ -34,6 +34,7 @@ builder.Services.AddHttpClient("Api", client =>
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
 
+builder.Services.AddScoped<IAuditTrailDetailFacade, AuditTrailDetailFacade>();
 builder.Services.AddScoped<AuditTrailDetailApiService>();
 builder.Services.AddScoped<ResidentApiService>();
 builder.Services.AddScoped<MedicinApiService>();
