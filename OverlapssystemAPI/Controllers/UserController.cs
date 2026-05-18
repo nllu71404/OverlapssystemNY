@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
-using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
-using Microsoft.AspNetCore.Authorization;
+using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -25,7 +26,15 @@ namespace OverlapssystemAPI.Controllers
         public async Task<IActionResult> GetUsers()
         {
             var result = await _userService.GetAllUsersAsync();
-            return Handle(result);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            var userDTOs = result.Value.Select(MapToUserDTO).ToList();
+
+            return Handle(Result.Ok(userDTOs));
         }
 
         //Hent på ID
@@ -33,8 +42,16 @@ namespace OverlapssystemAPI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUsersById(string userId)
         {
-            var restult = await _userService.GetUserByIdAsync(userId);
-            return Handle(restult);
+            var result = await _userService.GetUserByIdAsync(userId);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            var userDTO = MapToUserDTO(result.Value);
+
+            return Handle(Result.Ok(userDTO));
         }
 
         //Hent på brugernavn
@@ -42,8 +59,16 @@ namespace OverlapssystemAPI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUsersByUsername(string username)
         {
-            var restult = await _userService.GetUserByUserNameAsync(username);
-            return Handle(restult);
+            var result = await _userService.GetUserByUserNameAsync(username);
+
+            if (!result.Success)
+            {
+                return Handle(result);
+            }
+
+            var userDTO = MapToUserDTO(result.Value);
+
+            return Handle(Result.Ok(userDTO));
         }
 
         //Tilføj
@@ -58,6 +83,7 @@ namespace OverlapssystemAPI.Controllers
                 LastName = userDTO.LastName,
                 DepartmentId = userDTO.DepartmentId
             };
+
             var result = await _userService.CreateNewUserAsync(userModel, userDTO.Password, userDTO.Role);
             return Handle(result);
         }
@@ -67,42 +93,52 @@ namespace OverlapssystemAPI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
-            await _userService.DeleteUserAsync(userId);
-            return Ok(userId);
+            var result = await _userService.DeleteUserAsync(userId);
+            return Handle(result);
         }
 
-        ////Update
-        //[HttpPut("{userId}")]
-        //public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDTO userDTO)
-        //{
-        //    var userModel = MapToUpdateUserModel(userId, userDTO);
-        //    await _userService.UpdateUserAsync(userModel);
-        //    return Ok(userId);
-        //}
-        //Validering
+        //Update
+        [HttpPut("{userId}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDTO userDTO)
+        {
+            var userModel = new UserModel
+            {
+                UserName = userDTO.UserName,
+                FirstName = userDTO.FirstName,
+                LastName = userDTO.LastName,
+                DepartmentId = userDTO.DepartmentId
+            };
+
+            var result = await _userService.UpdateUserAsync(userId, userModel);
+            return Handle(result);
+        }
 
         [AllowAnonymous]
         [HttpPost("ValiderBruger")]
         public async Task<IActionResult> ValidateUser([FromBody] AddUserDTO userDTO)
         {
             var result = await _authService.LoginAsync(userDTO.UserName, userDTO.Password);
+
             if (!result.Success)
             {
                 return Unauthorized(new { message = result.Error.Message ?? "Ingen adgang" });
             }
 
-            return Ok(new { token = result.Value});
+            return Ok(new { token = result.Value });
         }
 
         //// ----- Mapping ---- //
-        //private static UserModel MapToUpdateUserModel(UpdateUserDTO userDTO, int id)
-        //{
-        //    return new UserModel
-        //    {
-        //        FirstName = userDTO.FirstName,
-        //        LastName = userDTO.LastName,
-
-        //    };
-        //}
+        private static UserDTO MapToUserDTO(UserModel user)
+        {
+            return new UserDTO
+            {
+                Id = user.Id,
+                UserName = user.UserName ?? "",
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DepartmentId = user.DepartmentId
+            };
+        }
     }
 }

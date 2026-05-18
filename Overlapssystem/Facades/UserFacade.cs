@@ -19,6 +19,31 @@ namespace Overlapssystem.Facades
             var dto = MapAddUser(vm);
             await _userApiService.CreateUser(dto);
         }
+        public async Task<List<UserDTO>> GetAllUsers()
+        {
+            return await _userApiService.GetAllUsers();
+        }
+
+        public async Task DeleteUser(string userId)
+        {
+            await _userApiService.DeleteUser(userId);
+        }
+        public async Task UpdateUser(string userId, UserViewModel vm)
+        {
+            var dto = new UpdateUserDTO
+            {
+                UserName = vm.UserName,
+                FirstName = vm.FirstName,
+                LastName = vm.LastName,
+                DepartmentId = vm.DepartmentId
+            };
+
+            await _userApiService.UpdateUser(userId, dto);
+        }
+        public async Task<string?> ValidateUser(UserViewModel vm)
+        {
+            return await _userApiService.ValidateUser(vm.UserName, vm.Password);
+        }
 
         private AddUserDTO MapAddUser(UserViewModel vm)
         {

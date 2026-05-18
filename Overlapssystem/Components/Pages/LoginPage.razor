@@ -10,7 +10,7 @@
 @using Overlapssystem.ViewModels
 @using Overlapssystem.Interfaces
 
-@inject UserApiService apiService
+@inject IUserFacade userFacade
 @inject NavigationManager navigation
 @inject HttpClient Http
 @inject AuthState authstate 
@@ -28,7 +28,7 @@
         <div class="input-group">
         <input list="brugere"
                placeholder="Vælg eller indtast brugernavn"
-               @bind="userName" />
+                   @bind="userViewModel.UserName" />
         <datalist id="brugere">
             <option value="Slot" />
             <option value="Skov" />
@@ -36,7 +36,7 @@
         </div>
 
         <div class="input-group">
-            <input type="password" placeholder="Indtast password" @bind="password" />
+            <input type="password" placeholder="Indtast password" @bind="userViewModel.Password" />
         </div>
 
         <button class="login-btn" @onclick="HandleLogin">Login</button>
@@ -49,11 +49,7 @@
 </div>
 
 @code{
-    [Parameter]
-    public UserModel User { get; set; } = new();
-
-    private string userName = string.Empty;
-    private string password = string.Empty;
+    private UserViewModel userViewModel = new();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
@@ -61,26 +57,21 @@
     {
         errorMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+        if (string.IsNullOrWhiteSpace(userViewModel.UserName) || string.IsNullOrWhiteSpace(userViewModel.Password))
         {
             errorMessage = "Brugernavn og password må ikke være tomme.";
             return;
         }
+
         try
         {
             isLoading = true;
-            // ValidateUser returnerer nu JWT token ved succes, null ved fejl
-            var token = await apiService.ValidateUser(userName, password);
+            var token = await userFacade.ValidateUser(userViewModel);
+
             if (token != null)
             {
-                // Gem tokenet i Authorization-headeren
-                Http.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-                // Fortæl Blazor at brugeren er logget ind
                 await authstate.MarkUserAsAuthenticated(token);
 
-                // Decode JWT og naviger til korrekt HandoverScheme
                 var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
                 var departmentId = jwtToken.Claims
@@ -95,15 +86,14 @@
             {
                 errorMessage = "Ugyldigt brugernavn eller password.";
             }
-
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             errorMessage = $"Der opstod en fejl: {ex.Message}";
         }
         finally
         {
-			isLoading = false;
+            isLoading = false;
         }
-
-	}
+    }
 }

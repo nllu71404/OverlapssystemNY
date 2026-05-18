@@ -14,24 +14,24 @@ namespace Overlapssystem.Services
         }
 
         //Hent alle
-        public async Task<List<UserModel>> GetAllUsers()
+        public async Task<List<UserDTO>> GetAllUsers()
         {
             var response = await _http.GetAsync("api/User/HenterBrugere");
-            var users = await response.ReadApiResponse<List<UserModel>>();
-            return users?.ToList() ?? new List<UserModel>();
+            var users = await response.ReadApiResponse<List<UserDTO>>();
+            return users?.ToList() ?? new List<UserDTO>();
         }
         //Hent på ID
-        public async Task<UserModel> GetUserByID(string userID)
+        public async Task<UserDTO> GetUserByID(string userID)
         {
             var response = await _http.GetAsync($"api/User/HenterBrugere/{userID}");
-            return await response.ReadApiResponse<UserModel>();
+            return await response.ReadApiResponse<UserDTO>();
         }
 
         //Hent på brugernavn
-        public async Task<UserModel> GetUserByUsername(string username)
+        public async Task<UserDTO> GetUserByUsername(string username)
         {
             var response = await _http.GetAsync($"api/User/HenterBrugere/Brugernavn/{username}");
-            return await response.ReadApiResponse<UserModel>();
+            return await response.ReadApiResponse<UserDTO>();
         }
 
         //Tilføj
@@ -46,13 +46,13 @@ namespace Overlapssystem.Services
             var response = await _http.DeleteAsync($"api/User/{userID}");
             await response.ReadApiResponse<object>();
         }
-        ////Update
-        //public async Task UpdateUser(string userID, AddUserDTO userDTO)
-        //{
-        //    var response = await _http.PutAsJsonAsync($"api/User/{userID}", userDTO);
-        //    await response.ReadApiResponse<object>();
-        //}
-        // Validering - returnerer JWT token ved succes, null ved fejl
+        //Update
+        public async Task UpdateUser(string userID, UpdateUserDTO userDTO)
+        {
+            var response = await _http.PutAsJsonAsync($"api/User/{userID}", userDTO);
+            await response.ReadApiResponse<object>();
+        }
+
         public async Task<string?> ValidateUser(string username, string password)
         {
             var dto = new { UserName = username, Password = password };

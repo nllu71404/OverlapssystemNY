@@ -1,44 +1,39 @@
 ﻿@page "/OpretBruger/{CurrentDepartmentId:int}"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @using Microsoft.AspNetCore.Authorization
 @using Overlapssystem.Interfaces
 @using Overlapssystem.ViewModels
 @using Microsoft.AspNetCore.Components.Authorization
+@using OverlapssystemShared
 
 @inject IUserFacade userFacade
 @inject NavigationManager Navigation
 
-
 <AuthorizeView Roles="Administrator">
     <Authorized>
-        <div class="login-wrapper">
-            <button class="btn-return" @onclick="GoToHandoverScheme">
-                Tilbage
-            </button>
+        <div style="display: flex; align-items: flex-start; gap: 60px; padding: 60px;">
             <div class="login-card">
+                <button class="btn-return" @onclick="GoToHandoverScheme">
+                    Tilbage
+                </button>
                 <h2>Opret bruger</h2>
 
                 <div class="input-group">
                     <input placeholder="Brugernavn" @bind="newUser.UserName" />
                 </div>
-
                 <div class="input-group">
                     <input type="password" placeholder="Password" @bind="newUser.Password" />
                 </div>
-
                 <div class="input-group">
                     <input placeholder="Fornavn" @bind="newUser.FirstName" />
                 </div>
-
                 <div class="input-group">
                     <input placeholder="Efternavn" @bind="newUser.LastName" />
                 </div>
-
                 <div class="input-group">
                     <input type="number" placeholder="Afdeling ID" @bind="newUserDepartmentId" />
                 </div>
-
                 <div class="input-group">
                     <select @bind="newUser.Role">
                         <option value="">Vælg rolle</option>
@@ -57,30 +52,73 @@
                     <p class="@messageCssClass">@message</p>
                 }
             </div>
+
+            <div class="user-table-section">
+                <h2>Brugere</h2>
+
+                @if (users.Count == 0)
+                {
+                    <p>Ingen brugere fundet.</p>
+                }
+                else
+                {
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Brugernavn</th>
+                                <th>Navn</th>
+                                <th>Afdeling</th>
+                                <th>Handling</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in users)
+                            {
+                                <tr>
+                                    <td>@user.UserName</td>
+                                    <td>@user.FirstName @user.LastName</td>
+                                    <td>@user.DepartmentId</td>
+                                    <td>
+                                        <button class="delete-user-btn" @onclick="() => DeleteUserAsync(user.Id)" disabled="@isLoading">
+                                            Slet
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
         </div>
     </Authorized>
-        <NotAuthorized>
+    <NotAuthorized>
         <p>Du har ikke adgang til denne side.</p>
     </NotAuthorized>
-    
 </AuthorizeView>
-
 
 @code {
     [Parameter]
     public int CurrentDepartmentId { get; set; }
 
     private UserViewModel newUser = new();
+    private List<UserDTO> users = new();
+
     private int? newUserDepartmentId;
     private bool isLoading;
     private string message = string.Empty;
     private bool wasCreated;
 
-    
-
-
     private string messageCssClass => wasCreated ? "success-msg" : "error-msg";
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        users = await userFacade.GetAllUsers();
+    }
 
     private async Task CreateUserAsync()
     {
@@ -101,18 +139,39 @@
         try
         {
             isLoading = true;
-
             newUser.DepartmentId = newUserDepartmentId;
             await userFacade.AddUser(newUser);
-
             wasCreated = true;
             message = "Brugeren er oprettet.";
             newUser = new UserViewModel();
             newUserDepartmentId = null;
+            await LoadUsersAsync();
         }
         catch (Exception ex)
         {
             message = $"Kunne ikke oprette bruger: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task DeleteUserAsync(string userId)
+    {
+        try
+        {
+            isLoading = true;
+            message = string.Empty;
+            await userFacade.DeleteUser(userId);
+            await LoadUsersAsync();
+            wasCreated = true;
+            message = "Brugeren er slettet.";
+        }
+        catch (Exception ex)
+        {
+            wasCreated = false;
+            message = $"Kunne ikke slette bruger: {ex.Message}";
         }
         finally
         {
