@@ -743,10 +743,10 @@ GO
 
 -- Delete an DepartmentTaskTopic entry in the DepartmentTask table
 CREATE OR ALTER PROCEDURE [dbo].[uspDeleteDepartmentTaskTopic]
-@DepartmentTaskTopic NVARCHAR(250)
+@DepartmentTaskID INT
 AS
 BEGIN
-DELETE FROM dbo.DepartmentTask WHERE DepartmentTaskTopic = @DepartmentTaskTopic
+DELETE FROM dbo.DepartmentTask WHERE DepartmentTaskID = @DepartmentTaskID 
 END;
 GO
 
