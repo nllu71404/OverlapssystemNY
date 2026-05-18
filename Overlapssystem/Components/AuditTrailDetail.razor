@@ -5,10 +5,12 @@
 
 @using Overlapssystem.Services
 @using OverlapssystemShared
+@using Overlapssystem.Interfaces
 @using OverlapssytemApplication.Common.Result
 @using OverlapssytemApplication.Common.Errors
 
 @inject AuditTrailDetailApiService AuditTrailDetailApiService
+@inject IDepartmentFacade departmentFacade
 @inject NavigationManager Navigation
 
 <!--- Viser tekniske fejl --->
@@ -105,16 +107,17 @@
     private List<AuditTrailDetailDTO> auditTrailDetails = new();
 
     // Automatically load audit trail details when the component parameters are set or updated
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        DepartmentName = DepartmentId switch
-        {
-            1 => "Slottet",
-            2 => "Skoven",
-            _ => "Ukendt afdeling"
-        };
-
+        
         await LoadAuditTrailDetails();
+        
+        //Henter afdelingens navn, som vises i overskriften
+        var department = await ExecuteAsyncT(() => departmentFacade.GetDepartmentById(DepartmentId));
+
+        DepartmentName = department?.Name ?? "Ukendt afdeling";
+
+        
     }
 
     // Method to load audit trail details from the API service based on the current DepartmentId

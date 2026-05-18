@@ -11,6 +11,8 @@
 @using Overlapssystem.Interfaces
 @using OverlapssytemApplication.Common.Result
 @using OverlapssytemApplication.Common.Errors
+@using System.IdentityModel.Tokens.Jwt
+@using System.Net.Http.Headers
 
 @inherits AppComponentBase
 @inject UserApiService apiService
@@ -81,44 +83,60 @@
 
     private async Task HandleLogin()
     {
-       
-
-        //Wrapper login logikken i ExecuteAsync fra AppComponentBase for at håndtere loading state og fejl
         await ExecuteAsync(async () =>
         {
-            
-            if (string.IsNullOrWhiteSpace(userName) ||
-           string.IsNullOrWhiteSpace(password))
-            {
+            if (!ValidateInput())
                 return Error.Validation("Brugernavn og password må ikke være tomme.");
-            }
-            
-            var result = await apiService.ValidateUser(userName, password);
 
-            if (!result.Success)
-            {
+            var token = await AuthenticateAsync();
+
+            if (token is null)
                 return Error.Validation("Ugyldigt brugernavn eller password.");
-            }
 
-            var token = result.Value;
+            await SetAuthStateAsync(token);
 
-            Http.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            await authstate.MarkUserAsAuthenticated(token);
-
-            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            var departmentId = jwtToken.Claims
-                .FirstOrDefault(c => c.Type == "DepartmentId")?.Value;
-
-            if (!string.IsNullOrEmpty(departmentId))
-                navigation.NavigateTo($"/HandoverScheme/{departmentId}");
-            else
-                navigation.NavigateTo("/HandoverScheme");
+            NavigateFromToken(token);
 
             return Result.Ok();
         });
+    }
+
+    // (Input-validering) Validerer at både brugernavn og password er indtastet
+    private bool ValidateInput()
+    {
+        return !string.IsNullOrWhiteSpace(userName)
+            && !string.IsNullOrWhiteSpace(password);
+    }
+
+    // Kalder API'et for at validere brugeren og returnere et token, hvis det er gyldigt
+    private async Task<string?> AuthenticateAsync()
+    {
+        var result = await apiService.ValidateUser(userName, password);
+
+        return result.Success ? result.Value : null;
+    }
+
+    // Sætter den autentificerede tilstand i applikationen ved at gemme token og opdatere auth state
+    private async Task SetAuthStateAsync(string token)
+    {
+        Http.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        await authstate.MarkUserAsAuthenticated(token);
+    }
+
+    // Navigerer til HandoverScheme baseret på informationen i tokenet (DepartmentId)
+    private void NavigateFromToken(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+
+        var departmentId = jwtToken.Claims
+            .FirstOrDefault(c => c.Type == "DepartmentId")?.Value;
+
+        if (int.TryParse(departmentId, out var id))
+            navigation.NavigateTo($"/HandoverScheme/{id}");
+        else
+            navigation.NavigateTo("/HandoverScheme");
     }
 }

@@ -90,13 +90,20 @@
                             <Authorized>
                                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                                 {
-                                    <input value="@employeePhone.EmployeeName"
+                                    <div class="field-group">
+                                    <input class="form-control @(HasErrorForId(employeePhone.EmployeePhoneID, "Name") ? "input-error" : "")" value="@employeePhone.EmployeeName"
                                            @onchange="async e =>
                                     {
                                          employeePhone.EmployeeName = e.Value?.ToString();
                                         await UpdateEmployeePhone(employeePhone);
                                      }"
                                            placeholder="Navn" />
+                                        @if (HasErrorForId(employeePhone.EmployeePhoneID, "Name"))
+                                        {    <div class="field-error-msg">
+                                                @GetErrorForId(employeePhone.EmployeePhoneID, "Name")
+                                            </div>
+                                        }
+                                    </div>
                                 }
                                 else if (context.User.IsInRole("Simpel"))
                                 {
@@ -163,13 +170,11 @@
 
     public List<EmployeePhoneViewModel> EmployeePhones { get; set; } = new();
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            EmployeePhones = await ExecuteAsyncT(() => employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId));
-            StateHasChanged();
-        }
+        EmployeePhones = await ExecuteAsyncT(() =>
+            employeePhoneFacade.GetEmployeePhonesByDepartment(DepartmentId)) ?? new List<EmployeePhoneViewModel>();
+
     }
 
     public async Task RefreshAsync() 
@@ -215,66 +220,72 @@
     // Validering af EmployeePhone data
     private bool ValidateEmployeePhone(EmployeePhoneViewModel employeePhone)
     {
-        _fieldErrors.Remove(GetKey(employeePhone.EmployeePhoneID, "PhoneNumber"));
-        _fieldErrors.Remove(GetKey(employeePhone.EmployeePhoneID, "Name"));
+        var keyPhone = GetKey(employeePhone.EmployeePhoneID, "PhoneNumber");
+        var keyName = GetKey(employeePhone.EmployeePhoneID, "Name");
 
-        employeePhone.PhoneNumber =
-            employeePhone.PhoneNumber?.Trim();
+        _fieldErrors.Remove(keyPhone);
+        _fieldErrors.Remove(keyName);
 
-        employeePhone.EmployeeName =
-            employeePhone.EmployeeName?.Trim();
+        employeePhone.PhoneNumber = employeePhone.PhoneNumber?.Trim();
+        employeePhone.EmployeeName = employeePhone.EmployeeName?.Trim();
 
-      
-        if (!string.IsNullOrWhiteSpace(employeePhone.PhoneNumber))
+        // Ingen validering hvis telefonnummer er tomt (da det er tomt, når telefonobjektet oprettes)
+        if (string.IsNullOrWhiteSpace(employeePhone.PhoneNumber))
         {
-            // Maks længde
-            if (employeePhone.PhoneNumber.Length > 20)
+            return true;
+        }
+
+        // Tjekker for ugyldige tegn (kun tilladt: cifre, mellemrum, +, -, og parenteser)
+        var regex = new Regex(@"^[\d\s\+\-\(\)]+$");
+
+        if (!regex.IsMatch(employeePhone.PhoneNumber))
+        {
+            _fieldErrors[keyPhone] = "Indeholder ugyldige tegn";
+            return false; // stop her
+        }
+
+        // Fjerner alle ikke-cifre for at tjekke længden på det faktiske telefonnummer
+        var digitsOnly = new string(
+            employeePhone.PhoneNumber
+                .Where(char.IsDigit)
+                .ToArray());
+
+        // Minimum længde (kun cifre)
+        if (digitsOnly.Length < 8)
+        {
+            _fieldErrors[keyPhone] = "Telefonnummer er for kort";
+            return false;
+        }
+
+        //Maks længde 
+        if (employeePhone.PhoneNumber.Length > 20)
+        {
+            _fieldErrors[keyPhone] = "Telefonnummer er for langt";
+            return false;
+        }
+
+        // Tjekker for duplikater 
+        bool exists = EmployeePhones.Any(x =>
+            x.EmployeePhoneID != employeePhone.EmployeePhoneID &&
+            x.PhoneNumber == employeePhone.PhoneNumber);
+
+        if (exists)
+        {
+            _fieldErrors[keyPhone] = "Telefonnummer findes allerede";
+            return false;
+        }
+
+        // Validering for EmployeeName (kun hvis det ikke er tomt, da det er tomt når objektet oprettes)
+        if (!string.IsNullOrWhiteSpace(employeePhone.EmployeeName))
+        {
+            if (employeePhone.EmployeeName.Length > 100)
             {
-                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
-                    "Telefonnummer er for langt";
-            }
-
-            // Gyldige tegn
-            var regex = new Regex(@"^[\d\s\+\-\(\)]+$");
-
-            if (!regex.IsMatch(employeePhone.PhoneNumber))
-            {
-                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
-                    "Telefonnummer indeholder ugyldige tegn";
-            }
-
-            // Minimum antal cifre
-            var digitsOnly = new string(
-                employeePhone.PhoneNumber
-                    .Where(char.IsDigit)
-                    .ToArray());
-
-            if (digitsOnly.Length < 8)
-            {
-                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
-                    "Telefonnummer er for kort";
-            }
-
-            // Dublet-check
-            bool exists = EmployeePhones.Any(x =>
-                x.EmployeePhoneID != employeePhone.EmployeePhoneID &&
-                x.PhoneNumber == employeePhone.PhoneNumber);
-
-            if (exists)
-            {
-                _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "PhoneNumber")] =
-                    "Telefonnummer findes allerede";
+                _fieldErrors[keyName] = "Navn er for langt";
+                return false;
             }
         }
 
-        // Navn valgfrit
-        if (!string.IsNullOrWhiteSpace(employeePhone.EmployeeName) &&
-            employeePhone.EmployeeName.Length > 100)
-        {
-            _fieldErrors[GetKey(employeePhone.EmployeePhoneID, "Name")] = "Navn er for langt";
-        }
-
-        return _fieldErrors.Count == 0;
+        return true;
     }
 
 }

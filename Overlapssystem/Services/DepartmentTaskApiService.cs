@@ -126,9 +126,7 @@ namespace Overlapssystem.Services
         {
             try
             {
-                var response = await _http.DeleteAsync(
-                    $"api/DepartmentTask/{id}"
-                );
+                var response = await _http.DeleteAsync($"api/DepartmentTask/{id}");
 
                 await response.ReadApiResponse<object>();
 

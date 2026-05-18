@@ -14,6 +14,7 @@
 
 @inherits AppComponentBase
 @inject IResidentFacade residentFacade
+@inject IDepartmentFacade departmentFacade
 @inject IDepartmentTaskFacade departmentTaskFacade
 @inject IEmployeePhoneFacade employeePhoneFacade
 @inject NavigationManager Navigation
@@ -35,18 +36,7 @@
     </div>
 }
 
-@if (departmentId == 1)
-{
-    <h2 class="h2-style">Slottet</h2>
-}
-else if (departmentId == 2)
-{
-   <h2 class="h2-style">Skoven</h2>
-}
-else 
-{
-    <h2 class="h2-style">Ukendt afdeling</h2>
-}
+<h2 class="h2-style">@departmentName</h2>
 
 
 <AuthorizeView>
@@ -102,12 +92,12 @@ else
 
 <div class="card-container">
             <DepartmentTaskCard @ref="departmentTaskCard"
-                DepartmentId="departmentId"
+                DepartmentId="DepartmentId"
                 OnAdd="AddDepartmentTaskAsync"
                 OnDelete="DeleteDepartmentTaskAsync"/>
 
             <EmployeePhoneCard @ref="employeePhoneCard"
-                DepartmentId="departmentId"
+                DepartmentId="DepartmentId"
                 OnAdd="AddEmployeePhoneAsync"
                 OnDelete="DeleteEmployeePhoneAsync"/>
 </div>
@@ -124,7 +114,7 @@ else
 
 
     [Parameter]
-    public int departmentId { get; set; }
+    public int DepartmentId { get; set; }
 
     private bool showCreateResident = false;
     private DepartmentTaskCard? departmentTaskCard;
@@ -132,19 +122,26 @@ else
 
     ResidentViewModel newResident = new ResidentViewModel { Risiko = Risiko.Green };
 
+    private string departmentName = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         await RefreshResidentsAsync();
+
+        //Henter afdelingens navn, som vises i overskriften
+        var department = await ExecuteAsyncT(() => departmentFacade.GetDepartmentById(DepartmentId));
+
+        departmentName = department?.Name ?? "Ukendt afdeling";
     }
 
     private void GoToCreateUser()
     {
-        Navigation.NavigateTo($"/OpretBruger/{departmentId}");
+        Navigation.NavigateTo($"/OpretBruger/{DepartmentId}");
     }
 
     private void GoToAuditTrail()
     {
-        Navigation.NavigateTo($"/audittrail/{departmentId}");
+        Navigation.NavigateTo($"/audittrail/{DepartmentId}");
     }
 
     private async Task ShowCreateResident()
@@ -152,7 +149,7 @@ else
         newResident = new ResidentViewModel
         {
             Risiko = Risiko.Green,
-            DepartmentId = departmentId,
+            DepartmentId = DepartmentId,
             Name = "Ny beboer"
         };
 
@@ -204,7 +201,7 @@ else
     private async Task RefreshResidentsAsync()
     {
         residents = await ExecuteAsyncT(() =>
-            residentFacade.GetResidentByDepartment(departmentId))
+            residentFacade.GetResidentByDepartment(DepartmentId))
             ?? new();
     }
 

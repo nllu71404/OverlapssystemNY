@@ -102,15 +102,8 @@
     {
         await ExecuteAsync(async () =>
         {
-            if (string.IsNullOrWhiteSpace(newUser.UserName) ||
-                string.IsNullOrWhiteSpace(newUser.Password) ||
-                string.IsNullOrWhiteSpace(newUser.FirstName) ||
-                string.IsNullOrWhiteSpace(newUser.LastName) ||
-                string.IsNullOrWhiteSpace(newUser.Role) ||
-                newUserDepartmentId is null)
-            {
+            if (!ValidateUser())
                 return Error.Validation("Udfyld alle felter.");
-            }
 
             newUser.DepartmentId = newUserDepartmentId;
 
@@ -131,5 +124,29 @@
     private void GoToHandoverScheme()
     {
         Navigation.NavigateTo($"/HandoverScheme/{CurrentDepartmentId}");
+    }
+
+    // Validerer at alle nødvendige felter er udfyldt
+    private bool ValidateUser()
+    {
+        if (string.IsNullOrWhiteSpace(newUser.UserName))
+            return false;
+
+        if (string.IsNullOrWhiteSpace(newUser.Password))
+            return false;
+
+        if (string.IsNullOrWhiteSpace(newUser.FirstName))
+            return false;
+
+        if (string.IsNullOrWhiteSpace(newUser.LastName))
+            return false;
+
+        if (string.IsNullOrWhiteSpace(newUser.Role))
+            return false;
+
+        if (newUserDepartmentId is null)
+            return false;
+
+        return true;
     }
 }

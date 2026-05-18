@@ -27,6 +27,7 @@ namespace Overlapssystem.Facades
         public async Task<Result> DeleteDepartmentTask(int departmentTaskId)
         {
             var result = await _departmentTaskApiService.DeleteDepartmentTask(departmentTaskId);
+           
             return result;
         }
 

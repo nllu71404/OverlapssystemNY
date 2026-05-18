@@ -148,7 +148,7 @@ namespace OverlapssystemInfrastructure.Repositories
         public async Task DeleteDepartmentTaskAsync(int departmentTaskId)
         {
             using SqlConnection connection = new SqlConnection(_connectionString);
-            using SqlCommand command = new SqlCommand("dbo.uspDeleteDepartmentTask", connection);
+            using SqlCommand command = new SqlCommand("dbo.uspDeleteDepartmentTaskTopic", connection);
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add("@DepartmentTaskID", SqlDbType.Int).Value = departmentTaskId;

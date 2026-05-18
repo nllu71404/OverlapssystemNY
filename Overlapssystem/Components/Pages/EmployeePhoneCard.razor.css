@@ -1,5 +1,4 @@
 ﻿.phone-card {
-    
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 10px;
@@ -7,6 +6,7 @@
     width: 500px;
     font-family: "Stack Sans Headline", sans-serif;
     font-size: 14px;
+    
 }
 
 .phone-card-header {
@@ -22,5 +22,6 @@
     background-color: #fff5f5 !important;
     border-radius: 4px;
 }
+
 
 

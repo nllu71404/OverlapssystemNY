@@ -1,12 +1,12 @@
 ﻿@using OverlapssystemDomain.Entities
 @using Overlapssystem.Services
 @using OverlapssystemDomain.Enums;
-@using Overlapssystem.Facades;
 @using Overlapssystem.ViewModels;
 @using Overlapssystem.Interfaces;
 @using Microsoft.AspNetCore.Components.Authorization
 @using OverlapssytemApplication.Common.Result
 @using OverlapssytemApplication.Common.Errors
+@using System.Text.RegularExpressions
 
 @inherits AppComponentBase
 @inject IDepartmentTaskFacade departmentTaskFacade
@@ -22,15 +22,6 @@
 
 <div class="department-task-card">
 
-   
-    <!--- Viser valideringsfejl --->
-    @if (CurrentError?.Type == ErrorType.Validation)
-    {
-        <div class="error-msg">
-            <ErrorDisplay Message="@CurrentError?.Message" />
-        </div>
-    }
-
     <div class="task-card-header">
         <AuthorizeView>
             <Authorized>
@@ -41,6 +32,7 @@
                         <option value="@ShiftType.Aften">Aftenvagt</option>
                         <option value="@ShiftType.Nat">Nattevagt</option>
                     </select>
+
                     @if (context.User.IsInRole("Administrator"))
                     {
                         <button class="btn-plus" @onclick="() => OnAdd.InvokeAsync(DepartmentId)">+</button>
@@ -49,9 +41,9 @@
                 else if (context.User.IsInRole("Simpel"))
                 {
                     <select disabled class="drop-down-box">
-                        <option value="@ShiftType.Dag" selected="@(dpTask.ShiftType == ShiftType.Dag)"></option>
-                        <option value="@ShiftType.Aften" selected="@(dpTask.ShiftType == ShiftType.Aften)"></option>
-                        <option value="@ShiftType.Nat" selected="@(dpTask.ShiftType == ShiftType.Nat)"></option>
+                        <option value="@ShiftType.Dag">Dagvagt</option>
+                        <option value="@ShiftType.Aften">Aftenvagt</option>
+                        <option value="@ShiftType.Nat">Nattevagt</option>
                     </select>
                 }
             </Authorized>
@@ -71,17 +63,36 @@
             @foreach (var task in Tasks.Where(t => t.ShiftType == selectedShift))
             {
                 <tr>
+
+                    <!-- TASK TOPIC -->
                     <td>
                         <AuthorizeView>
                             <Authorized>
                                 @if (context.User.IsInRole("Administrator"))
                                 {
-                                    <input value="@task.DepartmentTaskTopic"
-                                           @onchange="async e =>
-                                           {
-                                               task.DepartmentTaskTopic = e.Value?.ToString();
-                                               await UpdateDepartmentTask(task);
-                                           }" />
+                                    <div class="field-group">
+
+                                        <input class="form-control @(HasErrorForId(task.DepartmentTaskID, "TaskTopic") ? "input-error" : "")"
+                                               value="@task.DepartmentTaskTopic"
+                                               @onchange="async e =>
+                                                {
+                                                 task.DepartmentTaskTopic = e.Value?.ToString();
+
+                                                 if (!ValidateTask(task))
+                                                 return;
+
+                                                 await UpdateDepartmentTask(task);
+                                                 }" />
+
+                                        <!-- Viser valideringsfejl for TaskTopic -->
+                                        @if (HasErrorForId(task.DepartmentTaskID, "TaskTopic"))
+                                        {
+                                            <div class="field-error-msg">
+                                                @GetErrorForId(task.DepartmentTaskID, "TaskTopic")
+                                            </div>
+                                        }
+
+                                    </div>
                                 }
                                 else if (context.User.IsInRole("Medarbejder"))
                                 {
@@ -95,18 +106,36 @@
                         </AuthorizeView>
                     </td>
 
+                    <!-- EMPLOYEE NAME -->
                     <td>
                         <AuthorizeView>
                             <Authorized>
                                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                                 {
-                                    <input value="@task.EmployeeName"
-                                           @onchange="async e =>
-                                           {
-                                               task.EmployeeName = e.Value?.ToString();
-                                               await UpdateDepartmentTask(task);
-                                           }"
-                                             placeholder="Navn" />
+                                    <div class="field-group">
+
+                                        <input class="form-control @(HasErrorForId(task.DepartmentTaskID, "EmployeeName") ? "input-error" : "")"
+                                               value="@task.EmployeeName"
+                                               @onchange="async e =>
+                                                {
+                                                  task.EmployeeName = e.Value?.ToString();
+
+                                                  if (!ValidateTask(task))
+                                                  return;
+
+                                                  await UpdateDepartmentTask(task);
+                                                }"
+                                               placeholder="Navn" />
+
+                                        <!-- Viser valideringsfejl for EmployeeName -->
+                                        @if (HasErrorForId(task.DepartmentTaskID, "EmployeeName"))
+                                        {
+                                            <div class="field-error-msg">
+                                                @GetErrorForId(task.DepartmentTaskID, "EmployeeName")
+                                            </div>
+                                        }
+
+                                    </div>
                                 }
                                 else if (context.User.IsInRole("Simpel"))
                                 {
@@ -116,21 +145,23 @@
                         </AuthorizeView>
                     </td>
 
+                    <!-- DELETE -->
                     <td>
                         <AuthorizeView Roles="Administrator">
                             <Authorized>
                                 <button class="btn-grey"
-                                        @onclick="() => OnDelete.InvokeAsync(task)">
+                                        @onclick="() => ConfirmDeleteAsync(task)">
                                     Slet
                                 </button>
                             </Authorized>
                         </AuthorizeView>
                     </td>
+
                 </tr>
             }
         </tbody>
     </table>
-    </div>
+</div>
 
 @code {
     [Parameter]
@@ -151,24 +182,66 @@
 
     public List<DepartmentTaskViewModel> Tasks { get; set; } = new();
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            Tasks = await ExecuteAsyncT(() => departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId));
-            StateHasChanged();
-        }
+        Tasks = await ExecuteAsyncT(() =>
+            departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId)) ?? new List<DepartmentTaskViewModel>();
+
     }
 
     // Allow parent to ask this component to refresh its list after parent creates/updates.
     public async Task RefreshAsync()
     {
-        Tasks = await ExecuteAsyncT(() => departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId));
+        Tasks = await ExecuteAsyncT(() => departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId)) ?? new List<DepartmentTaskViewModel>();
         StateHasChanged();
     }
 
     private async Task UpdateDepartmentTask(DepartmentTaskViewModel task)
     {
         await ExecuteAsync(() => departmentTaskFacade.UpdateDepartmentTask(task));
+    }
+
+    private async Task ConfirmDeleteAsync(DepartmentTaskViewModel task)
+    {
+        var ok = await JS.InvokeAsync<bool>("confirm", "Er du sikker på, at du vil slette denne opgave?");
+
+        if (!ok) return;
+
+        await OnDelete.InvokeAsync(task);
+    }
+
+    private bool ValidateTask(DepartmentTaskViewModel task)
+    {
+        var keyTopic = GetKey(task.DepartmentTaskID, "TaskTopic");
+        var keyName = GetKey(task.DepartmentTaskID, "EmployeeName");
+
+        _fieldErrors.Remove(keyTopic);
+        _fieldErrors.Remove(keyName);
+
+        task.DepartmentTaskTopic = task.DepartmentTaskTopic?.Trim();
+        task.EmployeeName = task.EmployeeName?.Trim();
+
+        // Validering af task topic
+        if (string.IsNullOrWhiteSpace(task.DepartmentTaskTopic))
+        {
+            _fieldErrors[keyTopic] = "Opgave må ikke være tom";
+            return false;
+        }
+
+        if (task.DepartmentTaskTopic.Length > 100)
+        {
+            _fieldErrors[keyTopic] = "Opgave er for lang";
+            return false;
+        }
+
+        // Validering af employee name (kun hvis det ikke er tomt)
+        if (!string.IsNullOrWhiteSpace(task.EmployeeName) &&
+            task.EmployeeName.Length > 100)
+        {
+            _fieldErrors[keyName] = "Navn er for langt";
+            return false;
+        }
+
+        return true;
     }
 }

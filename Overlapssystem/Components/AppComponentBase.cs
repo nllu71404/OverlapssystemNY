@@ -16,7 +16,8 @@ public abstract class AppComponentBase : ComponentBase
     // Dictionary til at holde styr på valideringsfejl for hvert felt
     protected Dictionary<string, string> _fieldErrors = new();
 
-    // Hjælpefunktion til at generere unikke nøgler for inputfelter baseret på en ID og et felt navn
+    // Hjælpefunktion til at generere en unik nøgle for et felt baseret på ID og felt navn 
+    //Bruges til at håndtere fejl elementerne i DepartmentTask tabellen og EmployeePhone tabellen
     protected string GetKey(int id, string field)
     {
         return $"{id}_{field}";
