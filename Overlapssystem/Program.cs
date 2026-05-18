@@ -17,37 +17,68 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, AuthState>();
 builder.Services.AddScoped<AuthState>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<AuthState>());
 
 builder.Services.AddAuthentication("Bearer");
 
 // HttpClient
-builder.Services.AddTransient<AuthTokenHandler>();
+builder.Services.AddScoped<AuthTokenHandler>();
 
-builder.Services.AddHttpClient("Api", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7150");
-})
-.AddHttpMessageHandler<AuthTokenHandler>();
+//builder.Services.AddHttpClient("Api", client =>
+//{
+//    client.BaseAddress = new Uri("https://localhost:7150");
+//})
+//.AddHttpMessageHandler<AuthTokenHandler>();
 
-builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
+//builder.Services.AddScoped(sp =>
+//    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
 
-builder.Services.AddScoped<AuditTrailDetailApiService>();
-builder.Services.AddScoped<ResidentApiService>();
-builder.Services.AddScoped<MedicinApiService>();
-builder.Services.AddScoped<DepartmentApiService>();
-builder.Services.AddScoped<PNMedicinApiService>();
-builder.Services.AddScoped<ShoppingApiService>();
-builder.Services.AddScoped<DepartmentTaskApiService>();
-builder.Services.AddScoped<SpecialEventApiService>();
-builder.Services.AddScoped<EmployeePhoneApiService>();
+builder.Services.AddHttpClient<AuditTrailDetailApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<ResidentApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<MedicinApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<DepartmentApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<PNMedicinApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<ShoppingApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<DepartmentTaskApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<SpecialEventApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<EmployeePhoneApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+builder.Services.AddHttpClient<UserApiService>(client =>
+    client.BaseAddress = new Uri("https://localhost:7150"))
+    .AddHttpMessageHandler<AuthTokenHandler>();
+
+// Facades forbliver som de er
 builder.Services.AddScoped<IResidentFacade, ResidentFacade>();
 builder.Services.AddScoped<IDepartmentTaskFacade, DepartmentTaskFacade>();
 builder.Services.AddScoped<IDepartmentFacade, DepartmentFacade>();
 builder.Services.AddScoped<IEmployeePhoneFacade, EmployeePhoneFacade>();
-builder.Services.AddScoped<UserApiService>();
 builder.Services.AddScoped<IUserFacade, UserFacade>();
 
 

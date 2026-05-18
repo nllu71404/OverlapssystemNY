@@ -9,6 +9,7 @@ namespace Overlapssystem.TokenService
     public class AuthState : AuthenticationStateProvider
     {
         private readonly IJSRuntime _js;
+        private string? _token;
         private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
 
         public AuthState(IJSRuntime js)
@@ -39,6 +40,8 @@ namespace Overlapssystem.TokenService
         }
         public async Task<string?> GetTokenAsync()
         {
+            if (!string.IsNullOrEmpty(_token))
+                return _token;
             try
             {
                 return await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
@@ -52,6 +55,7 @@ namespace Overlapssystem.TokenService
         // Kaldes når brugeren logger ind med et JWT token
         public async Task MarkUserAsAuthenticated(string token)
         {
+            _token = token; // gem i hukommelsen
             await _js.InvokeVoidAsync("sessionStorage.setItem", "authToken", token);
             _currentUser = BuildClaimsPrincipal(token);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
@@ -59,6 +63,7 @@ namespace Overlapssystem.TokenService
         // Kaldes når brugeren logger ud
         public async Task MarkUserAsLoggedOut()
         {
+            _token = null;
             await _js.InvokeVoidAsync("sessionStorage.removeItem", "authToken");
             _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
