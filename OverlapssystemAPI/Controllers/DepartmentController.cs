@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
-using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
 using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -18,6 +19,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent Alle
         [HttpGet("HentAlleDepartments")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetAllDepartments()
         {
             var result = await _departmentService.GetAllDepartmentsAsync();
@@ -33,6 +35,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent by ID
         [HttpGet("HentAlleDepartmentsByID/{departmentId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetDepartmentById(int departmentId)
         {
             var result = await _departmentService.GetDepartmentByIdAsync(departmentId);
@@ -48,6 +51,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent by name
         [HttpGet("HentAlleDepartmentsByName/{departmentName}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetDepartmentByName(string departmentName)
         {
            
@@ -75,6 +79,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Slet
         [HttpDelete("{departmentId}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteDepartment(int departmentId)
         {
             var result = await _departmentService.DeleteDepartmentAsync(departmentId);
@@ -83,6 +88,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Update
         [HttpPut("{departmentId}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateDepartment(int departmentId, [FromBody] DepartmentDTO departmentDTO)
         {
             var departmentModel = MapToUpdateDepartmentModel(departmentDTO);

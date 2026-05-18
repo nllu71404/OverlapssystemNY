@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using OverlapssytemApplication.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
 using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Interfaces;
 
 
 namespace OverlapssystemAPI.Controllers
@@ -21,6 +22,7 @@ namespace OverlapssystemAPI.Controllers
          
         // Hent audit trail details på DepartmentId
         [HttpGet("{departmentId:int}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetAuditTrailDetailsByDepartmentId(int departmentId)
         {
             var result = await _auditTrailDetailService

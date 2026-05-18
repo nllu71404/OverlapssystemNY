@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
-using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Interfaces;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -18,6 +19,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent
         [HttpGet("HentSpecialEventForBorger/{residentId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetSpecialTaskByResidentID(int residentId)
         {
             var result = await _specialEventService.GetSpecialEventByResidentIdAsync(residentId);
@@ -32,6 +34,7 @@ namespace OverlapssystemAPI.Controllers
         }
         //Tilføj
         [HttpPost("TilføjSpecialEvent")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> AddSpecialEvent([FromBody] AddSpecialEventDTO addSpecialEventDTO)
         {
            var specialEventModel = MapToAddSpecialEventModel(addSpecialEventDTO);
@@ -46,6 +49,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Update
         [HttpPut("{specialEventID}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdateSpecialTask(int specialEventID, [FromBody] UpdateSpecialEventDTO specialEventDTO)
         {
             var specialEventModel = MapToUpdateSpecialEventModel(specialEventDTO);
@@ -55,6 +59,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Delete
         [HttpDelete("{specialEventID}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> DeleteSpecialEvent(int specialEventID)
         {
             var result = await _specialEventService.DeleteSpecialEventAsync(specialEventID);

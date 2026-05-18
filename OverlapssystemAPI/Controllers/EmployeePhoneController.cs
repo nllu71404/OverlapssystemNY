@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
-using OverlapssytemApplication.Services;
-using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
 using OverlapssytemApplication.Common;
+using OverlapssytemApplication.Interfaces;
+using OverlapssytemApplication.Services;
 
 
 
@@ -22,6 +23,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent alle medarbejdertelefonnumre
         [HttpGet("HentAlleEmployeePhones")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetAllEmployeePhoneNumbersAsync()
         {
             var result = await _employeePhoneService.GetAllEmployeePhoneNumbersAsync();
@@ -37,6 +39,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent medarbejdertelefon på id
         [HttpGet("HentEmployeePhoneById/{employeePhoneId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetEmployeePhoneByIdAsync(int employeePhoneId)
         {
             var result = await _employeePhoneService.GetEmployeePhoneByIdAsync(employeePhoneId);
@@ -52,6 +55,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent medarbejdertelefoner på departmentId
         [HttpGet("HentEmployeePhonesByDepartmentId/{departmentId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetEmployeePhonesByDepartmentIdAsync(int departmentId)
         {
             var result = await _employeePhoneService.GetEmployeePhonesByDepartmentIdAsync(departmentId);
@@ -65,6 +69,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj/Gem et medarbejdertelefonnummer
         [HttpPost("TilføjEmployeePhone")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> SaveNewEmployeePhoneAsync([FromBody] AddEmployeePhoneDTO employeePhoneDTO)
         {
             var employeePhoneModel = MapToAddEmployeePhoneModel(employeePhoneDTO);
@@ -74,6 +79,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Update et medarbejdertelefonnummer
         [HttpPut("OpdaterEmployeePhone/{employeePhoneId}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdateEmployeePhoneAsync(int employeePhoneId, [FromBody] EmployeePhoneDTO employeePhoneDTO)
         {
             var employeePhoneModel = MapToUpdateEmployeePhoneModel(employeePhoneDTO);
@@ -83,6 +89,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Delete et medarbejdertelefonnummer
         [HttpDelete("SletEmployeePhone/{employeePhoneId}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteEmployeePhoneAsync(int employeePhoneId)
         {
             var result = await _employeePhoneService.DeleteEmployeePhoneAsync(employeePhoneId);
