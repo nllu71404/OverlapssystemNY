@@ -52,7 +52,7 @@ namespace Overlapssystem.TokenService
             }
         }
 
-        // Kaldes når brugeren logger ind med et JWT token
+        // Kaldes når brugeren logger ind med et JWT token gemmer den token i sessionStorage
         public async Task MarkUserAsAuthenticated(string token)
         {
             _token = token; // gem i hukommelsen
