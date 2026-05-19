@@ -1,5 +1,5 @@
 ﻿@page "/audittrail/{DepartmentId:int}"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @inherits AppComponentBase
 

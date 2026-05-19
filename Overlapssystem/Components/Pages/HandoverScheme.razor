@@ -1,5 +1,5 @@
 ﻿@page "/HandoverScheme/{departmentId:int}"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using OverlapssystemDomain.Entities
 @using OverlapssystemDomain.Enums
 @using OverlapssystemDomain.Interfaces
@@ -8,6 +8,7 @@
 @using Overlapssystem.ViewModels
 @using Overlapssystem.Interfaces
 @using Overlapssystem.TokenService
+@using Overlapssystem.Components
 @using Microsoft.AspNetCore.Components.Authorization
 @using OverlapssytemApplication.Common.Result
 @using OverlapssytemApplication.Common.Errors

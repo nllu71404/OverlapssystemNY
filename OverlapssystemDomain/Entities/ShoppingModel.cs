@@ -11,11 +11,8 @@ namespace OverlapssystemDomain.Entities
     {
         public int ShoppingID { get; set; }
         public int ResidentID { get; set; }
-        //public string Day { get; set; } = ""; //skal være et enum
         public Day Day { get; set; }
         public TimeSpan? Time { get; set; } 
-        //public int Time { get; set; }   
-        //public DateTime? DateAndTime { get; set; }
         public string PaymentMethod { get; set; } = "";
     }
 }

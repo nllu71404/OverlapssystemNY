@@ -1,26 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Interfaces;
 using OverlapssytemApplication.Common.Errors;
 using OverlapssytemApplication.Common.Result;
 using OverlapssytemApplication.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OverlapssytemApplication.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IDepartmentRepository _departmentRepository;
         private readonly ILogger<UserService> _logger;
 
         public UserService(
-            IUserRepository userRepository, ILogger<UserService> logger)
+            IUserRepository userRepository, IDepartmentRepository departmentRepository, ILogger<UserService> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _departmentRepository = departmentRepository ?? throw new ArgumentNullException(nameof(departmentRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            
         }
+            
 
         public async Task<Result<List<UserModel>>> GetAllUsersAsync()
         {
@@ -88,28 +93,56 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-
+        //Metodens navn viser os at den returnerer et resultat (fejl eller succes) 
         public async Task<Result> CreateNewUserAsync(UserModel userModel, string password, string role)
         {
-            if (userModel == null) return Error.Validation("Brugermodellen er påkrævet");
-           
+
+            //Her kaster vi en ArgumentNullException hvis userModel er null, da dette ikke er en forventet situation 
+            //I dette tilfælde er det bedre at fejle hurtigt end at fortsætte med en ugyldig tilstand
+            ArgumentNullException.ThrowIfNull(userModel);
+
+            //Her kaster vi IKKE en exception for ugyldigt input, da dette er en forventelig fejl.
+            //Tjekker om det valgte afdelings-id findes, så der ikke oprettes en bruger der er tilknyttet en ugyldig afdeling. 
+            //var department = await _departmentRepository.GetDepartmentByIdAsync(userModel.DepartmentId.Value);
+
+            //if (department is null)
+            //    return Error.Validation("Den valgte afdeling findes ikke");
 
             try
             {
-                var existing = await _userRepository.GetUserByUserName(userModel.UserName);
-                if (existing != null) return Error.Validation("Brugernavnet er allerede i brug");
-
+ 
+                //Identity har indbygget validering for forventelige fejl som duplikate brugernavne og svage adgangskoder
+                //Vi sætter selv fejlmeddelelserne i denne metode, så de er på dansk og mere brugervenlige.
                 var result = await _userRepository.CreateUser(userModel, password, role);
                 if (!result.Succeeded)
-                    return Error.Validation(string.Join(", ", result.Errors.Select(e => e.Description)));
+                {
+                    var errors = result.Errors.Select(error => error.Code switch
+                    {
+                        "DuplicateUserName" => "Brugernavnet er allerede i brug",
+                        "PasswordTooShort" => "Adgangskoden er for kort",
+                        "PasswordRequiresNonAlphanumeric" =>
+                            "Adgangskoden skal indeholde et specialtegn",
+                        "PasswordRequiresDigit" =>
+                            "Adgangskoden skal indeholde mindst ét tal",
+                        "PasswordRequiresUpper" =>
+                            "Adgangskoden skal indeholde mindst ét stort bogstav",
+                        _ => "Brugeren kunne ikke oprettes"
+                    });
 
+                    return Error.Validation(string.Join(", ", errors));
+                }
+
+                
                 // Tildel Identity rolle
                 await _userRepository.AddToRoleAsync(userModel, role);
 
+                // Hvis alt lykkedes, returner en succes
                 return Result.Ok();
             }
             catch (Exception ex)
             {
+                // Hvis der opstår en uventet fejl, logges den med detaljeret fejlmeddelse til udviklere.
+                // Vi returner en generisk teknisk fejlmeddelelse til brugeren, for at undgå at eksponere følsomme detaljer.
                 _logger.LogError(ex, "Kunne ikke oprette bruger {UserName}", userModel.UserName);
                 return Error.Technical("Kunne ikke oprette bruger");
             }

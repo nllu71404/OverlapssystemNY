@@ -55,8 +55,11 @@ namespace OverlapssytemApplication.Services
         }
 
         // Hent på DepartmentId
+
+        //Metodens navn fortæller os, at den returnerer enten en liste af beboere eller en fejl
         public async Task<Result<List<ResidentModel>>> LoadResidentsByDepartmentAsync(int departmentId)
         {
+            
             if (departmentId <= 0)
                 return Error.Validation("Ugyldigt afdelingsID");
 
@@ -103,9 +106,6 @@ namespace OverlapssytemApplication.Services
 
             if (resident.ResidentId <= 0)
                 return Error.Validation("Ugyldigt beboer ID");
-
-            if (string.IsNullOrWhiteSpace(resident.Name))
-                return Error.Validation("Navn er påkrævet");
 
             try
             {
