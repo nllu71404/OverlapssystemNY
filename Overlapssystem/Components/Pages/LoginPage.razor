@@ -119,12 +119,12 @@
     }
    
 
-    // // (Input-validering) Validerer at både brugernavn og password er indtastet
-    // private bool ValidateInput()
-    // {
-    //     return !string.IsNullOrWhiteSpace(userName)
-    //         && !string.IsNullOrWhiteSpace(password);
-    // }
+    // (Input-validering) Validerer at både brugernavn og password er indtastet
+    private bool ValidateInput()
+    {
+        return !string.IsNullOrWhiteSpace(userName)
+            && !string.IsNullOrWhiteSpace(password);
+    }
 
     // // Kalder API'et for at validere brugeren og returnere et token, hvis det er gyldigt
     // private async Task<string?> AuthenticateAsync()
