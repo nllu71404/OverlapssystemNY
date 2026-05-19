@@ -666,6 +666,17 @@ DELETE FROM dbo.Department WHERE DepartmentID = @DepartmentID
 END;
 GO
 
+-- Checks if a department exists --
+CREATE OR ALTER PROCEDURE dbo.uspDepartmentExists
+    @DepartmentID INT
+AS
+BEGIN
+    SELECT COUNT(1)
+    FROM Department
+    WHERE DepartmentID = @DepartmentID
+END;
+GO
+
 -- DepartmentTask stored procedures
 -- Creates a DepartmentTask to the table of DepartmentTasks.
 CREATE OR ALTER PROCEDURE dbo.uspCreateDepartmentTask
