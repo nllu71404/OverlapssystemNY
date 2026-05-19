@@ -1,16 +1,21 @@
-﻿@page "/OpretBruger"
+﻿@page "/OpretBruger/{CurrentDepartmentId:int}"
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Authorization
 @using Overlapssystem.Interfaces
 @using Overlapssystem.ViewModels
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject IUserFacade userFacade
+@inject NavigationManager Navigation
 
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
         <div class="login-wrapper">
+            <button class="btn-return" @onclick="GoToHandoverScheme">
+                Tilbage
+            </button>
             <div class="login-card">
                 <h2>Opret bruger</h2>
 
@@ -31,7 +36,7 @@
                 </div>
 
                 <div class="input-group">
-                    <input type="number" placeholder="Afdeling ID" @bind="departmentId" />
+                    <input type="number" placeholder="Afdeling ID" @bind="newUserDepartmentId" />
                 </div>
 
                 <div class="input-group">
@@ -62,13 +67,20 @@
 
 
 @code {
+    [Parameter]
+    public int CurrentDepartmentId { get; set; }
+
     private UserViewModel newUser = new();
-    private int? departmentId;
+    private int? newUserDepartmentId;
     private bool isLoading;
     private string message = string.Empty;
     private bool wasCreated;
 
+    
+
+
     private string messageCssClass => wasCreated ? "success-msg" : "error-msg";
+
 
     private async Task CreateUserAsync()
     {
@@ -80,7 +92,7 @@
             string.IsNullOrWhiteSpace(newUser.FirstName) ||
             string.IsNullOrWhiteSpace(newUser.LastName) ||
             string.IsNullOrWhiteSpace(newUser.Role) ||
-            departmentId is null)
+            newUserDepartmentId is null)
         {
             message = "Udfyld alle felter.";
             return;
@@ -90,13 +102,13 @@
         {
             isLoading = true;
 
-            newUser.DepartmentId = departmentId;
+            newUser.DepartmentId = newUserDepartmentId;
             await userFacade.AddUser(newUser);
 
             wasCreated = true;
             message = "Brugeren er oprettet.";
             newUser = new UserViewModel();
-            departmentId = null;
+            newUserDepartmentId = null;
         }
         catch (Exception ex)
         {
@@ -106,5 +118,10 @@
         {
             isLoading = false;
         }
+    }
+
+    private void GoToHandoverScheme()
+    {
+        Navigation.NavigateTo($"/HandoverScheme/{CurrentDepartmentId}");
     }
 }

@@ -2,10 +2,12 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    
 }
 
 main {
     flex: 1;
+    
 }
 
 .top-row {
@@ -65,3 +67,5 @@ main {
         padding-right: 1.5rem !important;
     }
 }
+
+

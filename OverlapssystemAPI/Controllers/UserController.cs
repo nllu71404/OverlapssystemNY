@@ -21,6 +21,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent alle
         [HttpGet("HenterBrugere")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUsers()
         {
             var result = await _userService.GetAllUsersAsync();
@@ -29,6 +30,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent på ID
         [HttpGet("HenterBrugere/{userId}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUsersById(string userId)
         {
             var restult = await _userService.GetUserByIdAsync(userId);
@@ -37,6 +39,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent på brugernavn
         [HttpGet("HenterBrugere/Brugernavn/{username}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUsersByUsername(string username)
         {
             var restult = await _userService.GetUserByUserNameAsync(username);
@@ -45,6 +48,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj
         [HttpPost("OpretBruger")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> CreateUser([FromBody] AddUserDTO userDTO)
         {
             var userModel = new UserModel
@@ -60,6 +64,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Slet
         [HttpDelete("{userId}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
             await _userService.DeleteUserAsync(userId);
@@ -75,6 +80,7 @@ namespace OverlapssystemAPI.Controllers
         //    return Ok(userId);
         //}
         //Validering
+
         [AllowAnonymous]
         [HttpPost("ValiderBruger")]
         public async Task<IActionResult> ValidateUser([FromBody] AddUserDTO userDTO)

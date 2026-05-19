@@ -143,11 +143,6 @@ namespace OverlapssystemInfrastructure.Repositories
                     ? pNMedicin.PNTime.Value
                     : DBNull.Value;
 
-            command.Parameters.Add("@PNTimeStamp", SqlDbType.DateTime).Value =
-                pNMedicin.PNTimeStamp.HasValue
-                    ? pNMedicin.PNTimeStamp.Value
-                    : DBNull.Value;
-
             command.Parameters.Add("@Reason", SqlDbType.NVarChar, 250).Value =
                 string.IsNullOrWhiteSpace(pNMedicin.Reason)
                     ? DBNull.Value

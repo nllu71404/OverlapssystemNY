@@ -9,12 +9,14 @@ using Microsoft.Extensions.Configuration;
 using OverlapssystemDomain.Entities;
 using OverlapssystemDomain.Enums;
 using OverlapssystemDomain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace OverlapssystemInfrastructure.Repositories
 {
     public class ShoppingRepository : IShoppingRepository
     {
         private readonly string _connectionString;
+
 
         public ShoppingRepository(IConfiguration configuration)
         {

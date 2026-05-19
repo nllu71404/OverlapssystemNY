@@ -3,7 +3,8 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #eaf1fb;
+    gap: 40px;
+    padding: 60px;
 }
 
 .login-card {
@@ -21,6 +22,7 @@
         text-align: center;
         margin-bottom: 8px;
         color: #2c3e50;
+        font-family: "Stack Sans Headline", sans-serif;
     }
 
 .input-group input,
@@ -32,6 +34,7 @@
     font-size: 1rem;
     box-sizing: border-box;
     background-color: white;
+    font-family: "Stack Sans Headline", sans-serif;
 }
 
     .input-group input:focus,
@@ -43,7 +46,7 @@
 
 .login-btn {
     padding: 14px;
-    background-color: #f0a500;
+    background-color: #558754;
     color: white;
     border: none;
     border-radius: 8px;
@@ -51,10 +54,11 @@
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    font-family: "Stack Sans Headline", sans-serif;
 }
 
     .login-btn:hover {
-        background-color: #d4920a;
+        background-color: #365c2d;
     }
 
     .login-btn:disabled {
@@ -66,10 +70,12 @@
     color: #e05c5c;
     text-align: center;
     font-size: 0.9rem;
+    font-family: "Stack Sans Headline", sans-serif;
 }
 
 .success-msg {
     color: #2f8f46;
     text-align: center;
     font-size: 0.9rem;
+    font-family: "Stack Sans Headline", sans-serif;
 }

@@ -1,0 +1,121 @@
+﻿@page "/audittrail/{DepartmentId:int}"
+@rendermode InteractiveServer
+
+
+@using Overlapssystem.Services
+@using OverlapssystemShared
+
+@inject AuditTrailDetailApiService AuditTrailDetailApiService
+@inject NavigationManager Navigation
+
+@if (DepartmentId == 1)
+{
+    DepartmentName = "Slottet";
+}
+else if (DepartmentId == 2)
+{
+    DepartmentName = "Skoven";
+}
+else
+{
+    DepartmentName = "Ukendt afdeling";
+}
+
+<div class="audit-page">
+    <div class="audit-header">
+        <div>
+            <h3 class="h2-style">Audit log</h3>
+            <p class="standard-text">Viser ændringer for afdeling @DepartmentName</p>
+        </div>
+
+        <button class="btn-grey" @onclick="LoadAuditTrailDetails">
+            Opdater
+        </button>
+
+        <button class="btn-return" @onclick="GoToHandoverScheme">
+            Tilbage 
+        </button>
+    </div>
+     
+    @if (auditTrailDetails.Count == 0)
+    {
+        <div class="standard-text">
+            Ingen audit trail detaljer fundet for afdeling @DepartmentName.
+        </div>
+    }
+    else
+    {
+       
+            <div class="audit-table-wrapper">
+                <table class="table">
+                    <thead class="standard-text">
+                        <tr>
+                            <th>Dato</th>
+                            <th>Afdeling</th>
+                            <th>Tabel</th>
+                            <th>Operation</th>
+                            <th>Kolonne</th>
+                            <th>Gammel værdi</th>
+                            <th>Ny værdi</th>
+                            <th>Ændret af</th>
+                        </tr>
+                    </thead>
+                    <tbody class="standard-text">
+                        @foreach (var item in auditTrailDetails)
+                        {
+                            <tr>
+                                <td>@DisplayValue(item.ChangeDate)</td>
+                                <td>@DisplayValue(item.DepartmentID?.ToString())</td>
+                                <td>@DisplayValue(item.TableName)</td>
+                                <td>@DisplayValue(item.Operation)</td>
+                                <td>@DisplayValue(item.ColumnName)</td>
+                                <td class="audit-value">@DisplayValue(item.OldValue)</td>
+                                <td class="audit-value">@DisplayValue(item.NewValue)</td>
+                                <td>@DisplayValue(item.ChangedBy)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+       
+    }
+</div>
+
+
+
+@code {
+    [Parameter]
+    public int DepartmentId { get; set; }
+
+    public string DepartmentName { get; set; } = string.Empty;
+
+    private List<AuditTrailDetailDTO> auditTrailDetails = new();
+
+    // Automatically load audit trail details when the component parameters are set or updated
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadAuditTrailDetails();
+            StateHasChanged();
+        }
+    }
+
+    // Method to load audit trail details from the API service based on the current DepartmentId
+    private async Task LoadAuditTrailDetails()
+    {
+        auditTrailDetails = await AuditTrailDetailApiService.GetAuditTrailDetailsByDepartmentId(DepartmentId);
+    }
+
+    // Helper method to display values, showing a dash if the value is null or whitespace
+    private static string DisplayValue(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "-" : value;
+    }
+
+    private void GoToHandoverScheme()
+    {
+        Navigation.NavigateTo($"/HandoverScheme/{DepartmentId}");
+    }
+    
+}

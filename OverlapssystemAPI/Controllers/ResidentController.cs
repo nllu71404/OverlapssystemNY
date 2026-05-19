@@ -3,6 +3,7 @@ using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
 using OverlapssytemApplication.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -19,6 +20,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Hent alle
         [HttpGet("HenterResident")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetResidents()
         {
             var result = await _residentServices.LoadResidentsAsync();
@@ -36,6 +38,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Tilføj
         [HttpPost("OpretResident")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> CreateResident([FromBody] AddResidentDTO resident)
         {
             var residentModel = MapToAddResidentModel(resident);
@@ -47,6 +50,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Update
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdateResident(int id, [FromBody] UpdateResidentDTO resident)
         {
             var residentModel = MapToUpdateResidentModel(resident, id);
@@ -56,6 +60,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Delete
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteResident(int id)
         {
             var result = await _residentServices.DeleteResidentAsync(id);
@@ -64,6 +69,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Hent på afdeling
         [HttpGet("Department/{id}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetByDepartment(int id)
         {
 
@@ -112,9 +118,9 @@ namespace OverlapssystemAPI.Controllers
             };
         }
 
-        private static UpdateResidentDTO MapToGetResidentDTO(ResidentModel model)
+        private static ResidentDTO MapToGetResidentDTO(ResidentModel model)
         {
-            return new UpdateResidentDTO
+            return new ResidentDTO
             {
                 ResidentId = model.ResidentId,
                 Name = model.Name,
@@ -124,7 +130,50 @@ namespace OverlapssystemAPI.Controllers
                 Family = model.Family,
                 ResidentEmployee = model.ResidentEmployee,
                 Risiko = model.Risiko,
-                Mood = model.Mood
+                Mood = model.Mood,
+
+                MedicinTimes = model.MedicinTimes
+            .Select(m => new MedicinTimeDTO
+            {
+                MedicinTimeID = m.MedicinTimeID,
+                ResidentID = m.ResidentID,
+                MedicinTime = m.MedicinTime,
+                IsChecked = m.IsChecked,
+                MedicinCheckTimeStamp = m.MedicinCheckTimeStamp
+            })
+            .ToList(),
+
+                PNMedicin = model.PNMedicin
+            .Select(p => new PNMedicinDTO
+            {
+                PNMedicinID = p.PNMedicinID,
+                ResidentID = p.ResidentID,
+                PNTime = p.PNTime,
+                //PNTime = p.PNTimeStamp,
+                Reason = p.Reason
+            })
+            .ToList(),
+
+                Shopping = model.Shopping
+            .Select(s => new UpdateShoppingDTO
+            {
+                ShoppingID = s.ShoppingID,
+                ResidentID = s.ResidentID,
+                Day = s.Day,
+                Time = s.Time,
+                PaymentMethod = s.PaymentMethod
+            })
+            .ToList(),
+
+                SpecialEvents = model.SpecialEvents
+            .Select(se => new UpdateSpecialEventDTO
+            {
+                SpecialEventID = se.SpecialEventID,
+                ResidentID = se.ResidentID,
+                SpecialEventNote = se.SpecialEventNote,
+                SpecialEventDateTime = se.SpecialEventDateTime
+            })
+            .ToList()
             };
 
         }

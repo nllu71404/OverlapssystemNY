@@ -1,4 +1,5 @@
-﻿.department-task-card {
+﻿.phone-card {
+    
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 10px;
@@ -8,12 +9,14 @@
     font-size: 14px;
 }
 
-.task-card-header {
+.phone-card-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: right;
+    align-items: stretch;
     margin-bottom: 10px;
-    font-family: "Stack Sans Headline", sans-serif;
+    
 }
+
+
 
 

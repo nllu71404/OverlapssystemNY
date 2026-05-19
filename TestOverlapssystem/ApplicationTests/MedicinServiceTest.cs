@@ -86,7 +86,7 @@ namespace TestOverlapssystem.ApplicationTests
                 .Setup(r => r.SaveNewMedicinAsync(medicin))
                 .ReturnsAsync(5);
 
-            var result = await _service.AddMedicinTimeAsync(medicin);
+            var result = await _service.CreateMedicinTimeAsync(medicin);
 
             Assert.IsTrue(result.Success);
             Assert.AreEqual(5, result.Value);
@@ -97,7 +97,7 @@ namespace TestOverlapssystem.ApplicationTests
         {
             var medicin = new MedicinModel { ResidentID = 0 };
 
-            var result = await _service.AddMedicinTimeAsync(medicin);
+            var result = await _service.CreateMedicinTimeAsync(medicin);
 
             Assert.IsFalse(result.Success);
             Assert.AreEqual(ErrorType.Validation, result.Error.Type);
@@ -113,7 +113,7 @@ namespace TestOverlapssystem.ApplicationTests
                 .Setup(r => r.SaveNewMedicinAsync(medicin))
                 .ThrowsAsync(new Exception());
 
-            var result = await _service.AddMedicinTimeAsync(medicin);
+            var result = await _service.CreateMedicinTimeAsync(medicin);
 
             Assert.IsFalse(result.Success);
             Assert.AreEqual(ErrorType.Technical, result.Error.Type);
@@ -172,7 +172,7 @@ namespace TestOverlapssystem.ApplicationTests
             Assert.AreEqual("Kunne ikke slette medicintid", result.Error.Message);
         }
 
-        // -------------------- UPDATE --------------------
+  
 
         [TestMethod]
         public async Task UpdateMedicinAsync_WhenSuccess_ReturnsOk()
@@ -241,7 +241,7 @@ namespace TestOverlapssystem.ApplicationTests
             Assert.AreEqual(ErrorType.NotFound, result.Error.Type);
         }
 
-        // -------------------- SET CHECKED --------------------
+      
 
         [TestMethod]
         public async Task SetMedicinCheckedAsync_WhenSuccess_SetsCheckedTrue()

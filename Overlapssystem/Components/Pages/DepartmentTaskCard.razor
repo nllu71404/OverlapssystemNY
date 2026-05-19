@@ -15,7 +15,7 @@
             <Authorized>
                 @if (context.User.IsInRole("Medarbejder") || context.User.IsInRole("Administrator"))
                 {
-                    <select class="shift-select" @bind="selectedShift">
+                    <select class="drop-down-box" @bind="selectedShift">
                         <option value="@ShiftType.Dag">Dagvagt</option>
                         <option value="@ShiftType.Aften">Aftenvagt</option>
                         <option value="@ShiftType.Nat">Nattevagt</option>
@@ -27,7 +27,7 @@
                 }
                 else if (context.User.IsInRole("Simpel"))
                 {
-                    <select disabled class="form-control">
+                    <select disabled class="drop-down-box">
                         <option value="@ShiftType.Dag" selected="@(dpTask.ShiftType == ShiftType.Dag)"></option>
                         <option value="@ShiftType.Aften" selected="@(dpTask.ShiftType == ShiftType.Aften)"></option>
                         <option value="@ShiftType.Nat" selected="@(dpTask.ShiftType == ShiftType.Nat)"></option>
@@ -37,12 +37,12 @@
         </AuthorizeView>
     </div>
 
-    <table class="task-table">
+    <table class="table">
         <thead>
             <tr>
                 <th>Særligt ansvarlige</th>
                 <th>Navn</th>
-                <th>Slet</th>
+                <th></th>
             </tr>
         </thead>
 
@@ -98,7 +98,7 @@
                     <td>
                         <AuthorizeView Roles="Administrator">
                             <Authorized>
-                                <button class="btn-delete"
+                                <button class="btn-grey"
                                         @onclick="() => OnDelete.InvokeAsync(task)">
                                     Slet
                                 </button>

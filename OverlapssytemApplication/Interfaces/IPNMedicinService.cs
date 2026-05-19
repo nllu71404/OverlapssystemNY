@@ -12,7 +12,7 @@ namespace OverlapssytemApplication.Interfaces
     {
         Task<Result<List<PNMedicinModel>>> GetPNMedicinByResidentIdAsync(int residentId);
 
-        Task<Result<int>> AddPNMedicinAsync(PNMedicinModel pNMedicin);
+        Task<Result<int>> CreatePNMedicinAsync(PNMedicinModel pNMedicin);
 
         Task<Result> UpdatePNMedicinAsync(PNMedicinModel pNMedicin);
 

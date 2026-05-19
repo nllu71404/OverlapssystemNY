@@ -18,29 +18,43 @@
 
 
 
-<h3>Overlapsseddel</h3>
-<h5>Beboere</h5>
+@if (departmentId == 1)
+{
+    <h2 class="h2-style">Slottet</h2>
+}
+else if (departmentId == 2)
+{
+   <h2 class="h2-style">Skoven</h2>
+}
+else 
+{
+    <h2 class="h2-style">Ukendt afdeling</h2>
+}
+
 
 <AuthorizeView>
     <Authorized>
-        <p>Logget ind som: @context.User.Identity?.Name</p>
-        <p>Rolle: @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
+        <p class="standard-text">Logget ind som: @context.User.Identity?.Name</p>
+        <p class="standard-text">Rolle: @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
 
     </Authorized>
     <NotAuthorized>
-        <p>Ikke logget ind</p>
+        <p class="standard-text">Ikke logget ind</p>
     </NotAuthorized>
 </AuthorizeView>
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
         <div class="admin-action-bar">
-            <button @onclick="ShowCreateResident">
+            <button class="btn-grey" @onclick="ShowCreateResident">
                 Opret beboer
             </button>
-            <button @onclick="GoToCreateUser">
+            <button class="btn-navigate-2" @onclick="GoToCreateUser">
                 Opret bruger
             </button>
+            <button class="btn-navigate-1" @onclick="GoToAuditTrail">
+                Audit log
+                </button>
         </div>
     </Authorized>
 </AuthorizeView>
@@ -68,6 +82,8 @@ else
     </div>
 
 }
+
+<div class="card-container">
             <DepartmentTaskCard @ref="departmentTaskCard"
                 DepartmentId="departmentId"
                 OnAdd="AddDepartmentTaskAsync"
@@ -77,12 +93,15 @@ else
                 DepartmentId="departmentId"
                 OnAdd="AddEmployeePhoneAsync"
                 OnDelete="DeleteEmployeePhoneAsync"/>
+</div>
 
 <!-- Log ind knap nederst -->
 <div class="login-bar">
-    <button @onclick="LogIn">Log ind</button>
-    <button @onclick="LogOut">Log ud </button>
+    <button class="login-logout-btn" @onclick="LogIn">Log ind</button>
+    <button class="login-logout-btn" @onclick="LogOut">Log ud </button>
 </div>
+
+
 
 @code {
 
@@ -117,11 +136,19 @@ else
 
     private void GoToCreateUser()
     {
-        Navigation.NavigateTo("/OpretBruger");
+        Navigation.NavigateTo($"/OpretBruger/{departmentId}");
+    }
+
+    private void GoToAuditTrail()
+    {
+        Navigation.NavigateTo($"/audittrail/{departmentId}");
     }
 
     private async Task ShowCreateResident()
     {
+        
+       
+        
         newResident = new ResidentViewModel
         {
             Risiko = Risiko.Green,
@@ -132,6 +159,8 @@ else
         newResident.ResidentId = newID;
         showCreateResident = true;
         StateHasChanged();
+
+        Console.WriteLine($"Residentid in ShowCreateResident: {newResident.ResidentId}");
     }
 
     private async Task SaveResidentAsync(ResidentViewModel vm)
@@ -150,6 +179,9 @@ else
         }
 
         StateHasChanged();
+
+        Console.WriteLine($"Residentid in SaveResidentAsync: {newResident.ResidentId}");
+
     }
 
     private async Task DeleteResidentAsync(ResidentViewModel vm)

@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
+using OverlapssytemApplication.Common;
 using OverlapssytemApplication.Interfaces;
 using OverlapssytemApplication.Services;
-using OverlapssytemApplication.Common;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -20,6 +21,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent
         [HttpGet("HentMedicinForBorger/{residentId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetMedicinByResidentId(int residentId)
         {
             var result = await _medicinServices.GetMedicinByResidentIdAsync(residentId);
@@ -35,10 +37,11 @@ namespace OverlapssystemAPI.Controllers
 
         // Tilføjer medicintid 
         [HttpPost("TilføjMedicin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> AddMedicinTime([FromBody] AddMedicinTimeDTO medicinDTO)
         {
             var mappedModel = MapToAddMedicinModel(medicinDTO);
-            var id = await _medicinServices.AddMedicinTimeAsync(mappedModel);
+            var id = await _medicinServices.CreateMedicinTimeAsync(mappedModel);
             return Handle(id);
 
 
@@ -46,6 +49,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Delete
         [HttpDelete("{medicinTimeId}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> DeleteMedicin(int medicinTimeId)
         {
             var result = await _medicinServices.DeleteMedicinAsync(medicinTimeId);
@@ -54,6 +58,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Update
         [HttpPut("{medicinTimeId}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdateMedicin(int medicinTimeId, [FromBody] UpdateMedicinTimeDTO medicinDTO)
         {
             var mappedModel = MapToUpdateMedicinModel(medicinDTO);
@@ -64,6 +69,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Put: api/MedicinTid
         [HttpPut("SetChecked/{id}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> SetMedicinChecked(int id, [FromBody] SetMedicinCheckedDTO medicinDTO)
         {
 

@@ -43,7 +43,7 @@ namespace OverlapssytemApplication.Services
         }
 
         // Tilføj medicin
-        public async Task<Result<int>> AddMedicinTimeAsync(MedicinModel medicinModel)
+        public async Task<Result<int>> CreateMedicinTimeAsync(MedicinModel medicinModel)
         {
             if (medicinModel.ResidentID <= 0)
                 return Error.Validation("Ugyldigt beboer ID");
@@ -74,7 +74,7 @@ namespace OverlapssytemApplication.Services
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, "Medicintid blev ikke fundet");
+                _logger.LogWarning(ex, "Medicintid blev ikke fundet");
                 return Error.NotFound("Kunne ikke finde medicintid at slette");
             }
             catch (Exception ex)
@@ -101,7 +101,7 @@ namespace OverlapssytemApplication.Services
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, "Medicintid blev ikke fundet");
+                _logger.LogWarning(ex, "Medicintid blev ikke fundet");
                 return Error.NotFound("Kunne ikke finde medicintid at opdatere");
             }
             catch (Exception ex)
@@ -130,8 +130,8 @@ namespace OverlapssytemApplication.Services
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, "Medicintid blev ikke fundet");
-                return Error.Technical("Medicintid kunne ikke findes ved opdatering af medicinstatus");
+                _logger.LogWarning(ex, "Medicintid blev ikke fundet");
+                return Error.NotFound("Medicintid kunne ikke findes ved opdatering af medicinstatus");
             }
             catch (Exception ex)
             {
