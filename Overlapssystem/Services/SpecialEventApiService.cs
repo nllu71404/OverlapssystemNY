@@ -20,8 +20,6 @@ namespace Overlapssystem.Services
         // GET
         public async Task<Result<List<UpdateSpecialEventDTO>>> GetSpecialEventByResidentID(int residentId)
         {
-            if (residentId <= 0)
-                return Error.Validation("Ugyldigt resident id");
 
             try
             {
@@ -67,7 +65,10 @@ namespace Overlapssystem.Services
                     dto
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }
@@ -87,7 +88,10 @@ namespace Overlapssystem.Services
                     $"api/SpecialEvent/{specialEventID}"
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }

@@ -16,5 +16,7 @@ namespace OverlapssystemDomain.Interfaces
         Task DeleteDepartmentTaskAsync(int departmentTaskId);
         Task UpdateDepartmentTaskAsync(DepartmentTaskModel departmentTask);
 
+        
+
     }
 }

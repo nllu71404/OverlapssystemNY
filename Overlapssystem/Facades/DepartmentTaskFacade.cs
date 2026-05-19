@@ -26,16 +26,13 @@ namespace Overlapssystem.Facades
 
         public async Task<Result> DeleteDepartmentTask(int departmentTaskId)
         {
-            var result = await _departmentTaskApiService.DeleteDepartmentTask(departmentTaskId);
-           
-            return result;
+           return await _departmentTaskApiService.DeleteDepartmentTask(departmentTaskId);
         }
 
         public async Task<Result> UpdateDepartmentTask(DepartmentTaskViewModel vm)
         {
             var dto = MapUpdateDepartmentTask(vm);
-            var result = await _departmentTaskApiService.UpdateDepartmentTask(vm.DepartmentTaskID, dto);
-            return result;
+            return await _departmentTaskApiService.UpdateDepartmentTask(vm.DepartmentTaskID, dto);
         }
 
 
@@ -44,12 +41,8 @@ namespace Overlapssystem.Facades
             var departmentTasks = await _departmentTaskApiService.GetDepartmentTasksByDepartmentId(departmentId);
             
             
-            return departmentTasks.Map(dtos =>
-             {
-                 var vms = dtos.Select(dto => MapDepartmentTask(dto)).ToList();
-                 return vms;
-             });
-
+            return departmentTasks.Map(dtos => dtos.Select(MapDepartmentTask).ToList());
+                
         }
 
 

@@ -25,8 +25,7 @@ namespace Overlapssystem.Facades
 
         public async Task<Result> DeleteEmployeePhone(int employeePhoneId)
         {
-            var result = await _employeePhoneApiService.DeleteEmployeePhone(employeePhoneId);
-            return result;
+            return await _employeePhoneApiService.DeleteEmployeePhone(employeePhoneId);
         }
 
         public async Task<Result<List<EmployeePhoneViewModel>>> GetEmployeePhonesByDepartment(int departmentId)
@@ -40,8 +39,7 @@ namespace Overlapssystem.Facades
         public async Task<Result> UpdateEmployeePhone(EmployeePhoneViewModel vm)
         {
             var dto = MapUpdateEmployeePhone(vm);
-            var result = await _employeePhoneApiService.UpdateEmployeePhone(vm.EmployeePhoneID, dto);
-            return result;
+            return await _employeePhoneApiService.UpdateEmployeePhone(vm.EmployeePhoneID, dto);
         }
 
 

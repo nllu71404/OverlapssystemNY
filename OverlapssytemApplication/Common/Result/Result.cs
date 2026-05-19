@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace OverlapssytemApplication.Common.Result
 {
+    // Result-klassen er en generisk wrapper, der bruges til at repræsentere resultatet af en operation, som enten kan være en succes eller en fejl.
+    // Den indeholder information om, hvorvidt operationen var vellykket, og hvis ikke, hvilken fejl der opstod. 
     public class Result
     {
         public bool Success { get; }
@@ -18,6 +20,7 @@ namespace OverlapssytemApplication.Common.Result
             Error = error;
         }
 
+        
         public static Result Ok() => new(true, null);
 
         public static Result Fail(Error error) => new(false, error);
@@ -40,7 +43,8 @@ namespace OverlapssytemApplication.Common.Result
         }
     }
 
-
+    //Result<T> udvider Result-klassen og indeholder også den faktiske værdi(af typen T) i tilfælde af en succes.
+    //Bruges til metoder der returnerer en værdi.
     public class Result<T> : Result
     {
         public T Value { get; }

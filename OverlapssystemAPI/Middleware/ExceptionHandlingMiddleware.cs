@@ -3,6 +3,7 @@ using OverlapssytemApplication.Common.Errors;
 
 namespace OverlapssystemAPI.Middleware
 {
+    // Middleware til global håndtering af uventede fejl i API'en
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
@@ -14,6 +15,7 @@ namespace OverlapssystemAPI.Middleware
             _logger = logger;
         }
 
+        // Fanger alle exceptions, logger dem og returnerer en generisk fejlbesked til klienten
         public async Task InvokeAsync(HttpContext context)
         {
             try
@@ -34,6 +36,7 @@ namespace OverlapssystemAPI.Middleware
             }
         }
 
+        // Returnerer en standardiseret JSON-fejlbesked til klienten ved uventede fejl
         private static Task HandleExceptionAsync(HttpContext context)
         {
             context.Response.ContentType = "application/json";

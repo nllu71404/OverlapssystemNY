@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OverlapssytemApplication.Common.Errors
 {
+    // Error klassen repræsenterer en fejl, der kan opstå i applikationen.
+    // Den indeholder en fejlmeddelelse og en type, der angiver, hvilken slags fejl det er (f.eks. valideringsfejl, ikke fundet, teknisk fejl).
+    //Vi bruger typerne til at kunne håndtere forskellige fejltyper forskelligt i vores applikation, f.eks. ved at vise forskellige beskeder til brugeren eller logge dem på forskellige måder.
     public class Error
     {
         public string Message { get; init; } = string.Empty;

@@ -24,13 +24,8 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _pNMedicinService.GetPNMedicinByResidentIdAsync(residentId);
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var pNMedicinDTOs = result.Value.Select(MapToGetPNMedicinDTO).ToList();
-            return Handle(Result.Ok(pNMedicinDTOs));
+            return Handle(result.Map(pNMedicin =>
+                pNMedicin.Select(MapToGetPNMedicinDTO).ToList()));
         }
 
         //Tilføj

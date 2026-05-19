@@ -64,13 +64,20 @@ namespace Overlapssystem.Services
         }
 
         // CREATE
-        public async Task<Result<int>> CreateUser(AddUserDTO userDTO)
+        public async Task<Result> CreateUser(AddUserDTO userDTO)
         {
             try
             {
                 var response = await _http.PostAsJsonAsync("api/User/OpretBruger", userDTO);
-                 return await response.ReadApiResponse<int>();
-                
+
+
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
+
+                return Result.Ok();
+
             }
             catch (Exception ex)
             {
@@ -85,7 +92,11 @@ namespace Overlapssystem.Services
             try
             {
                 var response = await _http.DeleteAsync($"api/User/{userID}");
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
+
                 return Result.Ok();
             }
             catch (Exception ex)

@@ -41,8 +41,6 @@ namespace Overlapssystem.Services
         // GET BY DEPARTMENT
         public async Task<Result<List<ResidentDTO>>> GetByDepartment(int? id)
         {
-            if (id is null || id <= 0)
-                return Error.Validation("Ugyldigt afdeling id");
 
             try
             {
@@ -80,7 +78,10 @@ namespace Overlapssystem.Services
             {
                 var response = await _http.PutAsJsonAsync($"api/Resident/{id}", resident);
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                    if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }

@@ -29,15 +29,13 @@ namespace Overlapssystem.Facades
         public async Task<Result> UpdateResident(ResidentViewModel vm)
         {
             var dto = MapUpdateResident(vm);
-            await _residentApi.UpdateResident(vm.ResidentId, dto);
-            return Result.Ok();
+            return await _residentApi.UpdateResident(vm.ResidentId, dto);
         }
 
         public async Task<Result> DeleteResident(int residentId)
         {
            
-            await _residentApi.DeleteResident(residentId);
-            return Result.Ok();
+            return await _residentApi.DeleteResident(residentId);
         }
 
         public async Task<Result<int>> AddResident(ResidentViewModel vm)
@@ -71,8 +69,7 @@ namespace Overlapssystem.Facades
         public async Task<Result> UpdateMedicin(MedicinViewModel vm)
         {
             var dto = MapUpdateMedicin(vm);
-            await _medicinApi.UpdateMedicin(vm.MedicinTimeID, dto);
-            return Result.Ok();
+            return await _medicinApi.UpdateMedicin(vm.MedicinTimeID, dto);
         }
 
         public async Task<Result<int>> AddMedicinTime(MedicinViewModel vm)
@@ -84,14 +81,12 @@ namespace Overlapssystem.Facades
 
         public async Task<Result> DeleteMedicinTime(MedicinViewModel vm) // evt ændre til kun at tage id som parameter
         {
-            await _medicinApi.DeleteMedicin(vm.MedicinTimeID);
-            return Result.Ok();
+            return await _medicinApi.DeleteMedicin(vm.MedicinTimeID);
         }
 
         public async Task<Result> SetMedicinChecked(MedicinViewModel vm, bool isChecked)
         {
-            await _medicinApi.SetMedicinChecked(vm.MedicinTimeID, isChecked);
-            return Result.Ok();
+            return await _medicinApi.SetMedicinChecked(vm.MedicinTimeID, isChecked);
         }
 
         // PNMedicin
@@ -99,8 +94,7 @@ namespace Overlapssystem.Facades
         public async Task<Result> UpdatePNMedicin(PNMedicinViewModel vm)
         {
             var dto = MapUpdatePNMedicin(vm);
-            await _pnMedicinApi.UpdatePNMedicin(vm.PNMedicinID, dto);
-            return Result.Ok();
+            return await _pnMedicinApi.UpdatePNMedicin(vm.PNMedicinID, dto);
         }
 
         public async Task<Result<int>> AddPNMedicinTime(PNMedicinViewModel vm)
@@ -112,8 +106,7 @@ namespace Overlapssystem.Facades
 
         public async Task<Result> DeletePNMedicinTime(PNMedicinViewModel vm) // evt ændre til kun at tage id som parameter
         {
-            await _pnMedicinApi.DeletePNMedicin(vm.PNMedicinID);
-            return Result.Ok();
+            return await _pnMedicinApi.DeletePNMedicin(vm.PNMedicinID);
         }
         
 
@@ -122,8 +115,7 @@ namespace Overlapssystem.Facades
         public async Task<Result> UpdateShopping(ShoppingViewModel vm)
         {
             var dto = MapUpdateShopping(vm);
-            await _shoppingApi.UpdateShopping(vm.ShoppingID, dto);
-            return Result.Ok();
+            return await _shoppingApi.UpdateShopping(vm.ShoppingID, dto);
         }
 
         public async Task<Result<int>> AddShopping(ShoppingViewModel vm)
@@ -134,8 +126,7 @@ namespace Overlapssystem.Facades
         }
         public async Task<Result> DeleteShopping(ShoppingViewModel vm) // evt ændre til kun at tage id som parameter
         {
-            await _shoppingApi.DeleteShopping(vm.ShoppingID);
-            return Result.Ok();
+            return await _shoppingApi.DeleteShopping(vm.ShoppingID);
         }
 
         // SpecialEvent
@@ -143,8 +134,7 @@ namespace Overlapssystem.Facades
         public async Task<Result> UpdateSpecialEvent(SpecialEventViewModel vm)
         {
             var dto = MapUpdateSpecialEvent(vm);
-            await _specialEventApi.UpdateSpecialEvent(vm.SpecialEventID, dto);
-            return Result.Ok();
+            return await _specialEventApi.UpdateSpecialEvent(vm.SpecialEventID, dto);
         }
 
         public async Task<Result<int>> AddSpecialEvent(SpecialEventViewModel vm)
@@ -155,8 +145,7 @@ namespace Overlapssystem.Facades
         }
         public async Task<Result> DeleteSpecialEvent(SpecialEventViewModel vm) // evt ændre til kun at tage id som parameter
         {
-            await _specialEventApi.DeleteSpecialEvent(vm.SpecialEventID);
-            return Result.Ok();
+            return await _specialEventApi.DeleteSpecialEvent(vm.SpecialEventID);
         }
 
 

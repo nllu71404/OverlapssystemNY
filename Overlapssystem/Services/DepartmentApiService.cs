@@ -39,8 +39,6 @@ namespace Overlapssystem.Services
         // GET BY ID
         public async Task<Result<DepartmentDTO>> GetDepartmentById(int departmentId)
         {
-            if (departmentId <= 0)
-                return Error.Validation("Ugyldigt departmentId");
 
             try
             {
@@ -107,7 +105,10 @@ namespace Overlapssystem.Services
                     dto
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }
@@ -127,7 +128,10 @@ namespace Overlapssystem.Services
                     $"api/Department/{departmentId}"
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }

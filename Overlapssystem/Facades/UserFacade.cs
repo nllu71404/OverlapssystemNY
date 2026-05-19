@@ -15,7 +15,7 @@ namespace Overlapssystem.Facades
             _userApiService = userApiService;
         }
 
-        public async Task<Result<int>> AddUser(UserViewModel vm)
+        public async Task<Result> AddUser(UserViewModel vm)
         {
             var dto = MapAddUser(vm);
             var result = await _userApiService.CreateUser(dto);

@@ -18,8 +18,6 @@ namespace Overlapssystem.Services
 
         public async Task<Result<List<AuditTrailDetailDTO>>> GetAuditTrailDetailsByDepartmentId(int departmentId)
         {
-            if (departmentId <= 0)
-                return Error.Validation("Ugyldigt departmentId");
 
             try
             {

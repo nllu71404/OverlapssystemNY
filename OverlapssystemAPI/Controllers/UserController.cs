@@ -64,18 +64,13 @@ namespace OverlapssystemAPI.Controllers
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
-            await _userService.DeleteUserAsync(userId);
-            return Ok(userId);
+            
+                var result = await _userService.DeleteUserAsync(userId);
+                return Handle(result);
         }
+        
 
-        ////Update
-        //[HttpPut("{userId}")]
-        //public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDTO userDTO)
-        //{
-        //    var userModel = MapToUpdateUserModel(userId, userDTO);
-        //    await _userService.UpdateUserAsync(userModel);
-        //    return Ok(userId);
-        //}
+       
         //Validering
         [AllowAnonymous]
         [HttpPost("ValiderBruger")]
@@ -83,30 +78,12 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _authService.LoginAsync(userDTO.UserName, userDTO.Password);
 
-            if (!result.Success)
+            return Handle(result.Map(token => new TokenResponseDTO
             {
-                return Handle(result); 
-            }
-
-            return Ok(new ApiResponse<TokenResponseDTO>
-            {
-                Success = true,
-                Data = new TokenResponseDTO
-                {
-                    Token = result.Value
-                }
-            });
+                Token = token
+            }));
         }
 
-        //// ----- Mapping ---- //
-        //private static UserModel MapToUpdateUserModel(UpdateUserDTO userDTO, int id)
-        //{
-        //    return new UserModel
-        //    {
-        //        FirstName = userDTO.FirstName,
-        //        LastName = userDTO.LastName,
-
-        //    };
-        //}
+        
     }
 }

@@ -43,8 +43,6 @@ namespace Overlapssystem.Services
         // GET BY ID
         public async Task<Result<EmployeePhoneDTO>> GetEmployeePhoneById(int employeePhoneId)
         {
-            if (employeePhoneId <= 0)
-                return Error.Validation("Ugyldigt id");
 
             try
             {
@@ -113,7 +111,10 @@ namespace Overlapssystem.Services
                     dto
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }
@@ -133,7 +134,10 @@ namespace Overlapssystem.Services
                     $"api/EmployeePhone/SletEmployeePhone/{id}"
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }

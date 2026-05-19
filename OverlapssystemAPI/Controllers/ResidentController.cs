@@ -23,12 +23,8 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _residentServices.LoadResidentsAsync();
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-            var residentDTOs = result.Value.Select(MapToGetResidentDTO).ToList();
-            return Handle(Result.Ok(residentDTOs));
+            return Handle(result.Map(residents =>
+                 residents.Select(MapToGetResidentDTO).ToList()));
 
         }
 
@@ -69,13 +65,8 @@ namespace OverlapssystemAPI.Controllers
 
             var result = await _residentServices.LoadResidentsByDepartmentAsync(id);
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var residentDTOs = result.Value.Select(MapToGetResidentDTO).ToList();
-            return Handle(Result.Ok(residentDTOs));
+            return Handle(result.Map(residents =>
+                residents.Select(MapToGetResidentDTO).ToList()));
         }
 
 

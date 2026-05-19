@@ -22,13 +22,8 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentService.GetAllDepartmentsAsync();
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var departmentDTOs = result.Value.Select(MapToGetDepartmentDTO).ToList();
-            return Handle(Result.Ok(departmentDTOs));
+            return Handle(result.Map(departments =>
+               departments.Select(MapToGetDepartmentDTO).ToList()));
         }
 
         //Hent by ID
@@ -36,14 +31,8 @@ namespace OverlapssystemAPI.Controllers
         public async Task<IActionResult> GetDepartmentById(int departmentId)
         {
             var result = await _departmentService.GetDepartmentByIdAsync(departmentId);
-            if (!result.Success) 
-            {
-                Handle(result);
-            }
 
-            var departmentDTO = MapToGetDepartmentDTO(result.Value);
-
-            return Handle(Result.Ok(departmentDTO));
+            return Handle(result.Map(MapToGetDepartmentDTO));
         }
 
         //Hent by name
@@ -53,13 +42,7 @@ namespace OverlapssystemAPI.Controllers
            
             var result = await _departmentService.GetDepartmentByNameAsync(departmentName);
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var departmentDTO = MapToGetDepartmentDTO(result.Value);
-            return Handle(Result.Ok(departmentDTO));
+            return Handle(result.Map(MapToGetDepartmentDTO));
         }
 
         //Tilføj

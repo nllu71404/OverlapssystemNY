@@ -16,8 +16,8 @@ namespace OverlapssystemDomain.Interfaces
         Task<int> SaveNewDepartmentAsync(DepartmentModel department);
         Task DeleteDepartmentAsync(int departmentId);
         Task UpdateDepartmentAsync(DepartmentModel department);
-        
-        
-        
+        Task<bool> ExistsAsync(int departmentId);
+
+
     }
 }

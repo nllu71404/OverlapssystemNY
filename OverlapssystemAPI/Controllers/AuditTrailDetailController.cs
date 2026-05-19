@@ -26,16 +26,8 @@ namespace OverlapssystemAPI.Controllers
             var result = await _auditTrailDetailService
                 .LoadAuditTrailDetailsByDepartmentAsync(departmentId);
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var auditTrailDetailDTOs = result.Value
-                .Select(MapToGetAuditTrailDetailDTO)
-                .ToList();
-
-            return Handle(Result.Ok(auditTrailDetailDTOs)); ;
+            return Handle(result.Map(auditTrailDetails =>
+              auditTrailDetails.Select(MapToGetAuditTrailDetailDTO).ToList()));
         }
 
         // Mapping metode

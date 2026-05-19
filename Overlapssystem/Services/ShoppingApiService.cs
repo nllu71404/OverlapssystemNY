@@ -60,7 +60,10 @@ namespace Overlapssystem.Services
             {
                 var response = await _http.PutAsJsonAsync($"api/Shopping/{shoppingId}", dto);
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }
@@ -78,7 +81,10 @@ namespace Overlapssystem.Services
             {
                 var response = await _http.DeleteAsync($"api/Shopping/{shoppingId}");
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }

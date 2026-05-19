@@ -25,8 +25,6 @@ namespace Overlapssystem.Services
         // GET
         public async Task<Result<List<MedicinTimeDTO>>> GetMedicinByResidentId(int residentId)
         {
-            if (residentId <= 0)
-                return Error.Validation("Ugyldigt resident id");
 
             try
             {
@@ -72,7 +70,10 @@ namespace Overlapssystem.Services
                     dto
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }
@@ -92,7 +93,10 @@ namespace Overlapssystem.Services
                     $"api/Medicin/{id}"
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }
@@ -113,7 +117,10 @@ namespace Overlapssystem.Services
                     new { isChecked }
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }

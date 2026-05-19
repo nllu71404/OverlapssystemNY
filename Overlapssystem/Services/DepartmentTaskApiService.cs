@@ -40,8 +40,6 @@ namespace Overlapssystem.Services
         // GET BY ID
         public async Task<Result<DepartmentTaskDTO>> GetDepartmentTaskById(int id)
         {
-            if (id <= 0)
-                return Error.Validation("Ugyldigt id");
 
             try
             {
@@ -61,8 +59,6 @@ namespace Overlapssystem.Services
         // GET BY DEPARTMENT
         public async Task<Result<List<DepartmentTaskDTO>>> GetDepartmentTasksByDepartmentId(int departmentId)
         {
-            if (departmentId <= 0)
-                return Error.Validation("Ugyldigt departmentId");
 
             try
             {
@@ -110,7 +106,10 @@ namespace Overlapssystem.Services
                     dto
                 );
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }
@@ -128,7 +127,10 @@ namespace Overlapssystem.Services
             {
                 var response = await _http.DeleteAsync($"api/DepartmentTask/{id}");
 
-                await response.ReadApiResponse<object>();
+                var result = await response.ReadApiResponse<object>();
+
+                if (!result.Success)
+                    return result.Error;
 
                 return Result.Ok();
             }

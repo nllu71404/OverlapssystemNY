@@ -21,16 +21,10 @@ namespace OverlapssystemAPI.Controllers
         [HttpGet("Shopping/{residentId}")]
         public async Task<IActionResult> GetShoppingByResidentId(int residentId)
         {
-            
             var result = await _shoppingService.GetShoppingByResidentIdAsync(residentId);
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var shoppingDTOs = result.Value.Select(MapToGetShoppingModel).ToList();
-            return Handle(Result.Ok(shoppingDTOs));
+            return Handle(result.Map(shopping =>
+                shopping.Select(MapToGetShoppingModel).ToList()));
         }
 
         //Tilføj

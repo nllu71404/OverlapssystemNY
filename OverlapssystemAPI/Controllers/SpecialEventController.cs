@@ -22,14 +22,10 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _specialEventService.GetSpecialEventByResidentIdAsync(residentId);
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var specialEventDTOs = result.Value.Select(MapToGetSpecialEventDTO).ToList();
-            return Handle(Result.Ok(specialEventDTOs)); 
+            return Handle(result.Map(events =>
+                events.Select(MapToGetSpecialEventDTO).ToList()));
         }
+
         //Tilføj
         [HttpPost("TilføjSpecialEvent")]
         public async Task<IActionResult> AddSpecialEvent([FromBody] AddSpecialEventDTO addSpecialEventDTO)

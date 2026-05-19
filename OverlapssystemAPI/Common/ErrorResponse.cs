@@ -2,6 +2,7 @@
 
 namespace OverlapssystemAPI.Common
 {
+    
     public class ErrorResponse
     {
         public bool Success { get; set; }

@@ -5,19 +5,24 @@ using Microsoft.Extensions.Logging;
 
 public abstract class AppComponentBase : ComponentBase
 {
+
+    //Vi bruger AppComponentBase som en baseklasse for alle vores Blazor-komponenter for at centralisere håndteringen af loading state og fejl.
+    //På denne måde undgår vi en masse redundant kode i hver komponent
+
     [Inject]
     protected ILogger<AppComponentBase> Logger { get; set; } = default!;
 
+    // IsLoading bruges til at indikere, om der er en asynkron handling i gang, så vi kan vise en loading-indikator i UI'et.
     protected bool IsLoading { get; private set; }
 
-
+    // CurrentError bruges til at holde styr på den aktuelle fejl, der skal vises i UI'et.
     protected Error? CurrentError { get; set; }
 
     // Dictionary til at holde styr på valideringsfejl for hvert felt
     protected Dictionary<string, string> _fieldErrors = new();
 
     // Hjælpefunktion til at generere en unik nøgle for et felt baseret på ID og felt navn 
-    //Bruges til at håndtere fejl elementerne i DepartmentTask tabellen og EmployeePhone tabellen
+    //Bruges til at håndtere fejl-meddelelser i DepartmentTask tabellen og EmployeePhone tabellen
     protected string GetKey(int id, string field)
     {
         return $"{id}_{field}";
@@ -38,13 +43,16 @@ public abstract class AppComponentBase : ComponentBase
     {
         try
         {
+            // Når vi starter en asynkron handling, sætter vi IsLoading til true og nulstiller CurrentError
             IsLoading = true;
             CurrentError = null;
 
+            // Vi kalder StateHasChanged for at opdatere UI'et, så brugeren kan se, at der er en handling i gang
             StateHasChanged();
 
             var result = await action();
 
+            // Hvis handlingen ikke lykkedes, sætter vi CurrentError til den fejl, der blev returneret
             if (!result.Success)
             {
                 CurrentError = result.Error;

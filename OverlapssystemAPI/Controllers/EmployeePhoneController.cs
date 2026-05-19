@@ -26,13 +26,8 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _employeePhoneService.GetAllEmployeePhoneNumbersAsync();
 
-            if (!result.Success) 
-            {
-                 return Handle(result);
-            }
-
-            var employeePhoneDTOs = result.Value.Select(MapToGetEmployeePhoneDTO).ToList();
-            return Handle(Result.Ok(employeePhoneDTOs));
+            return Handle(result.Map(employeePhones =>
+                employeePhones.Select(MapToGetEmployeePhoneDTO).ToList()));
         }
 
         //Hent medarbejdertelefon på id

@@ -103,10 +103,14 @@ namespace OverlapssytemApplication.Services
 
             //Her kaster vi IKKE en exception for ugyldigt input, da dette er en forventelig fejl.
             //Tjekker om det valgte afdelings-id findes, så der ikke oprettes en bruger der er tilknyttet en ugyldig afdeling. 
-            //var department = await _departmentRepository.GetDepartmentByIdAsync(userModel.DepartmentId.Value);
+            if (!userModel.DepartmentId.HasValue)
+                return Error.Validation("Afdeling er påkrævet");
 
-            //if (department is null)
-            //    return Error.Validation("Den valgte afdeling findes ikke");
+            var exists = await _departmentRepository.ExistsAsync(userModel.DepartmentId.Value);
+
+            if (!exists)
+                return Error.Validation("Den valgte afdeling findes ikke");
+
 
             try
             {
@@ -136,7 +140,7 @@ namespace OverlapssytemApplication.Services
                 // Tildel Identity rolle
                 await _userRepository.AddToRoleAsync(userModel, role);
 
-                // Hvis alt lykkedes, returner en succes
+                // Hvis alt lykkedes, returner en succes.
                 return Result.Ok();
             }
             catch (Exception ex)

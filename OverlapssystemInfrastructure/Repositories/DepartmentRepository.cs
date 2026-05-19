@@ -1,13 +1,15 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using OverlapssystemDomain.Entities;
+using OverlapssystemDomain.Interfaces;
+using OverlapssystemInfrastructure.Data;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using OverlapssystemDomain.Entities;
-using OverlapssystemDomain.Interfaces;
 
 namespace OverlapssystemInfrastructure.Repositories
 {
@@ -145,6 +147,22 @@ namespace OverlapssystemInfrastructure.Repositories
            
             await connection.OpenAsync();
             await command.ExecuteNonQueryAsync();
+        }
+
+        //Bruges til at tjekke om en afdeling eksisterer, så vi ikke prøver at oprette brugere med ugyldige afdelings-id'er
+        public async Task<bool> ExistsAsync(int departmentId)
+        {
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            using SqlCommand command = new SqlCommand("dbo.uspDepartmentExists", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentId;
+
+            await connection.OpenAsync();
+
+            var result = await command.ExecuteScalarAsync();
+
+            return Convert.ToInt32(result) > 0;
         }
     }
 }

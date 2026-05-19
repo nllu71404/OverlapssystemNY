@@ -23,12 +23,8 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentTaskService.GetAllDepartmentTasksAsync();
 
-            if (!result.Success)
-                return Handle(result);
-
-            var dtoList = result.Value.Select(MapToDTO).ToList();
-
-            return Handle(Result.Ok(dtoList));
+            return Handle(result.Map(departmentTasks =>
+                departmentTasks.Select(MapToDTO).ToList()));
         }
 
         //Hent departmentTask på id
@@ -37,12 +33,7 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
 
-            if (!result.Success)
-                return Handle(result);
-
-            var dto = MapToDTO(result.Value);
-
-            return Handle(Result.Ok(dto));
+            return Handle(result.Map(MapToDTO));
         }
 
         //Hent departmentTask på departmentID
@@ -51,12 +42,8 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
 
-            if (!result.Success)
-                return Handle(result);
-
-            var dtoList = result.Value.Select(MapToDTO).ToList();
-
-            return Handle(Result.Ok(dtoList));
+            return Handle(result.Map(departmentTasks =>
+                departmentTasks.Select(MapToDTO).ToList()));
         }
 
         //Tilføj 

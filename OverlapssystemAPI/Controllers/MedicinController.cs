@@ -24,13 +24,8 @@ namespace OverlapssystemAPI.Controllers
         {
             var result = await _medicinServices.GetMedicinByResidentIdAsync(residentId);
 
-            if (!result.Success)
-            {
-                return Handle(result);
-            }
-
-            var medicinDTOs = result.Value.Select(MapToGetMedicinTimeDTO).ToList();
-            return Handle(Result.Ok(medicinDTOs));
+            return Handle(result.Map(medicin =>
+                 medicin.Select(MapToGetMedicinTimeDTO).ToList()));
         }
 
         // Tilføjer medicintid 
