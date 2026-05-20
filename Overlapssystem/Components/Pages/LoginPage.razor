@@ -15,10 +15,10 @@
 @using System.Net.Http.Headers
 
 @inherits AppComponentBase
-@inject UserApiService apiService
+@inject IUserFacade userFacade
 @inject NavigationManager navigation
-@inject HttpClient Http
 @inject AuthState authstate 
+@inject HttpClient Http
 
 
 <!--- Viser tekniske fejl --->
@@ -42,7 +42,7 @@
         <div class="input-group">
         <input list="brugere"
                placeholder="Vælg eller indtast brugernavn"
-               @bind="userName" />
+                   @bind="userViewModel.UserName" />
         <datalist id="brugere">
             <option value="Slot" />
             <option value="Skov" />
@@ -50,7 +50,7 @@
         </div>
 
         <div class="input-group">
-            <input type="password" placeholder="Indtast password" @bind="password" />
+            <input type="password" placeholder="Indtast password" @bind="userViewModel.Password" />
         </div>
 
         <button class="login-btn" @onclick="HandleLogin">Login</button>
@@ -75,10 +75,7 @@
 
 @code{
     [Parameter]
-    public UserModel User { get; set; } = new();
-
-    private string userName = string.Empty;
-    private string password = string.Empty;
+    public UserViewModel userViewModel { get; set; } = new();
   
 
     private async Task HandleLogin()
@@ -89,7 +86,7 @@
             if (!ValidateInput())
                 return Error.Validation("Brugernavn og password må ikke være tomme.");
 
-            var result = await apiService.ValidateUser(userName, password);
+            var result = await userFacade.ValidateUser(userViewModel);
 
             if (!result.Success)
             {
@@ -122,17 +119,11 @@
     // (Input-validering) Validerer at både brugernavn og password er indtastet
     private bool ValidateInput()
     {
-        return !string.IsNullOrWhiteSpace(userName)
-            && !string.IsNullOrWhiteSpace(password);
+        return !string.IsNullOrWhiteSpace(userViewModel.UserName)
+            && !string.IsNullOrWhiteSpace(userViewModel.Password);
     }
 
-    // // Kalder API'et for at validere brugeren og returnere et token, hvis det er gyldigt
-    // private async Task<string?> AuthenticateAsync()
-    // {
-    //     var result = await apiService.ValidateUser(userName, password);
 
-    //     return result.Success ? result.Value : null;
-    // }
 
    
 }

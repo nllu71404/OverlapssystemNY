@@ -3,6 +3,8 @@ using OverlapssystemDomain.Entities;
 using OverlapssytemApplication.Interfaces;
 using OverlapssystemShared;
 using OverlapssytemApplication.Common.Result;
+using OverlapssytemApplication.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OverlapssystemAPI.Controllers
 {
@@ -19,6 +21,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Hent alle
         [HttpGet("HenterResident")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetResidents()
         {
             var result = await _residentServices.LoadResidentsAsync();
@@ -32,6 +35,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Tilføj
         [HttpPost("OpretResident")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> CreateResident([FromBody] AddResidentDTO resident)
         {
             var residentModel = MapToAddResidentModel(resident);
@@ -43,6 +47,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Update
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdateResident(int id, [FromBody] UpdateResidentDTO resident)
         {
             var residentModel = MapToUpdateResidentModel(resident, id);
@@ -52,6 +57,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Delete
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteResident(int id)
         {
             var result = await _residentServices.DeleteResidentAsync(id);
@@ -60,6 +66,7 @@ namespace OverlapssystemAPI.Controllers
 
         // Hent på afdeling
         [HttpGet("Department/{id}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetByDepartment(int id)
         {
 

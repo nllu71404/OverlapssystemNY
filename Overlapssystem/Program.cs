@@ -12,27 +12,28 @@ using Overlapssystem.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, AuthState>();
 builder.Services.AddScoped<AuthState>();
-
+builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+    sp.GetRequiredService<AuthState>());
 builder.Services.AddAuthentication("Bearer");
 
-// HttpClient
-builder.Services.AddTransient<AuthTokenHandler>();
-
-builder.Services.AddHttpClient("Api", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7150");
-})
-.AddHttpMessageHandler<AuthTokenHandler>();
+builder.Services.AddScoped<AuthTokenHandler>();
 
 builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
+{
+    var authHandler = sp.GetRequiredService<AuthTokenHandler>();
+    authHandler.InnerHandler = new HttpClientHandler();
+
+    return new HttpClient(authHandler)
+    {
+        BaseAddress = new Uri("https://localhost:7150")
+    };
+});
 
 builder.Services.AddScoped<AuditTrailDetailApiService>();
 builder.Services.AddScoped<ResidentApiService>();
@@ -43,31 +44,25 @@ builder.Services.AddScoped<ShoppingApiService>();
 builder.Services.AddScoped<DepartmentTaskApiService>();
 builder.Services.AddScoped<SpecialEventApiService>();
 builder.Services.AddScoped<EmployeePhoneApiService>();
+builder.Services.AddScoped<UserApiService>();
+
 builder.Services.AddScoped<IResidentFacade, ResidentFacade>();
 builder.Services.AddScoped<IDepartmentTaskFacade, DepartmentTaskFacade>();
 builder.Services.AddScoped<IDepartmentFacade, DepartmentFacade>();
 builder.Services.AddScoped<IEmployeePhoneFacade, EmployeePhoneFacade>();
-builder.Services.AddScoped<UserApiService>();
 builder.Services.AddScoped<IUserFacade, UserFacade>();
-
-
-
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 

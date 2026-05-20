@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
 using OverlapssytemApplication.Interfaces;
@@ -19,6 +20,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent
         [HttpGet("Shopping/{residentId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetShoppingByResidentId(int residentId)
         {
             var result = await _shoppingService.GetShoppingByResidentIdAsync(residentId);
@@ -29,6 +31,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj
         [HttpPost("TilføjShopping")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> AddShopping([FromBody] AddShoppingDTO addShoppingDTO)
         {
             var shoppingModel = MapToAddShoppingModel(addShoppingDTO);
@@ -41,6 +44,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Update
         [HttpPut("{shoppingId}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdateShopping(int shoppingId, [FromBody] UpdateShoppingDTO shoppingDTO)
         {
             var shoppingModel = MapToUpdateShoppingModel(shoppingDTO);
@@ -50,6 +54,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Delete
         [HttpDelete("{shoppingId}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> DeleteShopping(int shoppingId)
         {
             var result = await _shoppingService.DeleteShoppingAsync(shoppingId);

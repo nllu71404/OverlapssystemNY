@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
 using OverlapssytemApplication.Common.Result;
@@ -19,6 +20,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent alle
         [HttpGet("HentDepartmentTasks")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetAllDepartmentTasksAsync()
         {
             var result = await _departmentTaskService.GetAllDepartmentTasksAsync();
@@ -29,6 +31,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent departmentTask på id
         [HttpGet("HentDepartmentTasksID/{departmentTaskId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
             var result = await _departmentTaskService.GetDepartmentTaskByIdAsync(departmentTaskId);
@@ -38,6 +41,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent departmentTask på departmentID
         [HttpGet("HentDepartmentTaskByDepartmentId/{departmentId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
         {
             var result = await _departmentTaskService.GetDepartmentTasksByDepartmentIdAsync(departmentId);
@@ -48,6 +52,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj 
         [HttpPost("TilføjDepartmentTask")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> SaveNewDepartmentTaskAsync([FromBody] AddDepartmentTaskDTO departmentTaskDTO)
         {
             var mappedModel = MapToAddDepartmentTaskModel(departmentTaskDTO);
@@ -59,6 +64,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Update
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdateDepartmentTaskAsync(int id, [FromBody] UpdateDepartmentTaskDTO departmentTaskDTO)
         {
             var mappedModel = MapToUpdateDepartmentTaskModel(departmentTaskDTO, id);
@@ -68,6 +74,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Delete
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteDepartmentTaskAsync(int id)
         {
             var result = await _departmentTaskService.DeleteDepartmentTaskAsync(id);

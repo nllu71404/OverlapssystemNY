@@ -40,7 +40,7 @@
 <h2 class="h2-style">@departmentName</h2>
 
 
-<AuthorizeView>
+@* <AuthorizeView>
     <Authorized>
         <p class="standard-text">Logget ind som: @context.User.Identity?.Name</p>
         <p class="standard-text">Rolle: @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
@@ -49,7 +49,7 @@
     <NotAuthorized>
         <p class="standard-text">Ikke logget ind</p>
     </NotAuthorized>
-</AuthorizeView>
+</AuthorizeView> *@
 
 <AuthorizeView Roles="Administrator">
     <Authorized>

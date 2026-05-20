@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OverlapssystemDomain.Entities;
 using OverlapssystemShared;
 using OverlapssytemApplication.Interfaces;
@@ -20,6 +21,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Hent
         [HttpGet("PNMedicintider/{residentId}")]
+        [Authorize(Roles = "Administrator,Medarbejder,Simpel")]
         public async Task<IActionResult> GetPNMedicinByResidentIdAsync(int residentId)
         {
             var result = await _pNMedicinService.GetPNMedicinByResidentIdAsync(residentId);
@@ -30,6 +32,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Tilføj
         [HttpPost("TilføjPNMedicin")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> AddPNMedicinTime([FromBody] AddPNMedicinDTO addPNMedicinDTO)
         { 
             var pNMedicinModel = MapToAddPNMedicinModel(addPNMedicinDTO);
@@ -43,6 +46,7 @@ namespace OverlapssystemAPI.Controllers
 
         //Update
         [HttpPut("{pNMedicinId}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> UpdatePNMedicinAsync(int pNMedicinId, [FromBody] UpdatePNMedicinDTO updatePNMedicinDTO)
         {
             var pNMedicinModel = MapToUpdatePNMedicinModel(updatePNMedicinDTO);
@@ -53,6 +57,7 @@ namespace OverlapssystemAPI.Controllers
         
         //Delete
         [HttpDelete("{pnMedicinId}")]
+        [Authorize(Roles = "Administrator,Medarbejder")]
         public async Task<IActionResult> DeletePNMedicinAsync(int pNMedicinId)
         {
             var result = await _pNMedicinService.DeletePNMedicinAsync(pNMedicinId);
