@@ -59,7 +59,7 @@ namespace Overlapssystem.TokenService
             _currentUser = BuildClaimsPrincipal(token);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
-        // Kaldes når brugeren logger ud
+        // Kaldes når brugeren logger ud så sker det her
         public async Task MarkUserAsLoggedOut()
         {
             _token = null;
