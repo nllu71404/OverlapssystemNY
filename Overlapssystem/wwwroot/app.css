@@ -12,8 +12,38 @@ h1:focus {
     outline: 1px solid #e50000;
 }
 
+/* Beskeder */
 .validation-message {
     color: #e50000;
+}
+
+.error-msg {
+    color: #e05c5c;
+    text-align: center;
+    font-size: 0.9rem;
+    font-family: "Stack Sans Headline", sans-serif;
+}
+
+.technical-error-msg {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffe5e5;
+    color: #b42323;
+    border: 1px solid #f3b5b5;
+    border-radius: 8px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 9999;
+    font-family: "Stack Sans Headline", sans-serif;
+}
+
+.field-error-msg {
+    display: block;
+    font-size: 12px;
+    color: #e53935;
+    font-family: "Stack Sans Headline", sans-serif;
 }
 
 .blazor-error-boundary {
@@ -29,6 +59,25 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
 
 
 /* UI til ResidentCard*/
@@ -79,25 +128,7 @@ h1:focus {
     padding: 10px;
 }
 
-#blazor-error-ui {
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
-    position: fixed;
-    width: 100%;
-    z-index: 1000;
-}
-
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }
-
+    /* Knapper */
 .btn-grey {
     background: #e9e8e8;
     border: 1px #808080;
@@ -184,42 +215,8 @@ h1:focus {
         background-color: #d4d4d4;
     }
 
-.error-msg {
-    color: #e05c5c;
-    text-align: center;
-    font-size: 0.9rem;
-    font-family: "Stack Sans Headline", sans-serif;
-}
 
-.technical-error-msg {
-    position: fixed;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #ffe5e5;
-    color: #b42323;
-    border: 1px solid #f3b5b5;
-    border-radius: 8px;
-    padding: 12px 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    z-index: 9999;
-    font-family: "Stack Sans Headline", sans-serif;
-}
-
-.field-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-}
-
-
-.field-error-msg {
-    display: block;
-    font-size: 12px;
-    color: #e53935;
-    font-family: "Stack Sans Headline", sans-serif;
-}
-
+/*Dropdown-bokse*/
 .drop-down-box {
     font-family: "Stack Sans Headline", sans-serif;
     padding: 2px 6px;
@@ -241,6 +238,7 @@ h1:focus {
         
     }
 
+ /*Tekst*/
 .h2-style {
     font-family: "Stack Sans Headline", sans-serif;
     font-size: 2rem;
@@ -262,6 +260,7 @@ h1:focus {
     margin-bottom: 0.5rem;
 }
 
+/*Tabeller (DepartmentTask, EmployeePhone, AuditTrailDetails)*/
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -287,6 +286,13 @@ h1:focus {
         font-family: "Stack Sans Headline", sans-serif;
     }
 
+.field-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+/*Loading spinner*/
 .spinner {
     width: 20px;
     height: 20px;
