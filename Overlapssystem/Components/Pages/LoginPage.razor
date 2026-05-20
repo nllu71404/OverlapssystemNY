@@ -1,6 +1,6 @@
 ﻿@page "/"
 @page "/login"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using OverlapssystemDomain.Entities
 @using OverlapssystemDomain.Enums
 @using OverlapssystemDomain.Interfaces

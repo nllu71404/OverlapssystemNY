@@ -10,7 +10,7 @@ namespace Overlapssystem.Facades
     {
         private readonly UserApiService _userApiService;
 
-        public UserFacade (UserApiService userApiService)
+        public UserFacade(UserApiService userApiService)
         {
             _userApiService = userApiService;
         }
@@ -18,9 +18,31 @@ namespace Overlapssystem.Facades
         public async Task<Result> AddUser(UserViewModel vm)
         {
             var dto = MapAddUser(vm);
-            var result = await _userApiService.CreateUser(dto);
-            return result;
+            return await _userApiService.CreateUser(dto);
+
         }
+
+        public async Task<Result<List<UserDTO>>> GetAllUsers()
+        {
+            return await _userApiService.GetAllUsers();
+        }
+
+        public async Task<Result> DeleteUser(string userId)
+        {
+            return await _userApiService.DeleteUser(userId);
+        }
+
+        public async Task<Result> UpdateUser(string userId, UserViewModel vm)
+        {
+            var dto = MapUpdateUser(vm);
+            return await _userApiService.UpdateUser(userId, dto);
+        }
+
+        public async Task<Result<string?>> ValidateUser(UserViewModel vm)
+        {
+            return await _userApiService.ValidateUser(vm.UserName, vm.Password);
+        }
+
 
         private AddUserDTO MapAddUser(UserViewModel vm)
         {
@@ -32,6 +54,17 @@ namespace Overlapssystem.Facades
                 LastName = vm.LastName,
                 DepartmentId = vm.DepartmentId,
                 Role = vm.Role
+            };
+        }
+
+        private UpdateUserDTO MapUpdateUser(UserViewModel vm)
+        {
+            return new UpdateUserDTO
+            {
+                UserName = vm.UserName,
+                FirstName = vm.FirstName,
+                LastName = vm.LastName,
+                DepartmentId = vm.DepartmentId
             };
         }
     }

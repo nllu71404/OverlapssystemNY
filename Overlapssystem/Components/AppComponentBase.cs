@@ -18,6 +18,12 @@ public abstract class AppComponentBase : ComponentBase
     // CurrentError bruges til at holde styr på den aktuelle fejl, der skal vises i UI'et.
     protected Error? CurrentError { get; set; }
 
+    // SuccessMessage kan bruges til at vise en bekræftelse til brugeren, når en handling lykkes.
+    protected string? SuccessMessage { get; private set; }
+
+    // WasSuccess kan bruges til at indikere, om den sidste handling lykkedes, så vi kan vise en succesmeddelelse i UI'et.
+    protected bool WasSuccess { get; private set; }
+
     // Dictionary til at holde styr på valideringsfejl for hvert felt
     protected Dictionary<string, string> _fieldErrors = new();
 
@@ -36,7 +42,15 @@ public abstract class AppComponentBase : ComponentBase
     protected bool HasErrorForId(int id, string field) => _fieldErrors.ContainsKey(GetKey(id, field));
     protected string? GetErrorForId(int id, string field) => _fieldErrors.TryGetValue(GetKey(id, field), out var error) ? error : null;
 
+    //Metode til at sende en succesmeddelelse til UI'et, når en handling lykkes
+    protected void SetSuccess(string message)
+    {
+        WasSuccess = true;
+        SuccessMessage = message;
 
+        StateHasChanged();
+
+    }
 
     // Metode til at udføre en asynkron handling med indbygget håndtering af loading state og fejl
     protected async Task ExecuteAsync(Func<Task<Result>> action)
@@ -46,6 +60,8 @@ public abstract class AppComponentBase : ComponentBase
             // Når vi starter en asynkron handling, sætter vi IsLoading til true og nulstiller CurrentError
             IsLoading = true;
             CurrentError = null;
+            SuccessMessage = null;
+            WasSuccess = false;
 
             // Vi kalder StateHasChanged for at opdatere UI'et, så brugeren kan se, at der er en handling i gang
             StateHasChanged();
@@ -56,6 +72,10 @@ public abstract class AppComponentBase : ComponentBase
             if (!result.Success)
             {
                 CurrentError = result.Error;
+            }
+            else
+            {
+                WasSuccess = true;
             }
         }
         catch (Exception ex)
@@ -79,6 +99,8 @@ public abstract class AppComponentBase : ComponentBase
         {
             IsLoading = true;
             CurrentError = null;
+            SuccessMessage = null;
+            WasSuccess = false;
 
             StateHasChanged();
 
@@ -87,6 +109,10 @@ public abstract class AppComponentBase : ComponentBase
             if (!result.Success)
             {
                 CurrentError = result.Error;
+            }
+            else
+            {
+                WasSuccess = true;
             }
         }
         catch (Exception ex)
@@ -115,6 +141,8 @@ public abstract class AppComponentBase : ComponentBase
         {
             IsLoading = true;
             CurrentError = null;
+            SuccessMessage = null;
+            WasSuccess = false;
 
             StateHasChanged();
 
@@ -124,6 +152,10 @@ public abstract class AppComponentBase : ComponentBase
             {
                 CurrentError = result.Error;
                 return default;
+            }
+            else
+            {
+                WasSuccess = true;
             }
 
             return result.Value;

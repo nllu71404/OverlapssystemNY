@@ -1,5 +1,5 @@
 ﻿@page "/OpretBruger/{CurrentDepartmentId:int}"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @using Microsoft.AspNetCore.Authorization
 @using Overlapssystem.Interfaces
@@ -7,88 +7,169 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using OverlapssytemApplication.Common.Result
 @using OverlapssytemApplication.Common.Errors
+@using OverlapssystemShared;
 
 @inherits AppComponentBase
 @inject IUserFacade userFacade
 @inject NavigationManager Navigation
 
 <AuthorizeView Roles="Administrator">
+
     <Authorized>
-        <div class="login-wrapper">
 
-            <!--- Viser tekniske fejl --->
-            @if (CurrentError?.Type == ErrorType.Technical || CurrentError?.Type == ErrorType.NotFound)
-            {
-                <div class="technical-error-msg">
-                    <ErrorDisplay Message="@CurrentError?.Message" />
-                </div>
-            }
+        <div style="display: flex; align-items: flex-start; gap: 60px; padding: 60px;">
 
-            <button class="btn-return" @onclick="GoToHandoverScheme">
-                Tilbage
-            </button>
+            <!-- LOGIN / OPRET BRUGER -->
+            <div class="login-wrapper">
 
-            <div class="login-card">
-                <h2>Opret bruger</h2>
-
-                <div class="input-group">
-                    <input placeholder="Brugernavn" @bind="newUser.UserName" />
-                </div>
-
-                <div class="input-group">
-                    <input type="password" placeholder="Password" @bind="newUser.Password" />
-                </div>
-
-                <div class="input-group">
-                    <input placeholder="Fornavn" @bind="newUser.FirstName" />
-                </div>
-
-                <div class="input-group">
-                    <input placeholder="Efternavn" @bind="newUser.LastName" />
-                </div>
-
-                <div class="input-group">
-                    <input type="number" placeholder="Afdeling ID" @bind="newUserDepartmentId" />
-                </div>
-
-                <div class="input-group">
-                    <select @bind="newUser.Role">
-                        <option value="">Vælg rolle</option>
-                        <option value="Simpel">Simpel</option>
-                        <option value="Medarbejder">Medarbejder</option>
-                        <option value="Administrator">Administrator</option>
-                    </select>
-                </div>
-
-                <button class="login-btn"
-                        @onclick="CreateUserAsync"
-                        disabled="@IsLoading">
-
-                    Opret bruger
-                </button>
-
-                <!--- Viser valideringsfejl --->
-                @if (CurrentError?.Type == ErrorType.Validation)
+                <!-- Viser tekniske fejl -->
+                @if (CurrentError?.Type == ErrorType.Technical ||
+                                CurrentError?.Type == ErrorType.NotFound)
                 {
-                    <div class="error-msg">
+                    <div class="technical-error-msg">
                         <ErrorDisplay Message="@CurrentError?.Message" />
                     </div>
                 }
 
-                @if (IsLoading)
-                {
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
+                <div class="login-card">
+
+                    <button class="btn-return" @onclick="GoToHandoverScheme">
+                        Tilbage
+                    </button>
+
+                    <h2>Opret bruger</h2>
+
+                    <div class="input-group">
+                        <input placeholder="Brugernavn"
+                               @bind="newUser.UserName" />
                     </div>
-                }
+
+                    <div class="input-group">
+                        <input type="password"
+                               placeholder="Password"
+                               @bind="newUser.Password" />
+                    </div>
+
+                    <div class="input-group">
+                        <input placeholder="Fornavn"
+                               @bind="newUser.FirstName" />
+                    </div>
+
+                    <div class="input-group">
+                        <input placeholder="Efternavn"
+                               @bind="newUser.LastName" />
+                    </div>
+
+                    <div class="input-group">
+                        <input type="number"
+                               placeholder="Afdeling ID"
+                               @bind="newUserDepartmentId" />
+                    </div>
+
+                    <div class="input-group">
+                        <select @bind="newUser.Role">
+                            <option value="">Vælg rolle</option>
+                            <option value="Simpel">Simpel</option>
+                            <option value="Medarbejder">Medarbejder</option>
+                            <option value="Administrator">Administrator</option>
+                        </select>
+                    </div>
+
+                    <button class="login-btn"
+                            @onclick="CreateUserAsync"
+                            disabled="@IsLoading">
+
+                        Opret bruger
+                    </button>
+
+                    <!-- Viser valideringsfejl -->
+                    @if (CurrentError?.Type == ErrorType.Validation)
+                    {
+                        <div class="error-msg">
+                            <ErrorDisplay Message="@CurrentError?.Message" />
+                        </div>
+                    }
+
+                    <!-- Viser succesbesked -->
+                    @if (WasSuccess && !string.IsNullOrWhiteSpace(SuccessMessage))
+                    {
+                        <p class="standard-text">
+                            @SuccessMessage
+                        </p>
+                    }
+                    
+
+                    <!-- Viser loading-indikator -->
+                    @if (IsLoading)
+                    {
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                        </div>
+                    }
+
+                </div>
             </div>
+
+            <!-- BRUGER TABEL -->
+            <div class="user-table-section">
+
+                <h2>Brugere</h2>
+
+                @if (users.Count == 0)
+                {
+                    <p>Ingen brugere fundet.</p>
+                }
+                else
+                {
+                    <table class="user-table">
+
+                        <thead>
+                            <tr>
+                                <th>Brugernavn</th>
+                                <th>Navn</th>
+                                <th>Afdeling</th>
+                                <th>Handling</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var user in users)
+                            {
+                                <tr>
+                                    <td>@user.UserName</td>
+                                    <td>@user.FirstName @user.LastName</td>
+                                    <td>@user.DepartmentId</td>
+
+                                    <td>
+                                        <button class="delete-user-btn"
+                                                @onclick="() => DeleteUserAsync(user.Id)"
+                                                disabled="@IsLoading">
+
+                                            Slet
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+                }
+
+            </div>
+
         </div>
+
     </Authorized>
 
     <NotAuthorized>
         <p>Du har ikke adgang til denne side.</p>
     </NotAuthorized>
+
 </AuthorizeView>
+
+
 
 
 @code {
@@ -96,26 +177,64 @@
     public int CurrentDepartmentId { get; set; }
 
     private UserViewModel newUser = new();
+    private List<UserDTO> users = new();
+
     private int? newUserDepartmentId;
+
+
+    private string messageCssClass => WasSuccess ? "success-msg" : "error-msg"; //Skal bare vise success besked, så den skal bare have en css class når der er success, og ingen når der ikke
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+
+        users = await ExecuteAsyncT(() => userFacade.GetAllUsers()) ?? new List<UserDTO>();
+
+    }
+
 
     private async Task CreateUserAsync()
     {
         await ExecuteAsync(async () =>
+{
+    if (!ValidateUser())
+        return Error.Validation("Udfyld alle felter.");
+
+    newUser.DepartmentId = newUserDepartmentId;
+
+    var result = await userFacade.AddUser(newUser);
+
+    if (!result.Success)
+        return result.Error;
+
+    SetSuccess("Brugeren er oprettet.");
+
+    newUser = new UserViewModel();
+    newUserDepartmentId = null;
+
+    await LoadUsersAsync();
+
+    return Result.Ok();
+});
+    }
+    
+    private async Task DeleteUserAsync(string userId)
+    {
+        await ExecuteAsync(async () =>
         {
-            if (!ValidateUser())
-                return Error.Validation("Udfyld alle felter.");
-
-            newUser.DepartmentId = newUserDepartmentId;
-
-            var result = await userFacade.AddUser(newUser);
+            var result = await userFacade.DeleteUser(userId);
 
             if (!result.Success)
-            {
                 return result.Error;
-            }
 
-            newUser = new UserViewModel();
-            newUserDepartmentId = null;
+            SetSuccess("Brugeren er slettet.");
+
+            await LoadUsersAsync();
 
             return Result.Ok();
         });

@@ -18,13 +18,16 @@ namespace Overlapssystem.Services
             _logger = logger;
         }
 
-        // GET ALL
-        public async Task<Result<List<UserModel>>> GetAllUsers()
+        // Hent alle
+        public async Task<Result<List<UserDTO>>> GetAllUsers()
         {
             try
             {
                 var response = await _http.GetAsync("api/User/HenterBrugere");
-                return await response.ReadApiResponse<List<UserModel>>();
+                var users = await response.ReadApiResponse<List<UserDTO>>();
+                var result = users ?? new List<UserDTO>();
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -33,13 +36,13 @@ namespace Overlapssystem.Services
             }
         }
 
-        // GET BY ID
-        public async Task<Result<UserModel>> GetUserByID(string userID)
+        // Hent på ID
+        public async Task<Result<UserDTO>> GetUserByID(string userID)
         {
             try
             {
                 var response = await _http.GetAsync($"api/User/HenterBrugere/{userID}");
-                return await response.ReadApiResponse<UserModel>();
+                return await response.ReadApiResponse<UserDTO>();
             }
             catch (Exception ex)
             {
@@ -48,13 +51,13 @@ namespace Overlapssystem.Services
             }
         }
 
-        // GET BY USERNAME
-        public async Task<Result<UserModel>> GetUserByUsername(string username)
+        // Hent på brugerenavn
+        public async Task<Result<UserDTO>> GetUserByUsername(string username)
         {
             try
             {
                 var response = await _http.GetAsync($"api/User/HenterBrugere/Brugernavn/{username}");
-                return await response.ReadApiResponse<UserModel>();
+                return await response.ReadApiResponse<UserDTO>();
             }
             catch (Exception ex)
             {
@@ -63,7 +66,7 @@ namespace Overlapssystem.Services
             }
         }
 
-        // CREATE
+        // Tilføj
         public async Task<Result> CreateUser(AddUserDTO userDTO)
         {
             try
@@ -106,8 +109,21 @@ namespace Overlapssystem.Services
             }
         }
 
+        //Update
+        public async Task<Result> UpdateUser(string userID, UpdateUserDTO userDTO)
+        {
+            var response = await _http.PutAsJsonAsync($"api/User/{userID}", userDTO);
+            var result = await response.ReadApiResponse<object>();
+
+            if (!result.Success)
+                return result.Error;
+
+            return Result.Ok();
+        }
+
+
         // VALIDATE USER (JWT)
-        public async Task<Result<string>> ValidateUser(string username, string password)
+        public async Task<Result<string?>> ValidateUser(string username, string password)
         {
             try
             {
@@ -120,7 +136,12 @@ namespace Overlapssystem.Services
                 if (!result.Success)
                     return result.Error;
 
-                return result.Map(x => x.Token);
+                var token = result.Value?.Token;
+
+                // Debug logging (remove in production)
+                Console.WriteLine($"Generated Token: {token}");
+
+                return token;
             }
             catch (Exception ex)
             {
