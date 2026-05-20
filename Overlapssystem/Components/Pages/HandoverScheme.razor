@@ -32,7 +32,7 @@ else
 }
 
 
-<AuthorizeView>
+@* <AuthorizeView>
     <Authorized>
         <p class="standard-text">Logget ind som: @context.User.Identity?.Name</p>
         <p class="standard-text">Rolle: @string.Join(", ", context.User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
@@ -41,7 +41,7 @@ else
     <NotAuthorized>
         <p class="standard-text">Ikke logget ind</p>
     </NotAuthorized>
-</AuthorizeView>
+</AuthorizeView> *@
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
