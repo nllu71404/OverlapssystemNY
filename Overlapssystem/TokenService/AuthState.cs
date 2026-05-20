@@ -21,21 +21,19 @@ namespace Overlapssystem.TokenService
         // Kaldes af Blazor for at få den aktuelle brugers authentication state
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // Hent token fra sessionStorage ved hver side load
             try
             {
-                var token = await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
+                _token ??= await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
 
-                if (string.IsNullOrEmpty(token))
+                if (string.IsNullOrWhiteSpace(_token))
                     return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
-                _currentUser = BuildClaimsPrincipal(token);
+                _currentUser = BuildClaimsPrincipal(_token);
                 return new AuthenticationState(_currentUser);
             }
             catch
             {
-                // JS er ikke klar endnu under pre-rendering
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                return new AuthenticationState(_currentUser);
             }
         }
         public async Task<string?> GetTokenAsync()
@@ -44,7 +42,8 @@ namespace Overlapssystem.TokenService
                 return _token;
             try
             {
-                return await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
+                _token = await _js.InvokeAsync<string>("sessionStorage.getItem", "authToken");
+                return _token;
             }
             catch
             {

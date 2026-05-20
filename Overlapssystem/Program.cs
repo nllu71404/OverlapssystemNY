@@ -17,18 +17,23 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, AuthState>();
 builder.Services.AddScoped<AuthState>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+    sp.GetRequiredService<AuthState>());
 builder.Services.AddAuthentication("Bearer");
 
-builder.Services.AddTransient<AuthTokenHandler>();
-builder.Services.AddHttpClient("Api", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7150");
-})
-.AddHttpMessageHandler<AuthTokenHandler>();
+builder.Services.AddScoped<AuthTokenHandler>();
+
 builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
+{
+    var authHandler = sp.GetRequiredService<AuthTokenHandler>();
+    authHandler.InnerHandler = new HttpClientHandler();
+
+    return new HttpClient(authHandler)
+    {
+        BaseAddress = new Uri("https://localhost:7150")
+    };
+});
 
 builder.Services.AddScoped<AuditTrailDetailApiService>();
 builder.Services.AddScoped<ResidentApiService>();
