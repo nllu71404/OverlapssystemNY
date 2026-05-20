@@ -54,7 +54,7 @@ namespace Overlapssystem.TokenService
         // Kaldes når brugeren logger ind med et JWT token gemmer den token i sessionStorage
         public async Task MarkUserAsAuthenticated(string token)
         {
-            _token = token; // gem i hukommelsen
+            _token = token; // den gemmer i hukommelsen
             await _js.InvokeVoidAsync("sessionStorage.setItem", "authToken", token);
             _currentUser = BuildClaimsPrincipal(token);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
