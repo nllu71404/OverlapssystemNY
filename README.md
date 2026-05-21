@@ -1,7 +1,12 @@
 
 # Overlapssystem
 
-Vi har udviklet et overlapssystem til et bosted, der sikrer effektiv og struktureret overlevering af beboerinformation mellem medarbejdere ved vagtskifte.
+Vi har udviklet et overlapssystem til et bosted, der sikrer effektiv overlevering af beboerinformation mellem medarbejdere ved vagtskifte.
+Systemet gør det muligt at registrere, opdatere og dele information om beboere, medicin, opgaver og hændelser på en struktureret måde.
+Systemet er bygget som en client-server løsning med en Blazor frontend, et REST API og en lagdelt backend-arkitektur (Clean Structure) bestående af Application-, Shared-, Domain- og Infrastructure-lag. Systemet anvender JWT-baseret autentificering og rollebaseret adgangskontrol.
+
+Lavet af: Ninna Lundberg, Mikkel Simon Ølting Jensen, Melinda Søholt Allen og Mia Engstrøm Madsen (Team 5) 
+
 
 
 
