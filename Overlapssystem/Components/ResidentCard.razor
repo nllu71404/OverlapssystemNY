@@ -245,6 +245,7 @@
 
             <input type="time" 
                    value="@med.MedicinTimeText"
+                   disabled="@(!context.User.IsInRole("Administrator"))"
                    @onchange="async e => {
                        med.MedicinTimeText = e.Value?.ToString();
                        await UpdateMedicinTimeAsync(med);
