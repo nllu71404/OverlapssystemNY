@@ -26,10 +26,23 @@ function App() {
 
 ## Features
 
-- Light/dark mode toggle
-- Live previews
-- Fullscreen mode
-- Cross platform
+- Different Departments
+- Resident Cards
+- Resident Status
+- Resident Mood
+- Resident Risk Level
+- Resident Activities
+- Resident Familie Note
+- Resident Employee
+- Department Tasks
+- PN Medicine
+- Medicine Time
+- Special Events
+- Shopping
+- Employee Phones
+- Autherization & Authentication
+- Audit Trail
+- 
 
 
 ## Authors
