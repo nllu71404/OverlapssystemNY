@@ -28,6 +28,16 @@ function App() {
   return <Component />
 }
 ```
+## Seed brugere
+var users = new[]
+{
+    new { UserName = "Slot", Password = "Slot123@", FirstName = "Slot", LastName = "Slottet", DepartmentId = 1, Role = "Simpel" },
+    new { UserName = "Skov", Password = "Skov123@", FirstName = "Skov", LastName = "Skoven", DepartmentId = 2, Role = "Simpel" },
+    new { UserName = "Medarbejder1", Password = "Test123@", FirstName = "Afdeling1", LastName = "Afdeling1", DepartmentId = 1, Role = "Medarbejder" },
+    new { UserName = "Medarbejder2", Password = "Test123@", FirstName = "Afdeling2", LastName = "Afdeling2", DepartmentId = 2, Role = "Medarbejder" },
+    new { UserName = "Admin1", Password = "Test123@", FirstName = "Admin1", LastName = "Admin1", DepartmentId = 1, Role = "Administrator" },
+    new { UserName = "Admin2", Password = "Test123@", FirstName = "Admin2", LastName = "Admin2", DepartmentId = 2, Role = "Administrator" },
+};
 
 
 ## Features
