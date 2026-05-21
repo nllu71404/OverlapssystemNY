@@ -8,28 +8,15 @@ Systemet er bygget som en client-server løsning med en Blazor frontend, et REST
 Lavet af: Ninna Lundberg, Mikkel Simon Ølting Jensen, Melinda Søholt Allen og Mia Engstrøm Madsen (Team 5) 
 
 
-
-
-## Installation
-
-Install my-project with npm
-
-```bash
-  npm install my-project
-  cd my-project
-```
     
-## Usage/Examples
+## Opsætningsvejledning
 
-```javascript
-import Component from 'my-project'
+1. Vi henviser til SQL-filen (der indeholder vores fulde SQL-script) i dette repository, hvis I vil prøve at køre systemet fra egen computer og database.
 
-function App() {
-  return <Component />
-}
+2. Tilføj dit eget servernavn til connectionstring der ligger i appsettings.json i Blazor og API
 
+3. Seedede brugerroller til test: 
 
-## Seed brugere
 Brugerrolle simpel:
 UserName: Slot
 PassWord: Slot123@
@@ -43,39 +30,6 @@ UserName: Admin1
 Password: Test123@
 
 
-## Features
-
-- Different Departments
-- Resident Cards
-- Resident Status
-- Resident Mood
-- Resident Risk Level
-- Resident Activities
-- Resident Familie Note
-- Resident Employee
-- Department Tasks
-- PN Medicine
-- Medicine Time
-- Special Events
-- Shopping
-- Employee Phones
-- Autherization & Authentication
-- Audit Trail
-- 
 
 
-## Authors
-
-- [@octokatherine](https://www.github.com/octokatherine)
-
-
-## Usage/Examples
-
-```javascript
-import Component from 'my-project'
-
-function App() {
-  return <Component />
-}
-```
 
