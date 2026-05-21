@@ -1,7 +1,8 @@
 
-# Project Title
+# Overlapssystem
 
-A brief description of what this project does and who it's for
+Vi har udviklet et overlapssystem til et bosted, der sikrer effektiv og struktureret overlevering af beboerinformation mellem medarbejdere ved vagtskifte.
+
 
 
 ## Installation
