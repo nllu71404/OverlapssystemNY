@@ -40,7 +40,7 @@ namespace OverlapssytemApplication.Services
                     .OrderByDescending(x => x.PNTime)
                     .ToList();
 
-                return filtered; // implicit success
+                return filtered; 
             }
             catch (Exception ex)
             {
@@ -82,7 +82,7 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _pnmedicinrepository.SaveNewPNMedicinAsync(pNMedicinModel);
 
-                return id; // implicit success
+                return id; 
             }
             catch (Exception ex)
             {

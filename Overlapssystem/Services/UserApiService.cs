@@ -138,9 +138,6 @@ namespace Overlapssystem.Services
 
                 var token = result.Value?.Token;
 
-                // Debug logging (remove in production)
-                Console.WriteLine($"Generated Token: {token}");
-
                 return token;
             }
             catch (Exception ex)

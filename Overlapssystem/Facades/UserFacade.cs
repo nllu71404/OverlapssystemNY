@@ -43,6 +43,7 @@ namespace Overlapssystem.Facades
             return await _userApiService.ValidateUser(vm.UserName, vm.Password);
         }
 
+        // ------------------- Mapping --------------------
 
         private AddUserDTO MapAddUser(UserViewModel vm)
         {

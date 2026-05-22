@@ -25,9 +25,6 @@
 
 
 <div class="resident-card @GetRiskClass()">
-    
-    <!-- Viser UI/design for en beboer-->
-    <!-- TOP 1 -->
     <div class="top-row">
         <AuthorizeView>
             <Authorized>
@@ -88,7 +85,7 @@
             @if (context.User.IsInRole("Administrator"))
             {
                 <div class="field-group">
-                <!-- Admin kan tilføje/fjerne/redigere -->
+               
                 <input class="form-control @(HasError("Name") ? "input-error" : "")"
                        value="@Resident.Name"
                        @onchange="OnNameChanged" />
@@ -104,12 +101,12 @@
             }
             else if (context.User.IsInRole("Medarbejder"))
             {
-                <!-- Medarbejder kan redigere -->
+               
                 <input class="form-control" value="@Resident.Name" disabled />
             }
             else if (context.User.IsInRole("Simpel"))
             {
-                <!-- Simpel kan kun se -->
+             
                 <p class="form-control">Navnet er skjult</p>
             }
         </Authorized>

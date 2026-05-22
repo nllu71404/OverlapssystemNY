@@ -229,13 +229,13 @@
         employeePhone.PhoneNumber = employeePhone.PhoneNumber?.Trim();
         employeePhone.EmployeeName = employeePhone.EmployeeName?.Trim();
 
-        // Ingen validering hvis telefonnummer er tomt (da det er tomt, når telefonobjektet oprettes)
+       
         if (string.IsNullOrWhiteSpace(employeePhone.PhoneNumber))
         {
             return true;
         }
 
-        // Tjekker for ugyldige tegn (kun tilladt: cifre, mellemrum, +, -, og parenteser)
+       
         var regex = new Regex(@"^[\d\s\+\-\(\)]+$");
 
         if (!regex.IsMatch(employeePhone.PhoneNumber))
@@ -244,27 +244,27 @@
             return false; // stop her
         }
 
-        // Fjerner alle ikke-cifre for at tjekke længden på det faktiske telefonnummer
+       
         var digitsOnly = new string(
             employeePhone.PhoneNumber
                 .Where(char.IsDigit)
                 .ToArray());
 
-        // Minimum længde (kun cifre)
+       
         if (digitsOnly.Length < 8)
         {
             _fieldErrors[keyPhone] = "Telefonnummer er for kort";
             return false;
         }
 
-        //Maks længde 
+      
         if (employeePhone.PhoneNumber.Length > 20)
         {
             _fieldErrors[keyPhone] = "Telefonnummer er for langt";
             return false;
         }
 
-        // Tjekker for duplikater 
+       
         bool exists = EmployeePhones.Any(x =>
             x.EmployeePhoneID != employeePhone.EmployeePhoneID &&
             x.PhoneNumber == employeePhone.PhoneNumber);
@@ -275,7 +275,7 @@
             return false;
         }
 
-        // Validering for EmployeeName (kun hvis det ikke er tomt, da det er tomt når objektet oprettes)
+       
         if (!string.IsNullOrWhiteSpace(employeePhone.EmployeeName))
         {
             if (employeePhone.EmployeeName.Length > 100)

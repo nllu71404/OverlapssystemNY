@@ -22,7 +22,7 @@ namespace OverlapssytemApplication.Services
 
         public List<DepartmentModel> Departments { get; private set; } = new();
 
-        // Get all
+      
         public async Task<Result<List<DepartmentModel>>> GetAllDepartmentsAsync()
         {
             try
@@ -39,7 +39,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Get by id
+     
         public async Task<Result<DepartmentModel>> GetDepartmentByIdAsync(int departmentId)
         {
             if (departmentId <= 0)
@@ -60,7 +60,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Get by name
+      
         public async Task<Result<DepartmentModel>> GetDepartmentByNameAsync(string departmentName)
         {
             if (string.IsNullOrWhiteSpace(departmentName))
@@ -73,7 +73,7 @@ namespace OverlapssytemApplication.Services
                 if (department == null)
                     return Error.NotFound("Department blev ikke fundet");
 
-                return department; // implicit success
+                return department; 
             }
             catch (Exception)
             {
@@ -81,7 +81,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Create
+       
         public async Task<Result<int>> SaveNewDepartmentAsync(DepartmentModel department)
         {
             if (department == null)
@@ -91,7 +91,7 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _departmentRepository.SaveNewDepartmentAsync(department);
 
-                return id; // implicit success
+                return id; 
             }
             catch (Exception)
             {
@@ -99,7 +99,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Delete
+       
         public async Task<Result> DeleteDepartmentAsync(int departmentId)
         {
             if (departmentId <= 0)
@@ -121,7 +121,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Update
+   
         public async Task<Result> UpdateDepartmentAsync(DepartmentModel department)
         {
             if (department == null)

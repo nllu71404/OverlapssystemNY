@@ -9,13 +9,13 @@ namespace OverlapssystemShared
 {
     public class AddResidentDTO
     {
-        public string Name { get; set; } = "";
+        public string Name { get; set; } 
 
         public int? DepartmentId { get; set; }
-        public string Status { get; set; } = "";
-        public string Activity { get; set; } = "";
-        public string Family { get; set; } = "";
-        public string ResidentEmployee { get; set; } = "";
+        public string Status { get; set; } 
+        public string Activity { get; set; } 
+        public string Family { get; set; } 
+        public string ResidentEmployee { get; set; } 
 
         public Risiko Risiko { get; set; }
         public Mood Mood { get; set; }

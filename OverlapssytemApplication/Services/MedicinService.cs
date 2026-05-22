@@ -23,7 +23,7 @@ namespace OverlapssytemApplication.Services
             _logger = logger;
         }
 
-        // Hent medicin
+       
         public async Task<Result<List<MedicinModel>>> GetMedicinByResidentIdAsync(int residentId)
         {
             if (residentId <= 0)
@@ -33,7 +33,7 @@ namespace OverlapssytemApplication.Services
             {
                 var result = await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
 
-                return result ?? new List<MedicinModel>(); // implicit success
+                return result ?? new List<MedicinModel>(); 
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Tilføj medicin
+       
         public async Task<Result<int>> CreateMedicinTimeAsync(MedicinModel medicinModel)
         {
             if (medicinModel.ResidentID <= 0)
@@ -51,7 +51,7 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _medicinRepository.SaveNewMedicinAsync(medicinModel);
 
-                return id; // implicit success
+                return id; 
             }
             catch (Exception ex)
             {
@@ -60,7 +60,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Slet medicin
+       
         public async Task<Result> DeleteMedicinAsync(int medicinId)
         {
             if (medicinId <= 0)

@@ -10,7 +10,7 @@ using System.Net.Http.Json;
 namespace Overlapssystem.Services
 {
 
-    // Blazor frontend kan ikke kalde controlleren direkte, derfor bruges HttpClient i en API Service som sender Http request til backend
+    
     public class ResidentApiService
     {
         private readonly HttpClient _http;

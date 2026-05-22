@@ -23,8 +23,7 @@ namespace OverlapssystemInfrastructure.Repositories
                 ?? throw new InvalidOperationException("Connection string 'ProjektDB' not found.");
         }
 
-        // Dette er funktionen som bliver kaldt for at hente alle beboere, og den kalder på stored procedure i SQL Server
-        //Husk at tjekke dictionaries ud!!
+       
         public async Task<List<ResidentModel>> GetAllResidentsAsync()
         {
             List<ResidentModel> residents = new();
@@ -38,7 +37,7 @@ namespace OverlapssystemInfrastructure.Repositories
 
             using SqlDataReader reader = await command.ExecuteReaderAsync();
 
-            var residentDict = new Dictionary<int, ResidentModel>(); //Tjek dictionaries ud!!!!
+            var residentDict = new Dictionary<int, ResidentModel>(); 
 
             while (await reader.ReadAsync())
             {
@@ -68,7 +67,7 @@ namespace OverlapssystemInfrastructure.Repositories
                     };
                 }
 
-                // Hvis der findes medicintid
+              
                 if (reader["MedicinTimeID"] != DBNull.Value)
                 {
                     var medicinId = Convert.ToInt32(reader["MedicinTimeID"]);
@@ -89,7 +88,7 @@ namespace OverlapssystemInfrastructure.Repositories
                     }
                 }
 
-                // Hvis der findes PN medicin
+               
                 if (reader["PNID"] != DBNull.Value)
                 {
                     var pnId = Convert.ToInt32(reader["PNID"]);
@@ -113,7 +112,7 @@ namespace OverlapssystemInfrastructure.Repositories
                         });
                     }
                 }
-                //Hvis der findes shopping
+               
                 if (reader["ShoppingID"] != DBNull.Value)
                 {
                     var shoppingId = Convert.ToInt32(reader["ShoppingID"]);
@@ -132,7 +131,7 @@ namespace OverlapssystemInfrastructure.Repositories
                         });
                     }
                 }
-                //Hvis der findes specialEvent
+               
                 if (reader["SpecialEventID"] != DBNull.Value)
                 {
                     var specialEventID = Convert.ToInt32(reader["SpecialEventID"]);
@@ -169,7 +168,7 @@ namespace OverlapssystemInfrastructure.Repositories
 
             using SqlDataReader reader = await command.ExecuteReaderAsync();
 
-            var residentDict = new Dictionary<int, ResidentModel>(); //Tjek dictionaries ud!!!!
+            var residentDict = new Dictionary<int, ResidentModel>(); 
 
             while (await reader.ReadAsync())
             {
@@ -199,7 +198,7 @@ namespace OverlapssystemInfrastructure.Repositories
                     };
                 }
 
-                // Hvis der findes medicintid
+               
                 if (reader["MedicinTimeID"] != DBNull.Value)
                 {
                     var medicinId = Convert.ToInt32(reader["MedicinTimeID"]);
@@ -220,7 +219,7 @@ namespace OverlapssystemInfrastructure.Repositories
                     }
                 }
 
-                // Hvis der findes PN medicin
+               
                 if (reader["PNID"] != DBNull.Value)
                 {
                     var pnId = Convert.ToInt32(reader["PNID"]);
@@ -244,7 +243,7 @@ namespace OverlapssystemInfrastructure.Repositories
                         });
                     }
                 }
-                // Hvis der findes shopping
+               
                 if (reader["ShoppingID"] != DBNull.Value)
                 {
                     var shoppingId = Convert.ToInt32(reader["ShoppingID"]);
@@ -264,7 +263,7 @@ namespace OverlapssystemInfrastructure.Repositories
                     }
                 }
 
-                //Hvis der findes specialEvent
+              
                 if (reader["SpecialEventID"] != DBNull.Value)
                 {
                     var specialEventID = Convert.ToInt32(reader["SpecialEventID"]);

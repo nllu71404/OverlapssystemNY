@@ -16,6 +16,7 @@ namespace Overlapssystem.Services
             _logger = logger;
         }
 
+        // Get by DepartmentId
         public async Task<Result<List<AuditTrailDetailDTO>>> GetAuditTrailDetailsByDepartmentId(int departmentId)
         {
 

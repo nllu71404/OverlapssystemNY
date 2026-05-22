@@ -10,7 +10,6 @@ namespace OverlapssystemDomain.Interfaces
     public interface IDepartmentRepository
     {
         Task<List<DepartmentModel>> GetAllDepartmentsAsync();
-        // Tilføj metoder til at hente en afdeling efter ID og navn
         Task<DepartmentModel> GetDepartmentByIdAsync(int departmentId);
         Task<DepartmentModel> GetDepartmentByNameAsync(string departmentName);
         Task<int> SaveNewDepartmentAsync(DepartmentModel department);

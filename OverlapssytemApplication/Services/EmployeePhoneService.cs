@@ -25,7 +25,7 @@ namespace OverlapssytemApplication.Services
 
         public List<EmployeePhoneModel> EmployeePhones { get; private set; } = new();
 
-        // Slet medarbejder telefon test
+        
         public async Task<Result> DeleteEmployeePhoneAsync(int employeePhoneId)
         {
             try
@@ -40,7 +40,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Hent alle
+       
         public async Task<Result<List<EmployeePhoneModel>>> GetAllEmployeePhoneNumbersAsync()
         {
             try
@@ -56,7 +56,7 @@ namespace OverlapssytemApplication.Services
 
         }
 
-        //Hent på ID
+       
         public async Task<Result<EmployeePhoneModel>> GetEmployeePhoneByIdAsync(int employeePhoneId)
         {
             if (employeePhoneId <= 0)
@@ -73,7 +73,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        //Hent på DepartmentID
+       
         public async Task<Result<List<EmployeePhoneModel>>> GetEmployeePhonesByDepartmentIdAsync(int departmentId)
         {
             if (departmentId <= 0)
@@ -90,7 +90,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        //Gem ny medarbejder telefon
+       
         public async Task<Result<int>> SaveNewEmployeePhoneAsync(EmployeePhoneModel employeePhone)
         {
             if (employeePhone == null)
@@ -108,7 +108,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        //Opdater medarbejder telefon
+       
         public async Task<Result> UpdateEmployeePhoneAsync(EmployeePhoneModel employeePhone)
         {
             try

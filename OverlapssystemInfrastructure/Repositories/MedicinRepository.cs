@@ -33,18 +33,17 @@ namespace OverlapssystemInfrastructure.Repositories
             {
                 MedicinModel medicinTime = new MedicinModel
                 {
-                    // Konverter MedicinTimeID til int, da det ikke er nullable i modellen
+                    
                     MedicinTimeID = Convert.ToInt32(reader["MedicinTimeID"]),
 
-                    // Hvis ResidentID er null i databasen, sæt det til null i modellen, ellers konverter det til int
+                   
                     ResidentID = reader["ResidentID"] == DBNull.Value ? null : Convert.ToInt32(reader["ResidentID"]),
 
-                    // Hent MedicinTime som DateTime, og hvis det er null, sæt det til DateTime.MinValue
-                    //MedicinTime = reader["MedicinTime"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(reader["MedicinTime"]),
+                   
                     MedicinTime = reader["MedicinTime"] == DBNull.Value ? TimeSpan.Zero : (TimeSpan)reader["MedicinTime"],
 
 
-                    // Hent MedicinCheckTimeStamp som DateTime?, og hvis det er null, sæt det til null i modellen
+                   
                     MedicinCheckTimeStamp = reader["MedicinCheckTimeStamp"] == DBNull.Value ? null : Convert.ToDateTime(reader["MedicinCheckTimeStamp"])
 
                 };

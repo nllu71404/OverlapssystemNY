@@ -24,7 +24,7 @@ namespace OverlapssytemApplication.Services
             _logger = logger;
         }
 
-        // Hent shopping
+       
         public async Task<Result<List<ShoppingModel>>> GetShoppingByResidentIdAsync(int residentId)
         {
             if (residentId <= 0)
@@ -43,7 +43,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Slet shopping
+       
         public async Task<Result> DeleteShoppingAsync(int shoppingId)
         {
             if (shoppingId <= 0)
@@ -67,7 +67,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Opret shopping
+       
         public async Task<Result<int>> CreateShoppingAsync(ShoppingModel shopping)
         {
             if (shopping.ResidentID <= 0)
@@ -86,7 +86,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Update shopping
+      
         public async Task<Result> UpdateShoppingAsync(ShoppingModel shopping)
         {
             if (shopping.ShoppingID <= 0)

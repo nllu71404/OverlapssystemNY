@@ -14,7 +14,7 @@ namespace Overlapssystem.Services.Extensions
     // Den forsøger først at parse fejlresponser, og hvis det ikke lykkes, håndterer den det som en teknisk fejl.
     // For succesresponser forsøger den at parse dataen, og hvis det ikke lykkes, håndterer den det som en teknisk fejl.
 
-    //Bruges også for at undgå gentagelse af kode i alle vores API-kald, da håndtering af responser ofte involverer det samme mønster af parsing og fejlhåndtering.
+    //Bruges for at undgå gentagelse af kode i alle vores API-kald, da håndtering af responser ofte involverer det samme mønster af parsing og fejlhåndtering.
     public static class HttpResponseExtensions
     {
         public static async Task<Result<T>> ReadApiResponse<T>(this HttpResponseMessage response)

@@ -50,8 +50,6 @@ namespace OverlapssystemInfrastructure.Repositories
                             ? day:Day.Monday,
                     Time = reader["ShoppingTime"] == DBNull.Value ? TimeSpan.Zero : (TimeSpan)reader["ShoppingTime"],
 
-                    //DateAndTime = reader["ShoppingTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["ShoppingTime"]),
-
                     PaymentMethod = reader["PaymentMethod"]?.ToString() ?? ""
 
                 };
@@ -87,8 +85,6 @@ namespace OverlapssystemInfrastructure.Repositories
                     Day = Enum.TryParse<Day>(reader["Risk"]?.ToString(), out var day)
                             ? day : Day.Monday,
                     Time = reader["ShoppingTime"] == DBNull.Value ? TimeSpan.Zero : (TimeSpan)reader["ShoppingTime"],
-
-                    //DateAndTime = reader["ShoppingTime"] == DBNull.Value ? null : Convert.ToDateTime(reader["ShoppingTime"]),
 
                     PaymentMethod = reader["PaymentMethod"]?.ToString() ?? ""
 

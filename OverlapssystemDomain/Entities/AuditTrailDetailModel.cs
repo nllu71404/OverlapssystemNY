@@ -8,8 +8,8 @@ namespace OverlapssystemDomain.Entities
 {
     public class AuditTrailDetailModel
     {
-        public int? DepartmentID { get; set; }
         public int AuditLogDetailId { get; set; }
+        public int? DepartmentID { get; set; }
         public string? TableName { get; set; }
         public string? PrimaryKeyValue { get; set; }
         public string? ColumnName { get; set; }

@@ -24,7 +24,7 @@ namespace OverlapssytemApplication.Services
 
         public List<DepartmentTaskModel> DepartmentTasks { get; private set; } = new();
 
-        // Hent alle
+       
         public async Task<Result<List<DepartmentTaskModel>>> GetAllDepartmentTasksAsync()
         {
             try
@@ -33,7 +33,7 @@ namespace OverlapssytemApplication.Services
 
                 DepartmentTasks = data ?? new List<DepartmentTaskModel>();
 
-                return DepartmentTasks; // implicit success
+                return DepartmentTasks; 
             }
             catch (Exception)
             {
@@ -41,7 +41,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Hent på TaskID
+      
         public async Task<Result<DepartmentTaskModel>> GetDepartmentTaskByIdAsync(int departmentTaskId)
         {
             if (departmentTaskId <= 0)
@@ -54,7 +54,7 @@ namespace OverlapssytemApplication.Services
                 if (task == null)
                     return Error.NotFound("Task blev ikke fundet");
 
-                return task; // implicit success
+                return task; 
             }
             catch (Exception)
             {
@@ -62,7 +62,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Hent på DepartmentID
+        
         public async Task<Result<List<DepartmentTaskModel>>> GetDepartmentTasksByDepartmentIdAsync(int departmentId)
         {
             if (departmentId <= 0)
@@ -82,7 +82,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Slet
+       
         public async Task<Result> DeleteDepartmentTaskAsync(int departmentTaskId)
         {
             if (departmentTaskId <= 0)
@@ -103,7 +103,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Tilføj ny
+      
         public async Task<Result<int>> SaveNewDepartmentTaskAsync(DepartmentTaskModel departmentTask)
         {
             if (departmentTask == null)
@@ -120,7 +120,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Update
+       
         public async Task<Result> UpdateDepartmentTaskAsync(DepartmentTaskModel departmentTask)
         {
             if (departmentTask == null)
@@ -141,7 +141,7 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Helper metode
+        // Helper metode til at bestemme shifttype baseret på tidspunkt på dagen
         public Task<Result<ShiftType>> GetTimeOfDayAsync()
         {
             var now = DateTime.Now.TimeOfDay;

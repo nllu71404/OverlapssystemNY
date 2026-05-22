@@ -91,11 +91,11 @@
                     }
 
                     <!-- Viser succesbesked -->
-                    @if (WasSuccess && !string.IsNullOrWhiteSpace(SuccessMessage))
+                    @if (!string.IsNullOrWhiteSpace(SuccessMessage))
                     {
-                        <p class="standard-text">
-                            @SuccessMessage
-                        </p>
+                        <div class="succes-msg">
+                            <ErrorDisplay Message="@SuccessMessage" />
+                        </div>
                     }
                     
 
@@ -182,9 +182,6 @@
     private int? newUserDepartmentId;
 
 
-    private string messageCssClass => WasSuccess ? "success-msg" : "error-msg"; //Skal bare vise success besked, så den skal bare have en css class når der er success, og ingen når der ikke
-
-
     protected override async Task OnInitializedAsync()
     {
         await LoadUsersAsync();
@@ -212,7 +209,7 @@
     if (!result.Success)
         return result.Error;
 
-    SetSuccess("Brugeren er oprettet.");
+    StateHasChanged();
 
     newUser = new UserViewModel();
     newUserDepartmentId = null;
@@ -221,6 +218,7 @@
 
     return Result.Ok();
 });
+        SuccessMessage = "Brugeren er oprettet.";
     }
     
     private async Task DeleteUserAsync(string userId)
@@ -232,12 +230,13 @@
             if (!result.Success)
                 return result.Error;
 
-            SetSuccess("Brugeren er slettet.");
+            StateHasChanged();
 
             await LoadUsersAsync();
 
             return Result.Ok();
         });
+        SuccessMessage = "Brugeren er slettet.";
     }
 
     private void GoToHandoverScheme()

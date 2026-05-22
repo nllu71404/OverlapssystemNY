@@ -15,7 +15,7 @@ namespace OverlapssystemAPI.Controllers
         //Ved fejl returneres en ErrorResponse med detaljer om fejlen, og HTTP-statuskoden bestemmes af typen af fejl (NotFound, Validation, Technical, etc.).
         //Ved succes returneres en ApiResponse med data (hvis relevant) og en success-indikator.
 
-        //Her benytter vi Match-metoden fra Result-klassen til at håndtere både succes og fejl på en mere struktureret måde, så vi undgår at skulle skrive if-else logik 
+        //Her benytter vi Match-metoden fra Result-klassen til at håndtere både succes og fejl på en mere struktureret måde
         protected IActionResult Handle(Result result)
         {
             return result.Match<IActionResult>(

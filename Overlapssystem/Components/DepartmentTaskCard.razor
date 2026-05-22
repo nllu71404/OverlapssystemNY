@@ -173,7 +173,6 @@
     [Parameter]
     public bool IsReadOnly { get; set; } = false;   
 
-    // Parent will handle creation; we invoke it with the DepartmentId.
     [Parameter]
     public EventCallback<int> OnAdd { get; set; }
 
@@ -189,7 +188,7 @@
 
     }
 
-    // Allow parent to ask this component to refresh its list after parent creates/updates.
+ 
     public async Task RefreshAsync()
     {
         Tasks = await ExecuteAsyncT(() => departmentTaskFacade.GetDepartmentTasksByDepartment(DepartmentId)) ?? new List<DepartmentTaskViewModel>();
@@ -234,7 +233,7 @@
             return false;
         }
 
-        // Validering af employee name (kun hvis det ikke er tomt)
+        // Validering af employee name 
         if (!string.IsNullOrWhiteSpace(task.EmployeeName) &&
             task.EmployeeName.Length > 100)
         {

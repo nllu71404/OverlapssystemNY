@@ -24,6 +24,7 @@ h1:focus {
     font-family: "Stack Sans Headline", sans-serif;
 }
 
+
 .technical-error-msg {
     position: fixed;
     top: 16px;
@@ -79,6 +80,12 @@ h1:focus {
         top: 0.5rem;
     }
 
+.succes-msg {
+    color: #118d26;
+    text-align: center;
+    font-size: 0.9rem;
+    font-family: "Stack Sans Headline", sans-serif;
+}
 
 /* UI til ResidentCard*/
 .resident-card {

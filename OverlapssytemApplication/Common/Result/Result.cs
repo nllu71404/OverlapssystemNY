@@ -69,7 +69,7 @@ namespace OverlapssytemApplication.Common.Result
             => Fail(error);
 
 
-        //Bruges til at håndtere både success og failure - reducerer if-else statements (mindre boilerplate code)
+        //Match Bruges til at håndtere både success og failure - reducerer if-else statements (mindre boilerplate code)
         //Bruges i controllers via ApiControllerBase 
 
         public TResult Match<TResult>(

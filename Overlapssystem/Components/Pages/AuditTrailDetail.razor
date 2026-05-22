@@ -21,7 +21,7 @@
     </div>
 }
 
-
+<!-- Viser loading spinner -->
 @if (IsLoading)
 {
     <div class="loading-spinner">
@@ -106,7 +106,7 @@
 
     private List<AuditTrailDetailDTO> auditTrailDetails = new();
 
-    // Automatically load audit trail details when the component parameters are set or updated
+   
     protected override async Task OnInitializedAsync()
     {
         

@@ -93,15 +93,13 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        //Metodens navn viser os at den returnerer et resultat (fejl eller succes) 
+       
         public async Task<Result> CreateNewUserAsync(UserModel userModel, string password, string role)
         {
 
-            //Her kaster vi en ArgumentNullException hvis userModel er null, da dette ikke er en forventet situation 
-            //I dette tilfælde er det bedre at fejle hurtigt end at fortsætte med en ugyldig tilstand
             ArgumentNullException.ThrowIfNull(userModel);
 
-            //Her kaster vi IKKE en exception for ugyldigt input, da dette er en forventelig fejl.
+            
             //Tjekker om det valgte afdelings-id findes, så der ikke oprettes en bruger der er tilknyttet en ugyldig afdeling. 
             if (!userModel.DepartmentId.HasValue)
                 return Error.Validation("Afdeling er påkrævet");
@@ -115,8 +113,7 @@ namespace OverlapssytemApplication.Services
             try
             {
  
-                //Identity har indbygget validering for forventelige fejl som duplikate brugernavne og svage adgangskoder
-                //Vi sætter selv fejlmeddelelserne i denne metode, så de er på dansk og mere brugervenlige.
+               
                 var result = await _userRepository.CreateUser(userModel, password, role);
                 if (!result.Succeeded)
                 {
@@ -140,13 +137,12 @@ namespace OverlapssytemApplication.Services
                 // Tildel Identity rolle
                 await _userRepository.AddToRoleAsync(userModel, role);
 
-                // Hvis alt lykkedes, returner en succes.
+              
                 return Result.Ok();
             }
             catch (Exception ex)
             {
-                // Hvis der opstår en uventet fejl, logges den med detaljeret fejlmeddelse til udviklere.
-                // Vi returner en generisk teknisk fejlmeddelelse til brugeren, for at undgå at eksponere følsomme detaljer.
+               
                 _logger.LogError(ex, "Kunne ikke oprette bruger {UserName}", userModel.UserName);
                 return Error.Technical("Kunne ikke oprette bruger");
             }

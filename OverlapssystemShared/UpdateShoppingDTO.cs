@@ -13,6 +13,6 @@ namespace OverlapssystemShared
         public int ResidentID { get; set; }
         public Day Day { get; set; }
         public TimeSpan? Time { get; set; }
-        public string PaymentMethod { get; set; } = "";
+        public string PaymentMethod { get; set; }
     }
 }

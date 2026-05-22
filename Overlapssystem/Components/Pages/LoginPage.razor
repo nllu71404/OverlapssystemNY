@@ -63,6 +63,7 @@
             </div>
         }
 
+        <!-- Viser loading spinner -->
         @if (IsLoading)
         {
             <div class="loading-spinner">
@@ -80,7 +81,7 @@
 
     private async Task HandleLogin()
     {
-        //Wrapper login logikken i ExecuteAsync fra AppComponentBase for at håndtere loading state og fejl
+       
         await ExecuteAsync(async () =>
         {
             if (!ValidateInput())
@@ -116,7 +117,7 @@
     }
    
 
-    // (Input-validering) Validerer at både brugernavn og password er indtastet
+    // Validerer at både brugernavn og password er indtastet
     private bool ValidateInput()
     {
         return !string.IsNullOrWhiteSpace(userViewModel.UserName)

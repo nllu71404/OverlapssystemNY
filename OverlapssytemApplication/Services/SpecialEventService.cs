@@ -40,7 +40,7 @@ namespace OverlapssytemApplication.Services
                     .OrderByDescending(x => x.SpecialEventDateTime)
                     .ToList();
 
-                return filtered; // implicit success
+                return filtered; 
                 
             }
             catch (Exception ex)
@@ -58,7 +58,7 @@ namespace OverlapssytemApplication.Services
             try
             {
                 var id = await _specialEventRepository.SaveNewSpecialEvent(specialEvent);
-                return id; // implicit success
+                return id; 
             }
             catch (Exception ex)
             {

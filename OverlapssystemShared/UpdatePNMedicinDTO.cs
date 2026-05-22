@@ -10,6 +10,6 @@ namespace OverlapssystemShared
     {
         public int PNMedicinID { get; set; }
         public DateTime? PNTime { get; set; }
-        public string Reason { get; set; } = "";
+        public string Reason { get; set; } 
     }
 }
