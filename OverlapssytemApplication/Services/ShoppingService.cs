@@ -34,7 +34,7 @@ namespace OverlapssytemApplication.Services
             {
                 var result = await _shoppingrepository.GetShoppingByResidentIdAsync(residentId);
 
-                return result ?? new List<ShoppingModel>(); // implicit success
+                return result ?? new List<ShoppingModel>(); 
             }
             catch (Exception ex)
             {
@@ -77,7 +77,7 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _shoppingrepository.SaveNewShoppingAsync(shopping);
 
-                return id; // implicit success
+                return id; 
             }
             catch (Exception ex)
             {

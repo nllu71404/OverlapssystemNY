@@ -33,7 +33,7 @@ namespace OverlapssytemApplication.Services
             {
                 var result = await _medicinRepository.GetMedicinByResidentIdAsync(residentId);
 
-                return result ?? new List<MedicinModel>(); // implicit success
+                return result ?? new List<MedicinModel>();
             }
             catch (Exception ex)
             {
@@ -51,7 +51,7 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _medicinRepository.SaveNewMedicinAsync(medicinModel);
 
-                return id; // implicit success
+                return id; 
             }
             catch (Exception ex)
             {

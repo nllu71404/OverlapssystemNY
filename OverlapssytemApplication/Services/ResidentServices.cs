@@ -45,18 +45,18 @@ namespace OverlapssytemApplication.Services
 
                 Residents = data ?? new List<ResidentModel>();
 
-                return Residents; // implicit success
+                return Residents; 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fejl ved hentning af beboere");
-                return Error.Technical("Fejl ved hentning af beboere"); // Så vi ikke eksponerer tekniske detaljer i fejl til brugeren
+                return Error.Technical("Fejl ved hentning af beboere"); 
             }
         }
 
         // Hent på DepartmentId
 
-        //Metodens navn fortæller os, at den returnerer enten en liste af beboere eller en fejl
+        
         public async Task<Result<List<ResidentModel>>> LoadResidentsByDepartmentAsync(int departmentId)
         {
             
@@ -74,7 +74,7 @@ namespace OverlapssytemApplication.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fejl ved hentning af beboere for afdeling {DepartmentId}", departmentId);
-                return Error.Technical("Fejl ved hentning af beboere for afdeling"); // Så vi ikke eksponerer tekniske detaljer i fejl til brugeren
+                return Error.Technical("Fejl ved hentning af beboere for afdeling"); 
             }
         }
 
@@ -90,13 +90,13 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _residentRepository.SaveNewResidentAsync(resident);
 
-                return id; // implicit success
+                return id; 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fejl ved oprettelse af beboer!");
 
-                return Error.Technical("Kunne ikke oprette beboer"); // Så vi ikke eksponerer tekniske detaljer i fejl til brugeren
+                return Error.Technical("Kunne ikke oprette beboer");
             }
         }
 

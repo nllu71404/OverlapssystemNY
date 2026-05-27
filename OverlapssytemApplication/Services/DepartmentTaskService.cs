@@ -33,7 +33,7 @@ namespace OverlapssytemApplication.Services
 
                 DepartmentTasks = data ?? new List<DepartmentTaskModel>();
 
-                return DepartmentTasks; // implicit success
+                return DepartmentTasks; 
             }
             catch (Exception)
             {
@@ -54,7 +54,7 @@ namespace OverlapssytemApplication.Services
                 if (task == null)
                     return Error.NotFound("Task blev ikke fundet");
 
-                return task; // implicit success
+                return task; 
             }
             catch (Exception)
             {

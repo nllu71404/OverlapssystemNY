@@ -31,7 +31,7 @@ namespace OverlapssytemApplication.Services
 
                 Departments = data ?? new List<DepartmentModel>();
 
-                return Departments; // implicit success
+                return Departments; 
             }
             catch (Exception)
             {
@@ -52,7 +52,7 @@ namespace OverlapssytemApplication.Services
                 if (department == null)
                     return Error.NotFound("Department blev ikke fundet");
 
-                return department; // implicit success
+                return department; 
             }
             catch (Exception)
             {
@@ -73,7 +73,7 @@ namespace OverlapssytemApplication.Services
                 if (department == null)
                     return Error.NotFound("Department blev ikke fundet");
 
-                return department; // implicit success
+                return department; 
             }
             catch (Exception)
             {
@@ -91,7 +91,7 @@ namespace OverlapssytemApplication.Services
             {
                 var id = await _departmentRepository.SaveNewDepartmentAsync(department);
 
-                return id; // implicit success
+                return id; 
             }
             catch (Exception)
             {
