@@ -100,14 +100,14 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Update
+        // Update 
         public async Task<Result> UpdateResidentAsync(ResidentModel resident)
         {
 
             if (resident.ResidentId <= 0)
                 return Error.Validation("Ugyldigt beboer ID");
             if(string.IsNullOrWhiteSpace(resident.Name))
-                return Error.Validation("Navn er påkrævet");
+                return Error.Validation("Navn er påkrævettt");
 
             try
             {
