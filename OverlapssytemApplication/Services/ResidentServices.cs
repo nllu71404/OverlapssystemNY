@@ -96,7 +96,7 @@ namespace OverlapssytemApplication.Services
             {
                 _logger.LogError(ex, "Fejl ved oprettelse af beboer!");
 
-                return Error.Technical("Kunne ikke oprette beboerrr");
+                return Error.Technical("Kunne ikke oprette beboer");
             }
         }
 
