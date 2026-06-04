@@ -107,7 +107,7 @@ namespace OverlapssytemApplication.Services
             if (resident.ResidentId <= 0)
                 return Error.Validation("Ugyldigt beboer ID");
             if(string.IsNullOrWhiteSpace(resident.Name))
-                return Error.Validation("Navn er påkrævettt");
+                return Error.Validation("Navn er påkrævett");
 
             try
             {
