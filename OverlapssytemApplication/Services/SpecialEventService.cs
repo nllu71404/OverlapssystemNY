@@ -58,7 +58,8 @@ namespace OverlapssytemApplication.Services
             try
             {
                 var id = await _specialEventRepository.SaveNewSpecialEvent(specialEvent);
-                return id; 
+                return id;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fejl ved oprettelse af særlig hændelse");
