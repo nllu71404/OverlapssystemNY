@@ -114,12 +114,12 @@ namespace OverlapssytemApplication.Services
             {
                 _logger.LogWarning("UpdateResident failed: invalid ResidentId");
                 return Error.Validation("Ugyldigt beboer ID");
-<<<<<<< Ninnas-note-branch
+
             }
-=======
+
             if(string.IsNullOrWhiteSpace(resident.Name))
                 return Error.Validation("Navn er påkrævet");
->>>>>>> master
+
 
             try
             {
