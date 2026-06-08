@@ -117,8 +117,11 @@ namespace OverlapssytemApplication.Services
 
             }
 
-            if(string.IsNullOrWhiteSpace(resident.Name))
+            if (string.IsNullOrWhiteSpace(resident.Name))
+            {
+                _logger.LogWarning("UpdateResident failed: Name is required");
                 return Error.Validation("Navn er påkrævet");
+            }
 
 
             try
