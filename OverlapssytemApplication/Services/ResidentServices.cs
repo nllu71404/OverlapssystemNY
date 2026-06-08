@@ -109,8 +109,6 @@ namespace OverlapssytemApplication.Services
         public async Task<Result> UpdateResidentAsync(ResidentModel resident)
         {
 
-
-
             if (resident.ResidentId <= 0)
             {
                 _logger.LogWarning("UpdateResident failed: invalid ResidentId");
