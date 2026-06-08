@@ -104,6 +104,7 @@ namespace OverlapssytemApplication.Services
         public async Task<Result> UpdateResidentAsync(ResidentModel resident)
         {
 
+
             if (resident.ResidentId <= 0)
                 return Error.Validation("Ugyldigt beboer ID");
             if(string.IsNullOrWhiteSpace(resident.Name))
