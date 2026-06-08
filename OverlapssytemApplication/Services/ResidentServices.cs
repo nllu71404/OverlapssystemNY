@@ -105,15 +105,21 @@ namespace OverlapssytemApplication.Services
             }
         }
 
-        // Update
+        // Update 
         public async Task<Result> UpdateResidentAsync(ResidentModel resident)
         {
+
 
             if (resident.ResidentId <= 0)
             {
                 _logger.LogWarning("UpdateResident failed: invalid ResidentId");
                 return Error.Validation("Ugyldigt beboer ID");
+<<<<<<< Ninnas-note-branch
             }
+=======
+            if(string.IsNullOrWhiteSpace(resident.Name))
+                return Error.Validation("Navn er påkrævet");
+>>>>>>> master
 
             try
             {

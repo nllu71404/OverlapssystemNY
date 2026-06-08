@@ -21,7 +21,7 @@ namespace OverlapssystemInfrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // UserModel - fjern UserID, UserName og UserPassword da Identity håndterer dem
+            
             modelBuilder.Entity<UserModel>(entity =>
             {
                 entity.HasOne<DepartmentModel>()
