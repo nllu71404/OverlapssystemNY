@@ -49,7 +49,7 @@ namespace OverlapssytemApplication.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fejl ved hentning af beboere");
+                _logger.LogError(ex, "LoadResidents failed: unexpected error");
                 return Error.Technical("Fejl ved hentning af beboere"); 
             }
         }
@@ -59,9 +59,12 @@ namespace OverlapssytemApplication.Services
         
         public async Task<Result<List<ResidentModel>>> LoadResidentsByDepartmentAsync(int departmentId)
         {
-            
+
             if (departmentId <= 0)
+            {
+                _logger.LogError("LoadResidentsByDepartment failed: invalid DepartmentId");
                 return Error.Validation("Ugyldigt afdelingsID");
+            }
 
             try
             {
@@ -73,7 +76,7 @@ namespace OverlapssytemApplication.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fejl ved hentning af beboere for afdeling {DepartmentId}", departmentId);
+                _logger.LogError(ex, "LoadResidentsByDepartment failed: unexpected error for DepartmentId {DepartmentId}", departmentId);
                 return Error.Technical("Fejl ved hentning af beboere for afdeling"); 
             }
         }
@@ -86,7 +89,7 @@ namespace OverlapssytemApplication.Services
 
             if (resident.DepartmentId == null || resident.DepartmentId <= 0)
             {
-                _logger.LogWarning("CreateResident failed: missing DepartmentId");
+                _logger.LogError("CreateResident failed: missing DepartmentId");
                 return Error.Validation("Afdelings ID er ikke sat");
             }
             try
@@ -99,7 +102,7 @@ namespace OverlapssytemApplication.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fejl ved oprettelse af beboer!");
+                _logger.LogError(ex, "CreateResident failed: unexpected error for ResidentId {ResidentId}", resident.ResidentId);
 
                 return Error.Technical("Kunne ikke oprette beboer");
             }
@@ -112,14 +115,14 @@ namespace OverlapssytemApplication.Services
 
             if (resident.ResidentId <= 0)
             {
-                _logger.LogWarning("UpdateResident failed: invalid ResidentId");
+                _logger.LogError("UpdateResident failed: invalid ResidentId");
                 return Error.Validation("Ugyldigt beboer ID");
 
             }
 
             if (string.IsNullOrWhiteSpace(resident.Name))
             {
-                _logger.LogWarning("UpdateResident failed: Name is required");
+                _logger.LogError("UpdateResident {ResidentId} failed: Name is required", resident.ResidentId);
                 return Error.Validation("Navn er påkrævet");
             }
 
@@ -134,12 +137,12 @@ namespace OverlapssytemApplication.Services
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, "Beboer blev ikke fundet");
+                _logger.LogError(ex, "UpdateResident failed: ResidentId {ResidentId} not found", resident.ResidentId);
                 return Error.NotFound("Kunne ikke finde beboer at opdatere");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fejl ved opdatering af beboer");
+                _logger.LogError(ex, "UpdateResident failed: unexpected error for ResidentId {ResidentId}", resident.ResidentId);
                 return Error.Technical("Kunne ikke opdatere beboer");
             }
         }
@@ -150,7 +153,7 @@ namespace OverlapssytemApplication.Services
 
             if (residentId <= 0)
             {
-                _logger.LogWarning("DeleteResident failed: invalid ResidentId");
+                _logger.LogError("DeleteResident failed: invalid ResidentId");
                 return Error.Validation("Ugyldigt beboer ID");
             }
 
@@ -164,12 +167,12 @@ namespace OverlapssytemApplication.Services
             }
             catch (KeyNotFoundException ex)
             {
-               _logger.LogError(ex, "Beboer kan ikke findes");
+               _logger.LogError(ex, "DeleteResident failed: ResidentId {ResidentId} not found", residentId);
                 return Error.NotFound("Kunne ikke finde beboer at slette");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fejl ved sletning af beboer");
+                _logger.LogError(ex, "DeleteResident failed: unexpected error for ResidentId {ResidentId}", residentId);
                 return Error.Technical("Kunne ikke slette beboer");
             }
             
@@ -180,7 +183,7 @@ namespace OverlapssytemApplication.Services
         {
             if (departmentId <= 0)
             {
-                _logger.LogWarning("SetDepartment failed: invalid DepartmentId");
+                _logger.LogError("SetDepartment failed: invalid DepartmentId");
                 return;
             }
 
