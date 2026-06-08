@@ -81,14 +81,19 @@ namespace OverlapssytemApplication.Services
         // Opret
         public async Task<Result<int>> CreateResidentAsync(ResidentModel resident)
         {
-            
+
+            _logger.LogInformation("Creating resident for department {DepartmentId}", resident.DepartmentId);
 
             if (resident.DepartmentId == null || resident.DepartmentId <= 0)
+            {
+                _logger.LogWarning("CreateResident failed: missing DepartmentId");
                 return Error.Validation("Afdelings ID er ikke sat");
-
+            }
             try
             {
                 var id = await _residentRepository.SaveNewResidentAsync(resident);
+
+                _logger.LogInformation("Resident created successfully with id {Id}", id);
 
                 return id; 
             }
@@ -106,13 +111,21 @@ namespace OverlapssytemApplication.Services
 
 
             if (resident.ResidentId <= 0)
+            {
+                _logger.LogWarning("UpdateResident failed: invalid ResidentId");
                 return Error.Validation("Ugyldigt beboer ID");
+
+            }
+
             if(string.IsNullOrWhiteSpace(resident.Name))
                 return Error.Validation("Navn er påkrævet");
+
 
             try
             {
                 await _residentRepository.UpdateResidentAsync(resident);
+
+                _logger.LogInformation("Resident {ResidentId} updated successfully", resident.ResidentId);
 
                 return Result.Ok();
             }
@@ -133,11 +146,16 @@ namespace OverlapssytemApplication.Services
         {
 
             if (residentId <= 0)
+            {
+                _logger.LogWarning("DeleteResident failed: invalid ResidentId");
                 return Error.Validation("Ugyldigt beboer ID");
+            }
 
             try
             {
                 await _residentRepository.DeleteResidentAsync(residentId);
+
+                _logger.LogInformation("Resident {ResidentId} deleted successfully", residentId);
 
                 return Result.Ok();
             }
@@ -158,7 +176,10 @@ namespace OverlapssytemApplication.Services
         public void SetDepartment(int departmentId)
         {
             if (departmentId <= 0)
+            {
+                _logger.LogWarning("SetDepartment failed: invalid DepartmentId");
                 return;
+            }
 
             SelectedDepartmentId = departmentId;
 
@@ -166,6 +187,7 @@ namespace OverlapssytemApplication.Services
             {
                 DepartmentId = departmentId
             };
+
         }
     }
 }

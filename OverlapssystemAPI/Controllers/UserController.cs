@@ -14,11 +14,13 @@ namespace OverlapssystemAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IAuthService _authService;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserService userService, IAuthService authService)
+        public UserController(IUserService userService, IAuthService authService, ILogger<UserController> logger)
         {
             _userService = userService;
             _authService = authService;
+            _logger = logger;
         }
 
         //Hent alle
@@ -122,7 +124,20 @@ namespace OverlapssystemAPI.Controllers
         [HttpPost("ValiderBruger")]
         public async Task<IActionResult> ValidateUser([FromBody] AddUserDTO userDTO)
         {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            _logger.LogInformation("Login attempt for {Username}", userDTO.UserName);
+
             var result = await _authService.LoginAsync(userDTO.UserName, userDTO.Password);
+
+            if (!result.Success)
+            {
+                
+                _logger.LogWarning("Failed login attempt | User: {Username} | IP: {IP}", userDTO.UserName, ip);
+                return Handle(result);
+            }
+
+            _logger.LogInformation("Successful login for {Username} from IP {IP}", userDTO.UserName, ip);
 
             return Handle(result.Map(token => new TokenResponseDTO
             {
